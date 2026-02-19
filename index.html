@@ -66,7 +66,9 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import {
+  getDatabase, ref, onValue, get, set, update, onDisconnect
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgV9PoUFut3FPc0iChFNm2-h6-Uc5z6s0",
@@ -88,7 +90,7 @@ const preloadFill   = document.getElementById("preloadBarFill");
 const preloadStatus = document.getElementById("preloadStatus");
 
 let mediaCache     = {};
-let slideEls       = [];   // pre-built slide elements, including video elements already streaming
+let slideEls       = [];
 let presentation   = null;
 let slideIndex     = 0;
 let slideTimer     = null;
@@ -97,164 +99,158 @@ let ytApiReady     = false;
 let ytApiLoading   = false;
 let pendingYtInits = [];
 let overlayShown   = false;
-let monitorName    = null;
 
-// ── Refresh signal ────────────────────────────────────────────
-let refreshSkipped = false;
-onValue(ref(db, "refreshSignal"), function() {
-  if (!refreshSkipped) { refreshSkipped = true; return; }
-  location.reload(true);
-});
+let monitorName = null;
+let monitorRef = null;
+let heartbeatInterval = null;
+let lastCommandAt = 0;
 
+// ── Utilities ─────────────────────────────────────────────────
 function setProgress(pct, label) {
   preloadFill.style.width = Math.min(100, Math.max(0, pct)) + "%";
   if (label !== undefined) preloadStatus.textContent = label;
 }
-
 function dismissPreload() {
   preloadScreen.classList.add("fade-out");
   canvas.style.opacity = "1";
   setTimeout(function() { preloadScreen.style.display = "none"; }, 650);
 }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function escHtml(s){ return s?String(s).replaceAll("<","&lt;").replaceAll(">","&gt;"):""; }
 
-function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
-
-// Get monitor name (url param > localStorage > prompt)
-function getMonitorName() {
-  const u = new URL(window.location.href);
-  const q = u.searchParams.get("monitor");
-  if (q && q.trim()) { localStorage.setItem("monitorName", q.trim()); return q.trim(); }
+// ── Monitor identity (persisted) ──────────────────────────────
+function getPersistedMonitorName() {
+  // 1) URL param ?monitor=Name
+  try {
+    const url = new URL(window.location.href);
+    const q = url.searchParams.get("monitor");
+    if (q && q.trim()) { localStorage.setItem("monitorName", q.trim()); return q.trim(); }
+  } catch(e){}
+  // 2) localStorage
   const ls = localStorage.getItem("monitorName");
   if (ls && ls.trim()) return ls.trim();
-  const p = prompt("Enter monitor name (case-sensitive):", "");
+  // 3) prompt once
+  const p = prompt("Enter monitor name (exact):", "");
   if (p && p.trim()) { localStorage.setItem("monitorName", p.trim()); return p.trim(); }
   return null;
 }
 
-/**
- * Wait for a video element to be ready to play from a given time with no stall.
- */
-function waitForVideoReady(vid, startTime) {
-  return new Promise(function(resolve) {
-    var st = startTime || 0;
-    var done = false;
+// ── Presence / Heartbeat ──────────────────────────────────────
+async function registerPresence(name) {
+  if (!name) return;
+  const key = encodeURIComponent(name);
+  monitorRef = ref(db, `monitors/${key}`);
 
-    var finish = function() {
-      if (done) return;
-      done = true;
-      resolve();
-    };
+  const payload = {
+    status: "online",
+    lastSeen: Date.now(),
+    resolution: `${screen.width}x${screen.height}`
+  };
+  await set(monitorRef, payload).catch(()=>{});
+  // onDisconnect: mark offline
+  const od = onDisconnect(monitorRef);
+  od.update({ status: "offline", lastSeen: Date.now() }).catch(()=>{});
 
-    var timeout = setTimeout(finish, 12000);
+  // heartbeat
+  if (heartbeatInterval) clearInterval(heartbeatInterval);
+  heartbeatInterval = setInterval(async () => {
+    try { await update(monitorRef, { lastSeen: Date.now(), resolution: `${screen.width}x${screen.height}` }); } catch(e) {}
+  }, 5000);
+}
 
-    var checkReady = function() {
-      if (vid.readyState >= 3) {
-        clearTimeout(timeout);
-        finish();
-        return;
-      }
-      vid.addEventListener("canplay", function() {
-        clearTimeout(timeout);
-        finish();
-      }, { once: true });
-    };
-
-    var seekAndWait = function() {
-      if (done) return;
-      try {
-        if (st > 0 && isFinite(vid.duration) && st < vid.duration) {
-          vid.currentTime = st;
-        }
-      } catch(e) {}
-      checkReady();
-    };
-
-    if (vid.readyState >= 1) {
-      seekAndWait();
-    } else {
-      vid.addEventListener("loadedmetadata", seekAndWait, { once: true });
+// ── Command listener (per-monitor) ────────────────────────────
+// Commands are written by dashboard to: monitors/<name>/command
+function attachCommandListener(name) {
+  if (!name) return;
+  const key = encodeURIComponent(name);
+  const cmdRef = ref(db, `monitors/${key}/command`);
+  onValue(cmdRef, snap => {
+    const cmd = snap.val();
+    if (!cmd || !cmd.at) return;
+    if (cmd.at <= lastCommandAt) return;
+    lastCommandAt = cmd.at;
+    if (cmd.cmd === "reloadPresentation") {
+      // explicit reload (re-fetch mapping & presentation)
+      handlePresentationChange(true);
+    } else if (cmd.cmd === "refreshMediaCache") {
+      // quick re-fetch of media list
+      fetchMediaAndMaybeRefreshPresentation();
     }
-
-    vid.load();
+    // clear command if desired (optional) -- leaving it so dashboard can show history
   });
 }
 
-/**
- * Wait for an image to fully load.
- */
-function waitForImageReady(img) {
-  return new Promise(function(resolve) {
-    if (img.complete && img.naturalWidth > 0) { resolve(); return; }
-    img.addEventListener("load",  resolve, { once: true });
-    img.addEventListener("error", resolve, { once: true });
-  });
+// ── Load helpers ──────────────────────────────────────────────
+async function fetchMediaAndMaybeRefreshPresentation() {
+  setProgress(1, "Fetching media…");
+  const mediaSnap = await get(ref(db, "media"));
+  mediaCache = mediaSnap.val() || {};
+  setProgress(2, "Media loaded");
+  // if presentation already loaded: try to refresh content in-place
+  if (presentation) {
+    // rebuild slides with new mediaCache but attempt to preserve current slide index/time
+    await buildSlides(presentation);
+  }
 }
 
-// ── Boot ──────────────────────────────────────────────────────
-async function boot() {
-  setProgress(0, "Connecting to database…");
+async function loadPresentationById(pId) {
+  if (!pId) return null;
+  const snap = await get(ref(db, `presentations/${pId}`));
+  return snap.val();
+}
 
-  monitorName = getMonitorName();
-
-  // Fetch media + activePresentation + monitor mapping in parallel
-  var results = await Promise.all([
-    get(ref(db, "media")),
-    get(ref(db, "activePresentation")),
-    monitorName ? get(ref(db, `monitors/${encodeURIComponent(monitorName)}`)) : Promise.resolve({ val: () => null })
-  ]);
-
-  mediaCache = results[0].val() || {};
-  var activeId = results[1].val();
-  var monitorMappedId = results[2].val();
-
-  var p = null;
-  // If a monitor mapping exists, prefer it
-  if (monitorMappedId) {
-    var s1 = await get(ref(db, "presentations/" + monitorMappedId));
-    p = s1.val();
-    // if mapping points to non-existent presentation, ignore it
-    if (!p) monitorMappedId = null;
+async function loadFallbackPresentation() {
+  const activeSnap = await get(ref(db, "activePresentation"));
+  const activeId = activeSnap.val();
+  if (activeId) {
+    const s1 = await get(ref(db, `presentations/${activeId}`));
+    if (s1 && s1.val()) return s1.val();
   }
+  const cur = await get(ref(db, "presentations/current"));
+  return cur.val();
+}
 
-  // If there is no monitor-mapped presentation, fallback to active / current
-  if (!p) {
-    if (activeId) { var s1 = await get(ref(db, "presentations/" + activeId)); p = s1.val(); }
-    if (!p)       { var s2 = await get(ref(db, "presentations/current"));    p = s2.val(); }
-  }
+// ── Clean up before switching presentations ────────────────────
+function cleanupCurrentPresentation() {
+  // stop timers
+  clearTimeout(slideTimer);
+  slideTimer = null;
+  // pause videos and remove slides
+  const slides = Array.from(canvas.querySelectorAll(".slide"));
+  slides.forEach(s => {
+    s.classList.remove("visible");
+    const v = s.querySelector("video");
+    if (v) { try { v.pause(); v.onended = null; } catch(e){} }
+  });
+  // destroy YouTube players map (they may persist in iframe API but we'll drop refs)
+  ytPlayers = {};
+  slideEls = [];
+  canvas.innerHTML = "";
+}
 
-  if (!p || !p.items || !p.items.length) {
-    setProgress(100, "No presentation found.");
-    setTimeout(dismissPreload, 1200);
-    return;
-  }
-
-  presentation = p;
-
-  // ── Build ALL slide elements up-front and add them to the canvas ──
+// ── Build slides (create DOM for presentation) ────────────────
+async function buildSlides(p) {
+  cleanupCurrentPresentation();
+  if (!p || !p.items || !p.items.length) return;
+  // create slides
   canvas.innerHTML = "";
   slideEls = [];
-
-  p.items.forEach(function(it, idx) {
-    var m = mediaCache[it.mediaId];
-    var slide = document.createElement("div");
+  p.items.forEach((it, idx) => {
+    const m = mediaCache[it.mediaId];
+    const slide = document.createElement("div");
     slide.className = "slide";
     slide.dataset.idx = idx;
-
     if (!m) {
-      slide.innerHTML = "<div style='color:#fff;font-size:24px'>Missing: " + it.mediaId + "</div>";
+      slide.innerHTML = `<div style='color:#fff;font-size:24px'>Missing: ${escHtml(it.mediaId)}</div>`;
     } else if (m.resource_type === "youtube") {
-      var wrap = document.createElement("div");
-      wrap.className = "yt-container";
-      var div = document.createElement("div");
-      div.id = "yt-player-" + idx;
+      const wrap = document.createElement("div"); wrap.className = "yt-container";
+      const div = document.createElement("div"); div.id = `yt-player-${idx}`;
       wrap.appendChild(div);
       slide.appendChild(wrap);
     } else if (m.resource_type === "image") {
-      var img = document.createElement("img");
-      img.src = m.url;
-      slide.appendChild(img);
+      const img = document.createElement("img"); img.src = m.url; slide.appendChild(img);
     } else {
-      var vid = document.createElement("video");
+      const vid = document.createElement("video");
       vid.src = m.url;
       vid.preload = "auto";
       vid.muted = true;
@@ -262,161 +258,68 @@ async function boot() {
       vid.controls = false;
       slide.appendChild(vid);
     }
-
     canvas.appendChild(slide);
     slideEls.push(slide);
   });
-
-  // ── Now wait for each media item to be ready, showing progress ──
-  var total = p.items.length;
-  var ready = 0;
-
-  var promises = p.items.map(function(it, idx) {
-    var m = mediaCache[it.mediaId];
-    if (!m || m.resource_type === "youtube") {
-      return Promise.resolve();
-    }
-
-    var slide = slideEls[idx];
-
-    if (m.resource_type === "image") {
-      var img = slide.querySelector("img");
-      return waitForImageReady(img).then(function() {
-        ready++;
-        setProgress((ready / total) * 95, "Loading " + ready + " / " + total);
-      });
-    } else {
-      var vid = slide.querySelector("video");
-      var startTime = it.start || 0;
-      return waitForVideoReady(vid, startTime).then(function() {
-        ready++;
-        setProgress((ready / total) * 95, "Buffering " + ready + " / " + total);
-      });
-    }
-  });
-
-  setProgress(2, "Loading 0 / " + total);
-
-  await Promise.all(promises);
-
-  setProgress(100, "Ready — launching…");
-  await sleep(300);
-  dismissPreload();
-  applyOverlay(p, true);
-  setupMonitorListener(monitorName);
-  listenForChanges();
-  showSlide(p, 0);
 }
 
-// ── Monitor mapping listener ──────────────────────────────────
-// If the monitors/<name> mapping changes we reload to pick up the new presentation.
-function setupMonitorListener(name) {
-  if (!name) return;
-  onValue(ref(db, `monitors/${encodeURIComponent(name)}`), async function(snap) {
-    // If mapping changed, reload to pick it up (easy, reliable)
-    // We use a strict reload so view picks up new media and presentation.
-    location.reload(true);
+// ── Preload / wait for readiness ──────────────────────────────
+function waitForVideoReady(vid, startTime) {
+  return new Promise(resolve => {
+    const st = startTime || 0;
+    let done = false;
+    const finish = () => { if (done) return; done = true; resolve(); };
+    const timeout = setTimeout(finish, 12000);
+    const checkReady = () => {
+      if (vid.readyState >= 3) { clearTimeout(timeout); finish(); return; }
+      vid.addEventListener("canplay", () => { clearTimeout(timeout); finish(); }, { once: true });
+    };
+    const seekAndWait = () => {
+      if (done) return;
+      try { if (st > 0 && isFinite(vid.duration) && st < vid.duration) vid.currentTime = st; } catch(e) {}
+      checkReady();
+    };
+    if (vid.readyState >= 1) seekAndWait();
+    else vid.addEventListener("loadedmetadata", seekAndWait, { once: true });
+    vid.load();
+  });
+}
+function waitForImageReady(img) {
+  return new Promise(resolve => {
+    if (img.complete && img.naturalWidth > 0) { resolve(); return; }
+    img.addEventListener("load", resolve, { once: true });
+    img.addEventListener("error", resolve, { once: true });
   });
 }
 
-// ── Live updates ──────────────────────────────────────────────
-function listenForChanges() {
-  onValue(ref(db, "activePresentation"), async function(snap) {
-    var activeId = snap.val();
-    var p = null;
-    if (activeId) { var s1 = await get(ref(db, "presentations/" + activeId)); p = s1.val(); }
-    if (!p)       { var s2 = await get(ref(db, "presentations/current"));    p = s2.val(); }
-    if (!p) return;
-
-    // If this display is bound to a specific monitor name, ignore global activePresentation changes.
-    if (monitorName) {
-      const mapped = (await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`))).val();
-      if (mapped) return;
-    }
-
-    var oldIds = (presentation && presentation.items ? presentation.items : []).map(function(i) { return i.mediaId; }).join(",");
-    var newIds = (p.items || []).map(function(i) { return i.mediaId; }).join(",");
-    if (oldIds !== newIds) { location.reload(true); return; }
-
-    presentation = p;
-    applyOverlay(p, false);
-  });
-
-  // Also watch presentations/current in case dashboard uses that path
-  onValue(ref(db, "presentations/current"), async function(snap) {
-    if (monitorName) {
-      const mapped = (await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`))).val();
-      if (mapped) return;
-    }
-    var p = snap.val();
-    if (!p) return;
-    var oldIds = (presentation && presentation.items ? presentation.items : []).map(function(i) { return i.mediaId; }).join(",");
-    var newIds = (p.items || []).map(function(i) { return i.mediaId; }).join(",");
-    if (oldIds !== newIds) { location.reload(true); return; }
-    presentation = p;
-    applyOverlay(p, false);
-  });
-}
-
-// ── Overlay ───────────────────────────────────────────────────
-function applyOverlay(p, firstShow) {
-  var ov = p.overlay || {};
-  overlayEl.style.background = ov.color     || "#cc0000";
-  overlayEl.style.color      = ov.textColor || "#ffffff";
-  overlayEl.textContent      = ov.text      || (monitorName ? `Monitor: ${monitorName}` : "");
-
-  if (ov.visible || !ov.text) {
-    overlayEl.style.display = "block";
-    if (firstShow && !overlayShown) {
-      overlayEl.classList.remove("animate-in");
-      void overlayEl.offsetWidth;
-      overlayEl.classList.add("animate-in");
-      overlayShown = true;
-    }
-  } else {
-    overlayEl.style.display = "none";
-    overlayShown = false;
-  }
-}
-
-// ── Slide navigation / playback code (unchanged) ─────────────
+// ── Show / schedule slides ───────────────────────────────────
 function showSlide(p, idx) {
-  clearTimeout(slideTimer);
-  slideTimer = null;
+  clearTimeout(slideTimer); slideTimer = null;
   if (!p || !p.items || !p.items.length) return;
   idx = ((idx % p.items.length) + p.items.length) % p.items.length;
   slideIndex = idx;
-
-  var slides = Array.from(canvas.querySelectorAll(".slide"));
-
-  slides.forEach(function(s) {
-    var i = parseInt(s.dataset.idx, 10);
+  const slides = Array.from(canvas.querySelectorAll(".slide"));
+  slides.forEach(s => {
+    const i = parseInt(s.dataset.idx, 10);
     if (i === idx) return;
     s.classList.remove("visible");
-    var v = s.querySelector("video");
+    const v = s.querySelector("video");
     if (v) { v.pause(); v.onended = null; }
-    var pl = ytPlayers[i];
+    const pl = ytPlayers[i];
     if (pl) { try { pl.pauseVideo(); } catch(e) {} }
   });
-
-  var slide = null;
-  for (var i = 0; i < slides.length; i++) {
-    if (parseInt(slides[i].dataset.idx, 10) === idx) { slide = slides[i]; break; }
-  }
+  const slide = slides.find(s => parseInt(s.dataset.idx, 10) === idx);
   if (!slide) return;
-
   slide.style.transition = p.transition === "cut" ? "none" : "opacity 800ms ease";
   void slide.offsetWidth;
   slide.classList.add("visible");
-
-  var item  = p.items[idx];
-  var media = mediaCache[item.mediaId];
+  const item = p.items[idx];
+  const media = mediaCache[item.mediaId];
   if (!media) { scheduleNext(p); return; }
-
   if (media.resource_type === "youtube") {
     playYT(p, idx, item, media);
   } else if (media.resource_type !== "image") {
-    var vid = slide.querySelector("video");
+    const vid = slide.querySelector("video");
     if (vid) playVideo(p, slide, vid, item);
     else scheduleNext(p);
   } else {
@@ -425,19 +328,15 @@ function showSlide(p, idx) {
 }
 
 function playVideo(p, slideEl, vid, item) {
-  var start = item.start || 0;
-  var end   = item.end   || null;
+  const start = item.start || 0;
+  const end = item.end || null;
   vid.onended = null;
   vid.onloadedmetadata = null;
   vid.muted = false;
-  try {
-    if (isFinite(vid.duration) && start < vid.duration) {
-      vid.currentTime = Math.min(start, vid.duration - 0.01);
-    }
-  } catch(e) {}
-  vid.play().catch(function() {});
+  try { if (isFinite(vid.duration) && start < vid.duration) vid.currentTime = Math.min(start, vid.duration - 0.01); } catch(e){}
+  vid.play().catch(()=>{});
   if (end && end > start) {
-    var poll = function() {
+    const poll = () => {
       if (!slideEl.classList.contains("visible")) return;
       if (vid.currentTime >= end) { vid.pause(); advance(p); }
       else requestAnimationFrame(poll);
@@ -448,7 +347,22 @@ function playVideo(p, slideEl, vid, item) {
   }
 }
 
-// YouTube helpers (unchanged)
+function scheduleNext(p) {
+  clearTimeout(slideTimer); slideTimer = null;
+  if (p.mode === "single") return;
+  const interval = p.intervalMs || 5000;
+  slideTimer = setTimeout(() => {
+    showSlide(p, (slideIndex + 1) % (p.items.length || 1));
+  }, interval);
+}
+
+function advance(p) {
+  clearTimeout(slideTimer); slideTimer = null;
+  if (p.mode === "single") return;
+  showSlide(p, (slideIndex + 1) % (p.items.length || 1));
+}
+
+// ── YouTube (iframe API) ────────────────────────────────────
 function loadYtApi(cb) {
   if (ytApiReady) { cb(); return; }
   pendingYtInits.push(cb);
@@ -456,26 +370,24 @@ function loadYtApi(cb) {
   ytApiLoading = true;
   window.onYouTubeIframeAPIReady = function() {
     ytApiReady = true;
-    pendingYtInits.forEach(function(fn) { fn(); });
+    pendingYtInits.forEach(fn => fn());
     pendingYtInits = [];
   };
-  var tag = document.createElement("script");
+  const tag = document.createElement("script");
   tag.src = "https://www.youtube.com/iframe_api";
   document.head.appendChild(tag);
 }
-
 function playYT(p, idx, item, media) {
-  var start = (item.start != null) ? item.start : ((media.start != null) ? media.start : 0);
-  var end   = (item.end   != null) ? item.end   : ((media.end   != null) ? media.end   : null);
-
-  var init = function() {
+  const start = (item.start != null) ? item.start : ((media.start != null) ? media.start : 0);
+  const end = (item.end != null) ? item.end : ((media.end != null) ? media.end : null);
+  const init = function() {
     if (ytPlayers[idx]) {
-      var pl = ytPlayers[idx];
+      const pl = ytPlayers[idx];
       try { pl.seekTo(start, true); pl.playVideo(); } catch(e) {}
       if (end && end > start) pollYt(p, idx, pl, end);
       return;
     }
-    var divId = "yt-player-" + idx;
+    const divId = `yt-player-${idx}`;
     if (!document.getElementById(divId)) return;
     new window.YT.Player(divId, {
       videoId: media.ytId,
@@ -493,105 +405,188 @@ function playYT(p, idx, item, media) {
   };
   loadYtApi(init);
 }
-
 function pollYt(p, idx, player, end) {
-  var check = function() {
-    var slide = canvas.querySelector(".slide[data-idx=\"" + idx + "\"]");
+  const check = () => {
+    const slide = canvas.querySelector(`.slide[data-idx="${idx}"]`);
     if (!slide || !slide.classList.contains("visible")) return;
-    try { if (player.getCurrentTime() >= end) { player.pauseVideo(); advance(p); return; } } catch(e) {}
+    try { if (player.getCurrentTime() >= end) { player.pauseVideo(); advance(p); return; } } catch(e){}
     requestAnimationFrame(check);
   };
   requestAnimationFrame(check);
 }
 
-function advance(p) {
-  clearTimeout(slideTimer);
-  slideTimer = null;
-  if (p.mode === "single") return;
-  showSlide(p, (slideIndex + 1) % (p.items.length || 1));
-}
-
-var timerSetAt = null;
-
-function scheduleNext(p) {
-  clearTimeout(slideTimer);
-  slideTimer = null;
-  if (p.mode === "single") return;
-  var interval = p.intervalMs || 5000;
-  timerSetAt = Date.now();
-  slideTimer = setTimeout(function() {
-    timerSetAt = null;
-    showSlide(p, (slideIndex + 1) % (p.items.length || 1));
-  }, interval);
-}
-
-// ── Tab visibility handling (unchanged) ───────────────────────
-var hiddenAt      = null;
+// ── Visibility handling ──────────────────────────────────────
 var pausedForHide = false;
 var timerRemainingMs = null;
-
+var timerSetAt = null;
 document.addEventListener("visibilitychange", function() {
   if (!presentation) return;
-
   if (document.visibilityState === "hidden") {
-    hiddenAt = Date.now();
     if (slideTimer) {
-      var elapsed = hiddenAt - (timerSetAt || hiddenAt);
-      var interval = (presentation.intervalMs || 5000);
+      const hiddenAt = Date.now();
+      const elapsed = hiddenAt - (timerSetAt || hiddenAt);
+      const interval = presentation.intervalMs || 5000;
       timerRemainingMs = Math.max(0, interval - elapsed);
-      clearTimeout(slideTimer);
-      slideTimer = null;
-    } else {
-      timerRemainingMs = null;
-    }
-
-    var slide = canvas.querySelector(".slide[data-idx=\"" + slideIndex + "\"]");
+      clearTimeout(slideTimer); slideTimer = null;
+    } else timerRemainingMs = null;
+    const slide = canvas.querySelector(`.slide[data-idx="${slideIndex}"]`);
     if (slide) {
-      var vid = slide.querySelector("video");
-      if (vid && !vid.paused) {
-        vid.pause();
-        pausedForHide = true;
-      } else {
-        pausedForHide = false;
-      }
+      const vid = slide.querySelector("video");
+      if (vid && !vid.paused) { vid.pause(); pausedForHide = true; } else pausedForHide = false;
     }
-
-    var ytPl = ytPlayers[slideIndex];
-    if (ytPl) { try { ytPl.pauseVideo(); } catch(e) {} }
-
+    const ytPl = ytPlayers[slideIndex]; if (ytPl) { try { ytPl.pauseVideo(); } catch(e){} }
   } else {
-    var item  = presentation.items[slideIndex];
-    var media = item ? mediaCache[item.mediaId] : null;
-
+    const item = presentation.items[slideIndex];
+    const media = item ? mediaCache[item.mediaId] : null;
     if (media && media.resource_type !== "image" && media.resource_type !== "youtube") {
-      var slide2 = canvas.querySelector(".slide[data-idx=\"" + slideIndex + "\"]");
+      const slide2 = canvas.querySelector(`.slide[data-idx="${slideIndex}"]`);
       if (slide2 && pausedForHide) {
-        var vid2 = slide2.querySelector("video");
+        const vid2 = slide2.querySelector("video");
         if (vid2) {
-          if (vid2.readyState >= 3) {
-            vid2.play().catch(function() {});
-          } else {
-            vid2.addEventListener("canplay", function() {
-              vid2.play().catch(function() {});
-            }, { once: true });
-          }
+          if (vid2.readyState >= 3) vid2.play().catch(()=>{});
+          else vid2.addEventListener("canplay", () => vid2.play().catch(()=>{}), { once: true });
         }
       }
     } else if (media && media.resource_type === "youtube") {
-      var ytPl2 = ytPlayers[slideIndex];
-      if (ytPl2) { try { ytPl2.playVideo(); } catch(e) {} }
+      const ytPl2 = ytPlayers[slideIndex];
+      if (ytPl2) { try { ytPl2.playVideo(); } catch(e){} }
     }
-
     pausedForHide = false;
-
     if (timerRemainingMs !== null) {
-      slideTimer = setTimeout(function() {
-        showSlide(presentation, (slideIndex + 1) % (presentation.items.length || 1));
-      }, timerRemainingMs);
+      slideTimer = setTimeout(() => { showSlide(presentation, (slideIndex + 1) % (presentation.items.length || 1)); }, timerRemainingMs);
       timerRemainingMs = null;
     }
   }
 });
+
+// ── Presentation change handling (when monitors/<name> mapping or global active/current changes) ─────────────────
+async function handlePresentationChange(forceReload = false) {
+  // Decide which presentation to show for this monitorName:
+  if (!monitorName) return;
+  const mapping = (await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`))).val();
+  let p = null;
+  if (mapping && typeof mapping === "string") {
+    // mapping is a presentationId
+    p = await loadPresentationById(mapping);
+  } else if (mapping && mapping.presentationId) {
+    p = await loadPresentationById(mapping.presentationId);
+  }
+
+  if (!p || !p.items || !p.items.length) {
+    // fallback to active/current unless explicit mapping that points to nothing
+    p = await loadFallbackPresentation();
+  }
+
+  if (!p || !p.items || !p.items.length) {
+    setProgress(100, "No presentation found.");
+    await sleep(600);
+    dismissPreload();
+    return;
+  }
+
+  // If presentation hasn't changed and not forced, do nothing
+  const oldIds = (presentation && presentation.items ? presentation.items.map(i=>i.mediaId).join(",") : "");
+  const newIds = (p.items ? p.items.map(i=>i.mediaId).join(",") : "");
+  if (!forceReload && presentation && oldIds === newIds && presentation.name === p.name && presentation.intervalMs === p.intervalMs) {
+    // Only update overlay and return
+    presentation = p;
+    applyOverlay(p, false);
+    return;
+  }
+
+  // Full in-place switch: prefetch media, build slides, preload, then start
+  setProgress(0, "Preparing presentation…");
+
+  // Fetch media cache fresh
+  const mediaSnap = await get(ref(db, "media"));
+  mediaCache = mediaSnap.val() || {};
+
+  presentation = p;
+  await buildSlides(p);
+
+  // Preload assets (images & video readiness)
+  let ready = 0;
+  const total = p.items.length;
+  setProgress(2, `Loading 0 / ${total}`);
+  const preloadPromises = p.items.map((it, idx) => {
+    const m = mediaCache[it.mediaId];
+    if (!m || m.resource_type === "youtube") return Promise.resolve().then(()=>{ ready++; setProgress((ready/total)*95, `Loading ${ready} / ${total}`); });
+    const slide = slideEls[idx];
+    if (m.resource_type === "image") {
+      const img = slide.querySelector("img");
+      return waitForImageReady(img).then(()=>{ ready++; setProgress((ready/total)*95, `Loading ${ready} / ${total}`); });
+    } else {
+      const vid = slide.querySelector("video");
+      const startTime = it.start || 0;
+      return waitForVideoReady(vid, startTime).then(()=>{ ready++; setProgress((ready/total)*95, `Buffering ${ready} / ${total}`); });
+    }
+  });
+
+  await Promise.all(preloadPromises);
+  setProgress(100, "Ready — launching…");
+  await sleep(250);
+  dismissPreload();
+  applyOverlay(p, true);
+
+  // Start playback from first slide
+  slideIndex = 0;
+  showSlide(p, 0);
+}
+
+// ── Overlay ───────────────────────────────────────────────────
+function applyOverlay(p, firstShow) {
+  const ov = p.overlay || {};
+  overlayEl.style.background = ov.color || "#cc0000";
+  overlayEl.style.color = ov.textColor || "#ffffff";
+  overlayEl.textContent = ov.text || (monitorName ? `Monitor: ${monitorName}` : "");
+  if (ov.visible || !ov.text) {
+    overlayEl.style.display = "block";
+    if (firstShow && !overlayShown) {
+      overlayEl.classList.remove("animate-in");
+      void overlayEl.offsetWidth;
+      overlayEl.classList.add("animate-in");
+      overlayShown = true;
+    }
+  } else {
+    overlayEl.style.display = "none";
+    overlayShown = false;
+  }
+}
+
+// ── Listeners for global changes that should trigger a re-evaluate ─────────────────
+function attachGlobalListeners() {
+  // If presentations/current changes and this monitor isn't explicitly mapped, update
+  onValue(ref(db, "presentations/current"), async () => {
+    // only act if monitor has no explicit mapping
+    const mapping = (await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`))).val();
+    if (mapping && (typeof mapping === "string" || mapping.presentationId)) return;
+    handlePresentationChange(false);
+  });
+
+  // If activePresentation changes and monitor not mapped, update
+  onValue(ref(db, "activePresentation"), async () => {
+    const mapping = (await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`))).val();
+    if (mapping && (typeof mapping === "string" || mapping.presentationId)) return;
+    handlePresentationChange(false);
+  });
+
+  // If this monitor's mapping changes, respond in-place
+  onValue(ref(db, `monitors/${encodeURIComponent(monitorName)}`), () => {
+    handlePresentationChange(false);
+  });
+}
+
+// ── Boot (initialise once) ────────────────────────────────────
+async function boot() {
+  setProgress(0, "Initializing…");
+  monitorName = getPersistedMonitorName();
+  await registerPresence(monitorName);
+  attachCommandListener(monitorName);
+  attachGlobalListeners();
+  // initial fetch and start
+  await fetchMediaAndMaybeRefreshPresentation();
+  await handlePresentationChange(false);
+}
 
 boot();
 </script>
