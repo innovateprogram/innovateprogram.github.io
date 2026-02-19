@@ -3,96 +3,256 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <title>Fullscreen View</title>
+        <title>Media Upload & Presentation Editor</title>
         <style>
-            html,
             body {
-                height: 100%;
-                margin: 0;
-                background: #000;
-                color: #fff;
                 font-family: system-ui, Arial;
-                cursor: none; /* hide cursor */
-            }
-
-            .p {
-                color: #fff;
-            }
-            #root {
-                position: fixed;
-                inset: 0;
+                margin: 0;
                 display: flex;
-                align-items: center;
-                justify-content: center;
-                overflow: hidden;
+                height: 100vh;
             }
-            .canvas {
-                position: relative;
+            .left {
+                width: 420px;
+                border-right: 1px solid #ddd;
+                padding: 12px;
+                overflow: auto;
+            }
+            .right {
+                flex: 1;
+                padding: 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .card {
+                background: #fafafa;
+                border: 1px solid #eee;
+                padding: 10px;
+                border-radius: 6px;
+                margin-bottom: 10px;
+            }
+            .media-list {
+                max-height: 40vh;
+                overflow: auto;
+            }
+            .media-item {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                padding: 6px;
+                border-bottom: 1px solid #eee;
+            }
+            .media-item img,
+            .media-item video {
+                width: 72px;
+                height: 48px;
+                object-fit: cover;
+                border-radius: 4px;
+            }
+            label {
+                display: block;
+                margin-top: 6px;
+                font-weight: 600;
+                font-size: 13px;
+            }
+            input,
+            select,
+            textarea {
                 width: 100%;
-                height: 100%;
+                padding: 8px;
+                box-sizing: border-box;
+                margin-top: 6px;
+            }
+            button {
+                padding: 8px 10px;
+                margin-top: 8px;
+            }
+            .small {
+                font-size: 13px;
+                color: #666;
+            }
+            .row {
                 display: flex;
-                align-items: center;
-                justify-content: center;
-                background: #000;
+                gap: 8px;
             }
-            .slide {
-                position: absolute;
-                inset: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: opacity 800ms ease;
-                opacity: 0;
-                pointer-events: none;
-            }
-            .slide.visible {
-                opacity: 1;
-                pointer-events: auto;
-            }
-            .slide img,
-            .slide video {
-                max-width: 100%;
-                max-height: 100%;
-                object-fit: contain;
+            .row > * {
+                flex: 1;
             }
 
-            /* Overlay - solid top-left banner sliding in from left */
-            @keyframes bannerIn {
-                from {
-                    transform: translateX(-110%);
-                }
-                to {
-                    transform: translateX(0);
-                }
+            /* Upload progress bar */
+            #progressWrap {
+                display: none;
+                margin-top: 10px;
             }
-            .overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                padding: 18px 40px 18px 28px;
-                border-radius: 0 0 12px 0;
-                font-size: 28px;
-                font-weight: 800;
-                letter-spacing: 0.03em;
-                line-height: 1.3;
-                z-index: 100;
-                max-width: 80vw;
-                word-break: break-word;
-                box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
-                animation: bannerIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-                /* background and color set dynamically via JS */
+            #progressWrap label {
+                font-weight: 600;
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            #progressBar {
+                width: 100%;
+                height: 16px;
+                border-radius: 8px;
+                overflow: hidden;
+                background: #e0e0e0;
+                margin-top: 4px;
+            }
+            #progressFill {
+                height: 100%;
+                width: 0%;
+                background: linear-gradient(90deg, #4caf50, #81c784);
+                border-radius: 8px;
+                transition: width 0.2s ease;
+            }
+            #progressPct {
+                font-size: 12px;
+                color: #333;
+                margin-top: 3px;
+                text-align: right;
+            }
+
+            /* Overlay colour swatches */
+            .overlay-colors {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+                margin-top: 8px;
+            }
+            .overlay-colors .swatch {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                cursor: pointer;
+                border: 2px solid transparent;
+                transition: border-color 0.15s;
+            }
+            .overlay-colors .swatch.active {
+                border-color: #000;
             }
         </style>
     </head>
     <body>
-        <div id="root">
-            <div class="canvas" id="canvas"></div>
-            <div class="overlay" id="overlay" style="display: none"></div>
+        <div class="left">
+            <h3>Upload media</h3>
+            <div class="card">
+                <input id="file" type="file" accept="image/*,video/*" />
+                <label>Filename (optional)</label>
+                <input id="fname" type="text" placeholder="Label for this media" />
+                <label>Make visible in 'current' presentation after upload?</label>
+                <select id="showNow">
+                    <option value="no">No</option>
+                    <option value="append">Append to end</option>
+                    <option value="replace">Replace presentation</option>
+                </select>
+                <button id="uploadBtn">Upload to Cloudinary</button>
+
+                <div id="progressWrap">
+                    <label>Upload progress</label>
+                    <div id="progressBar"><div id="progressFill"></div></div>
+                    <div id="progressPct">0%</div>
+                </div>
+
+                <div id="uploadStatus" class="small"></div>
+            </div>
+
+            <h3>Stored media</h3>
+            <div class="card media-list" id="mediaList"></div>
+        </div>
+
+        <div class="right">
+            <h2>Presentation Editor (current)</h2>
+            <div class="card">
+                <label>Mode</label>
+                <select id="mode">
+                    <option value="slideshow">Slideshow</option>
+                    <option value="single">Single slide</option>
+                </select>
+
+                <div class="row">
+                    <div>
+                        <label>Transition</label>
+                        <select id="transition">
+                            <option value="fade">fade</option>
+                            <option value="cut">cut</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Interval (ms)</label>
+                        <input id="intervalMs" type="number" value="5000" />
+                    </div>
+                </div>
+
+                <label>Overlay text</label>
+                <input id="overlayText" placeholder="e.g. Innovate room closed for today!" />
+
+                <label>Overlay background colour</label>
+                <div class="overlay-colors" id="overlayColors">
+                    <div class="swatch active" style="background: #cc0000" data-color="#cc0000"></div>
+                    <div class="swatch" style="background: #e65c00" data-color="#e65c00"></div>
+                    <div class="swatch" style="background: #f5c518" data-color="#f5c518"></div>
+                    <div class="swatch" style="background: #1a7f37" data-color="#1a7f37"></div>
+                    <div class="swatch" style="background: #0055d4" data-color="#0055d4"></div>
+                    <div class="swatch" style="background: #6a0dad" data-color="#6a0dad"></div>
+                    <div class="swatch" style="background: #00bcd4" data-color="#00bcd4"></div>
+                    <div class="swatch" style="background: #212121" data-color="#212121"></div>
+                    <div class="swatch" style="background: #ffffff; border: 1px solid #ccc" data-color="#ffffff"></div>
+                </div>
+                <input
+                    id="overlayColor"
+                    type="color"
+                    value="#cc0000"
+                    style="margin-top: 6px; width: 100%; height: 32px; padding: 2px; cursor: pointer"
+                    title="Custom colour" />
+
+                <label>Overlay text colour</label>
+                <div class="overlay-colors" id="overlayTextColors">
+                    <div
+                        class="swatch active"
+                        style="background: #ffffff; border: 1px solid #ccc"
+                        data-color="#ffffff"></div>
+                    <div class="swatch" style="background: #000000" data-color="#000000"></div>
+                    <div class="swatch" style="background: #f5c518" data-color="#f5c518"></div>
+                    <div class="swatch" style="background: #ff6b6b" data-color="#ff6b6b"></div>
+                </div>
+                <input
+                    id="overlayTextColor"
+                    type="color"
+                    value="#ffffff"
+                    style="margin-top: 6px; width: 100%; height: 32px; padding: 2px; cursor: pointer"
+                    title="Custom text colour" />
+
+                <label><input id="overlayVisible" type="checkbox" /> overlay visible</label>
+
+                <div class="row">
+                    <button id="savePresentation">Save presentation</button>
+                    <button id="clearPresentation">Clear current</button>
+                </div>
+            </div>
+
+            <h3>Presentation items (drag order will determine playback)</h3>
+            <div class="card" id="presentationItems"></div>
+
+            <div class="card">
+                <div class="small">
+                    Click a stored media item to add to the presentation. When added, you can set start/end seconds for
+                    videos, or duration for images.
+                </div>
+            </div>
         </div>
 
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-            import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+            import {
+                getDatabase,
+                ref,
+                push,
+                set,
+                onValue,
+                update,
+                remove,
+                child,
+                get
+            } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
             const firebaseConfig = {
                 apiKey: "AIzaSyBgV9PoUFut3FPc0iChFNm2-h6-Uc5z6s0",
@@ -103,209 +263,367 @@
                 messagingSenderId: "805770674259",
                 appId: "1:805770674259:web:bcc520979e6772fda5c6a6"
             };
+            const CLOUD_NAME = "dgrmpcha9";
+            const UPLOAD_PRESET = "Innovate";
 
             const app = initializeApp(firebaseConfig);
             const db = getDatabase(app);
             const mediaRef = ref(db, "media");
             const presentationRef = ref(db, "presentations/current");
 
-            const canvas = document.getElementById("canvas");
-            const overlayEl = document.getElementById("overlay");
+            const fileInput = document.getElementById("file");
+            const uploadBtn = document.getElementById("uploadBtn");
+            const uploadStatus = document.getElementById("uploadStatus");
+            const fname = document.getElementById("fname");
+            const showNow = document.getElementById("showNow");
+            const progressWrap = document.getElementById("progressWrap");
+            const progressFill = document.getElementById("progressFill");
+            const progressPct = document.getElementById("progressPct");
 
-            let mediaCache = {};
-            let presentation = null;
-            let slideIndex = 0;
-            let slideTimer = null;
-            let currentSlideEl = null;
+            const mediaListEl = document.getElementById("mediaList");
+            const presentationItemsEl = document.getElementById("presentationItems");
+
+            const modeEl = document.getElementById("mode");
+            const transitionEl = document.getElementById("transition");
+            const intervalMsEl = document.getElementById("intervalMs");
+            const overlayTextEl = document.getElementById("overlayText");
+            const overlayVisibleEl = document.getElementById("overlayVisible");
+            const overlayColorInput = document.getElementById("overlayColor");
+            const overlayTextColorInput = document.getElementById("overlayTextColor");
+            const savePresentationBtn = document.getElementById("savePresentation");
+            const clearPresentationBtn = document.getElementById("clearPresentation");
+
+            let localMedia = {};
+            let selectedOverlayColor = "#cc0000";
+            let selectedOverlayTextColor = "#ffffff";
+
+            // Swatch picker logic
+            function setupSwatches(containerId, colorInputId, onSelect) {
+                const container = document.getElementById(containerId);
+                const colorInput = document.getElementById(colorInputId);
+                container.querySelectorAll(".swatch").forEach((s) => {
+                    s.onclick = () => {
+                        container.querySelectorAll(".swatch").forEach((x) => x.classList.remove("active"));
+                        s.classList.add("active");
+                        colorInput.value = s.dataset.color;
+                        onSelect(s.dataset.color);
+                    };
+                });
+                colorInput.oninput = () => {
+                    container.querySelectorAll(".swatch").forEach((x) => x.classList.remove("active"));
+                    onSelect(colorInput.value);
+                };
+            }
+
+            setupSwatches("overlayColors", "overlayColor", (c) => {
+                selectedOverlayColor = c;
+            });
+            setupSwatches("overlayTextColors", "overlayTextColor", (c) => {
+                selectedOverlayTextColor = c;
+            });
 
             onValue(mediaRef, (snap) => {
-                mediaCache = snap.val() || {};
-                if (presentation) renderPresentation(presentation);
+                const data = snap.val() || {};
+                localMedia = data;
+                renderMediaList();
             });
 
             onValue(presentationRef, (snap) => {
-                presentation = snap.val() || { items: [] };
-                renderPresentation(presentation);
+                const p = snap.val();
+                renderPresentationEditor(p);
             });
 
-            function renderPresentation(p) {
-                clearTimeout(slideTimer);
-                slideTimer = null;
-                slideIndex = 0;
-
-                // Pause any playing videos before clearing
-                canvas.querySelectorAll("video").forEach((v) => v.pause());
-                canvas.innerHTML = "";
-
-                if (!p || !p.items || p.items.length === 0) {
-                    overlayEl.style.display = "none";
-                    return;
+            function renderMediaList() {
+                mediaListEl.innerHTML = "";
+                const keys = Object.keys(localMedia).sort(
+                    (a, b) => localMedia[a].uploadedAt - localMedia[b].uploadedAt
+                );
+                for (const id of keys) {
+                    const m = localMedia[id];
+                    const div = document.createElement("div");
+                    div.className = "media-item";
+                    div.innerHTML = `
+                        ${m.resource_type === "image" ? `<img src="${m.url}" />` : `<video src="${m.url}" muted playsinline></video>`}
+                        <div style="flex:1">
+                            <div><strong>${m.filename || id}</strong></div>
+                            <div class="small">${m.resource_type} • ${new Date(m.uploadedAt).toLocaleString()}</div>
+                            <div style="margin-top:6px">
+                                <button data-id="${id}" class="addBtn">Add to presentation</button>
+                                <button data-id="${id}" class="deleteBtn">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    mediaListEl.appendChild(div);
                 }
-
-                // Overlay styling — always fully solid, no transparency
-                const overlayColor = (p.overlay && p.overlay.color) || "#cc0000";
-                const overlayTextColor = (p.overlay && p.overlay.textColor) || "#ffffff";
-                overlayEl.style.background = overlayColor;
-                overlayEl.style.color = overlayTextColor;
-                overlayEl.textContent = (p.overlay && p.overlay.text) || "";
-
-                const overlayVisible = p.overlay && p.overlay.visible;
-                if (overlayVisible) {
-                    overlayEl.style.display = "block";
-                    overlayEl.style.animation = "none";
-                    void overlayEl.offsetWidth;
-                    overlayEl.style.animation = "";
-                } else {
-                    overlayEl.style.display = "none";
-                }
-
-                // Create slide elements
-                p.items.forEach((it, idx) => {
-                    const m = mediaCache[it.mediaId];
-                    const slide = document.createElement("div");
-                    slide.className = "slide";
-                    slide.dataset.idx = idx;
-                    slide.dataset.mediaId = it.mediaId;
-
-                    if (!m) {
-                        slide.innerHTML = `<div style="color:#fff;font-size:24px">Missing media: ${it.mediaId}</div>`;
-                    } else if (m.resource_type === "image") {
-                        const img = document.createElement("img");
-                        img.src = m.url;
-                        slide.appendChild(img);
-                    } else {
-                        const vid = document.createElement("video");
-                        vid.src = m.url;
-                        vid.setAttribute("playsinline", "");
-                        vid.preload = "auto";
-                        vid.controls = false;
-                        vid.style.maxWidth = "100%";
-                        vid.style.maxHeight = "100%";
-                        slide.appendChild(vid);
-                    }
-                    canvas.appendChild(slide);
+                mediaListEl.querySelectorAll(".addBtn").forEach((b) => {
+                    b.onclick = () => addToPresentation(b.dataset.id);
                 });
-
-                slideIndex = 0;
-                showSlideAtIndex(p, 0);
-            }
-
-            function showSlideAtIndex(p, idx) {
-                clearTimeout(slideTimer);
-                slideTimer = null;
-
-                if (!p.items || p.items.length === 0) return;
-                if (idx >= p.items.length) idx = 0;
-                if (idx < 0) idx = 0;
-                slideIndex = idx;
-
-                const slides = Array.from(canvas.querySelectorAll(".slide"));
-
-                // Hide all other slides and stop their videos
-                slides.forEach((s) => {
-                    if (parseInt(s.dataset.idx, 10) !== idx) {
-                        s.classList.remove("visible");
-                        const v = s.querySelector("video");
-                        if (v) {
-                            v.pause();
-                            v.onended = null;
-                        }
-                    }
-                });
-
-                const newSlide = slides.find((s) => parseInt(s.dataset.idx, 10) === idx);
-                if (!newSlide) return;
-
-                // Apply transition
-                if (p.transition === "cut") {
-                    newSlide.style.transition = "none";
-                } else {
-                    newSlide.style.transition = "opacity 800ms ease";
-                }
-                void newSlide.offsetWidth;
-                newSlide.classList.add("visible");
-                currentSlideEl = newSlide;
-
-                const item = p.items[idx];
-                const videoEl = newSlide.querySelector("video");
-
-                if (videoEl) {
-                    const start = item.start || 0;
-                    const end = item.end || null;
-
-                    // Clear previous handlers
-                    videoEl.onended = null;
-                    videoEl.onloadedmetadata = null;
-
-                    const playFrom = () => {
-                        try {
-                            if (videoEl.duration && start <= videoEl.duration) {
-                                videoEl.currentTime = Math.min(start, videoEl.duration - 0.01);
-                            }
-                        } catch (e) {
-                            /* ignore */
-                        }
-
-                        videoEl.play().catch(() => {});
-
-                        if (end && end > start) {
-                            // Poll to detect end time
-                            const checkEnd = () => {
-                                if (!newSlide.classList.contains("visible")) return;
-                                if (videoEl.currentTime >= end) {
-                                    videoEl.pause();
-                                    advanceNow(p);
-                                } else {
-                                    requestAnimationFrame(checkEnd);
-                                }
-                            };
-                            requestAnimationFrame(checkEnd);
-                        } else {
-                            // No end specified: advance immediately when video ends
-                            videoEl.onended = () => advanceNow(p);
-                        }
+                mediaListEl.querySelectorAll(".deleteBtn").forEach((b) => {
+                    b.onclick = () => {
+                        if (!confirm("Delete media permanently?")) return;
+                        remove(ref(db, "media/" + b.dataset.id));
+                        get(presentationRef).then((s) => {
+                            const p = s.val();
+                            if (!p || !p.items) return;
+                            p.items = p.items.filter((it) => it.mediaId !== b.dataset.id);
+                            set(presentationRef, p);
+                        });
                     };
+                });
+            }
 
-                    if (videoEl.readyState >= 1) {
-                        playFrom();
-                    } else {
-                        videoEl.onloadedmetadata = () => playFrom();
-                        // Force load in case it's stalled
-                        videoEl.load();
+            async function addToPresentation(mediaId) {
+                const media = localMedia[mediaId];
+                if (!media) return alert("Media not found");
+                const currentSnap = await get(presentationRef);
+                const p = currentSnap.val() || {
+                    id: "current",
+                    items: [],
+                    mode: "slideshow",
+                    intervalMs: 5000,
+                    transition: "fade",
+                    overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" }
+                };
+                const item = { mediaId, start: 0, end: media.duration || null, label: media.filename || "" };
+                p.items = p.items || [];
+                p.items.push(item);
+                await set(presentationRef, p);
+                alert("Added to presentation");
+            }
+
+            function renderPresentationEditor(p) {
+                presentationItemsEl.innerHTML = "";
+                if (!p) {
+                    p = {
+                        items: [],
+                        mode: "slideshow",
+                        intervalMs: 5000,
+                        transition: "fade",
+                        overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" }
+                    };
+                }
+                modeEl.value = p.mode || "slideshow";
+                transitionEl.value = p.transition || "fade";
+                intervalMsEl.value = p.intervalMs || 5000;
+                overlayTextEl.value = (p.overlay && p.overlay.text) || "";
+                overlayVisibleEl.checked = p.overlay && p.overlay.visible;
+
+                // Restore saved colors
+                if (p.overlay && p.overlay.color) {
+                    selectedOverlayColor = p.overlay.color;
+                    overlayColorInput.value = p.overlay.color;
+                }
+                if (p.overlay && p.overlay.textColor) {
+                    selectedOverlayTextColor = p.overlay.textColor;
+                    overlayTextColorInput.value = p.overlay.textColor;
+                }
+
+                (p.items || []).forEach((it, index) => {
+                    const m = localMedia[it.mediaId] || { filename: "(missing)" };
+                    const div = document.createElement("div");
+                    div.className = "card";
+                    div.innerHTML = `
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <strong>${m.filename || it.mediaId}</strong>
+                            <div>
+                                <button data-idx="${index}" class="upBtn">▲</button>
+                                <button data-idx="${index}" class="downBtn">▼</button>
+                                <button data-idx="${index}" class="removeBtn">remove</button>
+                            </div>
+                        </div>
+                        <div class="small">mediaId: ${it.mediaId}</div>
+                        <label>Label</label><input data-idx="${index}" class="itemLabel" value="${escapeHtml(it.label || "")}" />
+                        <div class="row">
+                            <div>
+                                <label>start (s)</label>
+                                <input type="number" data-idx="${index}" class="itemStart" value="${it.start || 0}" />
+                            </div>
+                            <div>
+                                <label>end (s) (leave blank for auto)</label>
+                                <input type="number" data-idx="${index}" class="itemEnd" value="${it.end === null || it.end === undefined ? "" : it.end}" />
+                            </div>
+                        </div>
+                    `;
+                    presentationItemsEl.appendChild(div);
+                });
+
+                presentationItemsEl.querySelectorAll(".removeBtn").forEach(
+                    (b) =>
+                        (b.onclick = async () => {
+                            const idx = +b.dataset.idx;
+                            p.items.splice(idx, 1);
+                            await set(presentationRef, p);
+                        })
+                );
+                presentationItemsEl.querySelectorAll(".upBtn").forEach(
+                    (b) =>
+                        (b.onclick = async () => {
+                            const i = +b.dataset.idx;
+                            if (i <= 0) return;
+                            [p.items[i - 1], p.items[i]] = [p.items[i], p.items[i - 1]];
+                            await set(presentationRef, p);
+                        })
+                );
+                presentationItemsEl.querySelectorAll(".downBtn").forEach(
+                    (b) =>
+                        (b.onclick = async () => {
+                            const i = +b.dataset.idx;
+                            if (i >= p.items.length - 1) return;
+                            [p.items[i + 1], p.items[i]] = [p.items[i], p.items[i + 1]];
+                            await set(presentationRef, p);
+                        })
+                );
+                presentationItemsEl.querySelectorAll(".itemStart").forEach(
+                    (inp) =>
+                        (inp.onchange = async () => {
+                            const idx = +inp.dataset.idx;
+                            p.items[idx].start = parseFloat(inp.value) || 0;
+                            await set(presentationRef, p);
+                        })
+                );
+                presentationItemsEl.querySelectorAll(".itemEnd").forEach(
+                    (inp) =>
+                        (inp.onchange = async () => {
+                            const idx = +inp.dataset.idx;
+                            const v = inp.value;
+                            p.items[idx].end = v === "" ? null : parseFloat(v);
+                            await set(presentationRef, p);
+                        })
+                );
+                presentationItemsEl.querySelectorAll(".itemLabel").forEach(
+                    (inp) =>
+                        (inp.onchange = async () => {
+                            const idx = +inp.dataset.idx;
+                            p.items[idx].label = inp.value;
+                            await set(presentationRef, p);
+                        })
+                );
+            }
+
+            savePresentationBtn.onclick = async () => {
+                const p = {
+                    id: "current",
+                    mode: modeEl.value,
+                    transition: transitionEl.value,
+                    intervalMs: parseInt(intervalMsEl.value, 10) || 5000,
+                    overlay: {
+                        text: overlayTextEl.value,
+                        visible: !!overlayVisibleEl.checked,
+                        color: selectedOverlayColor,
+                        textColor: selectedOverlayTextColor
                     }
-                } else {
-                    // Image: wait intervalMs then advance
-                    scheduleNext(p);
+                };
+                const cur = await get(presentationRef);
+                p.items = (cur.val() && cur.val().items) || [];
+                await set(presentationRef, p);
+                alert("Presentation saved");
+            };
+
+            clearPresentationBtn.onclick = async () => {
+                if (!confirm("Clear current presentation?")) return;
+                await set(presentationRef, {
+                    id: "current",
+                    items: [],
+                    mode: "slideshow",
+                    intervalMs: 5000,
+                    transition: "fade",
+                    overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" }
+                });
+            };
+
+            // Upload with XMLHttpRequest for progress tracking
+            uploadBtn.onclick = async () => {
+                const file = fileInput.files[0];
+                if (!file) return alert("Choose a file first");
+
+                uploadStatus.textContent = "";
+                progressWrap.style.display = "block";
+                progressFill.style.width = "0%";
+                progressPct.textContent = "0%";
+                uploadBtn.disabled = true;
+
+                try {
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    fd.append("upload_preset", UPLOAD_PRESET);
+
+                    const data = await new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`);
+
+                        xhr.upload.onprogress = (e) => {
+                            if (e.lengthComputable) {
+                                const pct = Math.round((e.loaded / e.total) * 100);
+                                progressFill.style.width = pct + "%";
+                                progressPct.textContent = pct + "%";
+                            }
+                        };
+
+                        xhr.onload = () => {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                resolve(JSON.parse(xhr.responseText));
+                            } else {
+                                reject(new Error("Upload failed: " + xhr.status));
+                            }
+                        };
+                        xhr.onerror = () => reject(new Error("Network error"));
+                        xhr.send(fd);
+                    });
+
+                    progressFill.style.width = "100%";
+                    progressPct.textContent = "100%";
+
+                    const now = Date.now();
+                    const duration = data.duration || null;
+                    const mobj = {
+                        url: data.secure_url,
+                        resource_type: data.resource_type,
+                        filename: fname.value || file.name,
+                        uploadedAt: now,
+                        duration
+                    };
+                    const newRef = push(mediaRef);
+                    await set(newRef, mobj);
+                    uploadStatus.textContent = "✅ Uploaded and saved.";
+
+                    if (showNow.value === "append" || showNow.value === "replace") {
+                        const pSnap = await get(presentationRef);
+                        let p = pSnap.val() || {
+                            id: "current",
+                            items: [],
+                            mode: "slideshow",
+                            intervalMs: 5000,
+                            transition: "fade",
+                            overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" }
+                        };
+                        const item = {
+                            mediaId: newRef.key,
+                            start: 0,
+                            end: mobj.duration || null,
+                            label: mobj.filename
+                        };
+                        if (showNow.value === "append") {
+                            p.items = p.items || [];
+                            p.items.push(item);
+                        } else {
+                            p.items = [item];
+                        }
+                        await set(presentationRef, p);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    uploadStatus.textContent = "❌ Upload failed: " + err.message;
+                } finally {
+                    uploadBtn.disabled = false;
+                    setTimeout(() => {
+                        progressWrap.style.display = "none";
+                    }, 3000);
                 }
+            };
+
+            function escapeHtml(s) {
+                return s ? s.replaceAll("<", "&lt;").replaceAll(">", "&gt;") : "";
             }
-
-            // Called after a video finishes — go to next slide with NO extra delay
-            function advanceNow(p) {
-                clearTimeout(slideTimer);
-                slideTimer = null;
-                if (p.mode === "single") return;
-                const next = (slideIndex + 1) % (p.items.length || 1);
-                showSlideAtIndex(p, next);
-            }
-
-            // Called after an image — wait the configured interval before advancing
-            function scheduleNext(p) {
-                clearTimeout(slideTimer);
-                slideTimer = null;
-                if (p.mode === "single") return;
-
-                const interval = p.intervalMs || 5000;
-                slideTimer = setTimeout(() => {
-                    const next = (slideIndex + 1) % (p.items.length || 1);
-                    showSlideAtIndex(p, next);
-                }, interval);
-            }
-
-            document.addEventListener("visibilitychange", () => {
-                if (document.visibilityState === "visible" && presentation) {
-                    showSlideAtIndex(presentation, slideIndex);
-                }
-            });
         </script>
     </body>
 </html>
