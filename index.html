@@ -14,6 +14,10 @@
                 font-family: system-ui, Arial;
                 cursor: none; /* hide cursor */
             }
+
+            .p {
+                color: #fff;
+            }
             #root {
                 position: fixed;
                 inset: 0;
@@ -245,22 +249,20 @@
                         videoEl.play().catch(() => {});
 
                         if (end && end > start) {
-                            // Use a polling approach to detect end time (more reliable than setTimeout drift)
+                            // Poll to detect end time
                             const checkEnd = () => {
-                                if (!newSlide.classList.contains("visible")) return; // slide changed
+                                if (!newSlide.classList.contains("visible")) return;
                                 if (videoEl.currentTime >= end) {
                                     videoEl.pause();
-                                    scheduleNext(p);
+                                    advanceNow(p);
                                 } else {
                                     requestAnimationFrame(checkEnd);
                                 }
                             };
                             requestAnimationFrame(checkEnd);
                         } else {
-                            // No end specified: play until video naturally ends, then immediately advance
-                            videoEl.onended = () => {
-                                scheduleNext(p);
-                            };
+                            // No end specified: advance immediately when video ends
+                            videoEl.onended = () => advanceNow(p);
                         }
                     };
 
@@ -277,6 +279,16 @@
                 }
             }
 
+            // Called after a video finishes — go to next slide with NO extra delay
+            function advanceNow(p) {
+                clearTimeout(slideTimer);
+                slideTimer = null;
+                if (p.mode === "single") return;
+                const next = (slideIndex + 1) % (p.items.length || 1);
+                showSlideAtIndex(p, next);
+            }
+
+            // Called after an image — wait the configured interval before advancing
             function scheduleNext(p) {
                 clearTimeout(slideTimer);
                 slideTimer = null;
