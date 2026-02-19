@@ -66,7 +66,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgV9PoUFut3FPc0iChFNm2-h6-Uc5z6s0",
@@ -97,6 +97,7 @@ let ytApiReady     = false;
 let ytApiLoading   = false;
 let pendingYtInits = [];
 let overlayShown   = false;
+let monitorName    = null;
 
 // ── Refresh signal ────────────────────────────────────────────
 let refreshSkipped = false;
@@ -118,14 +119,20 @@ function dismissPreload() {
 
 function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
 
+// Get monitor name (url param > localStorage > prompt)
+function getMonitorName() {
+  const u = new URL(window.location.href);
+  const q = u.searchParams.get("monitor");
+  if (q && q.trim()) { localStorage.setItem("monitorName", q.trim()); return q.trim(); }
+  const ls = localStorage.getItem("monitorName");
+  if (ls && ls.trim()) return ls.trim();
+  const p = prompt("Enter monitor name (case-sensitive):", "");
+  if (p && p.trim()) { localStorage.setItem("monitorName", p.trim()); return p.trim(); }
+  return null;
+}
+
 /**
  * Wait for a video element to be ready to play from a given time with no stall.
- * We mimic "open in new tab" behaviour:
- *   - src is set directly (browser uses range requests, no CORS issues)
- *   - we seek to startTime
- *   - we wait for readyState >= HAVE_FUTURE_DATA (3) which means
- *     "enough data to play from current position without immediately stalling"
- * This is exactly what happens when you open a video in a new tab.
  */
 function waitForVideoReady(vid, startTime) {
   return new Promise(function(resolve) {
@@ -138,11 +145,9 @@ function waitForVideoReady(vid, startTime) {
       resolve();
     };
 
-    // Hard timeout — move on after 12s regardless
     var timeout = setTimeout(finish, 12000);
 
     var checkReady = function() {
-      // readyState 3 = HAVE_FUTURE_DATA: can play without stalling right now
       if (vid.readyState >= 3) {
         clearTimeout(timeout);
         finish();
@@ -165,7 +170,6 @@ function waitForVideoReady(vid, startTime) {
     };
 
     if (vid.readyState >= 1) {
-      // Already have metadata — seek and wait
       seekAndWait();
     } else {
       vid.addEventListener("loadedmetadata", seekAndWait, { once: true });
@@ -190,17 +194,33 @@ function waitForImageReady(img) {
 async function boot() {
   setProgress(0, "Connecting to database…");
 
+  monitorName = getMonitorName();
+
+  // Fetch media + activePresentation + monitor mapping in parallel
   var results = await Promise.all([
     get(ref(db, "media")),
-    get(ref(db, "activePresentation"))
+    get(ref(db, "activePresentation")),
+    monitorName ? get(ref(db, `monitors/${encodeURIComponent(monitorName)}`)) : Promise.resolve({ val: () => null })
   ]);
 
   mediaCache = results[0].val() || {};
   var activeId = results[1].val();
+  var monitorMappedId = results[2].val();
 
   var p = null;
-  if (activeId) { var s1 = await get(ref(db, "presentations/" + activeId)); p = s1.val(); }
-  if (!p)       { var s2 = await get(ref(db, "presentations/current"));    p = s2.val(); }
+  // If a monitor mapping exists, prefer it
+  if (monitorMappedId) {
+    var s1 = await get(ref(db, "presentations/" + monitorMappedId));
+    p = s1.val();
+    // if mapping points to non-existent presentation, ignore it
+    if (!p) monitorMappedId = null;
+  }
+
+  // If there is no monitor-mapped presentation, fallback to active / current
+  if (!p) {
+    if (activeId) { var s1 = await get(ref(db, "presentations/" + activeId)); p = s1.val(); }
+    if (!p)       { var s2 = await get(ref(db, "presentations/current"));    p = s2.val(); }
+  }
 
   if (!p || !p.items || !p.items.length) {
     setProgress(100, "No presentation found.");
@@ -211,9 +231,6 @@ async function boot() {
   presentation = p;
 
   // ── Build ALL slide elements up-front and add them to the canvas ──
-  // This is key: video elements are in the real DOM with their src set,
-  // so the browser starts fetching via range requests immediately —
-  // exactly like opening in a new tab.
   canvas.innerHTML = "";
   slideEls = [];
 
@@ -237,17 +254,16 @@ async function boot() {
       img.src = m.url;
       slide.appendChild(img);
     } else {
-      // VIDEO: set src immediately so the browser starts range-fetching now
       var vid = document.createElement("video");
       vid.src = m.url;
       vid.preload = "auto";
-      vid.muted = true;           // muted so browser allows early play/buffering
+      vid.muted = true;
       vid.setAttribute("playsinline", "");
       vid.controls = false;
       slide.appendChild(vid);
     }
 
-    canvas.appendChild(slide);   // in the real DOM = browser starts fetching
+    canvas.appendChild(slide);
     slideEls.push(slide);
   });
 
@@ -255,11 +271,9 @@ async function boot() {
   var total = p.items.length;
   var ready = 0;
 
-  // Collect promises for all media items
   var promises = p.items.map(function(it, idx) {
     var m = mediaCache[it.mediaId];
     if (!m || m.resource_type === "youtube") {
-      // YouTube: nothing to preload here
       return Promise.resolve();
     }
 
@@ -272,7 +286,6 @@ async function boot() {
         setProgress((ready / total) * 95, "Loading " + ready + " / " + total);
       });
     } else {
-      // Video
       var vid = slide.querySelector("video");
       var startTime = it.start || 0;
       return waitForVideoReady(vid, startTime).then(function() {
@@ -284,15 +297,26 @@ async function boot() {
 
   setProgress(2, "Loading 0 / " + total);
 
-  // Wait for ALL media to be ready in parallel
   await Promise.all(promises);
 
   setProgress(100, "Ready — launching…");
   await sleep(300);
   dismissPreload();
   applyOverlay(p, true);
+  setupMonitorListener(monitorName);
   listenForChanges();
   showSlide(p, 0);
+}
+
+// ── Monitor mapping listener ──────────────────────────────────
+// If the monitors/<name> mapping changes we reload to pick up the new presentation.
+function setupMonitorListener(name) {
+  if (!name) return;
+  onValue(ref(db, `monitors/${encodeURIComponent(name)}`), async function(snap) {
+    // If mapping changed, reload to pick it up (easy, reliable)
+    // We use a strict reload so view picks up new media and presentation.
+    location.reload(true);
+  });
 }
 
 // ── Live updates ──────────────────────────────────────────────
@@ -304,10 +328,31 @@ function listenForChanges() {
     if (!p)       { var s2 = await get(ref(db, "presentations/current"));    p = s2.val(); }
     if (!p) return;
 
+    // If this display is bound to a specific monitor name, ignore global activePresentation changes.
+    if (monitorName) {
+      const mapped = (await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`))).val();
+      if (mapped) return;
+    }
+
     var oldIds = (presentation && presentation.items ? presentation.items : []).map(function(i) { return i.mediaId; }).join(",");
     var newIds = (p.items || []).map(function(i) { return i.mediaId; }).join(",");
     if (oldIds !== newIds) { location.reload(true); return; }
 
+    presentation = p;
+    applyOverlay(p, false);
+  });
+
+  // Also watch presentations/current in case dashboard uses that path
+  onValue(ref(db, "presentations/current"), async function(snap) {
+    if (monitorName) {
+      const mapped = (await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`))).val();
+      if (mapped) return;
+    }
+    var p = snap.val();
+    if (!p) return;
+    var oldIds = (presentation && presentation.items ? presentation.items : []).map(function(i) { return i.mediaId; }).join(",");
+    var newIds = (p.items || []).map(function(i) { return i.mediaId; }).join(",");
+    if (oldIds !== newIds) { location.reload(true); return; }
     presentation = p;
     applyOverlay(p, false);
   });
@@ -318,9 +363,9 @@ function applyOverlay(p, firstShow) {
   var ov = p.overlay || {};
   overlayEl.style.background = ov.color     || "#cc0000";
   overlayEl.style.color      = ov.textColor || "#ffffff";
-  overlayEl.textContent      = ov.text      || "";
+  overlayEl.textContent      = ov.text      || (monitorName ? `Monitor: ${monitorName}` : "");
 
-  if (ov.visible) {
+  if (ov.visible || !ov.text) {
     overlayEl.style.display = "block";
     if (firstShow && !overlayShown) {
       overlayEl.classList.remove("animate-in");
@@ -334,7 +379,7 @@ function applyOverlay(p, firstShow) {
   }
 }
 
-// ── Slide navigation ──────────────────────────────────────────
+// ── Slide navigation / playback code (unchanged) ─────────────
 function showSlide(p, idx) {
   clearTimeout(slideTimer);
   slideTimer = null;
@@ -344,7 +389,6 @@ function showSlide(p, idx) {
 
   var slides = Array.from(canvas.querySelectorAll(".slide"));
 
-  // Pause all other slides
   slides.forEach(function(s) {
     var i = parseInt(s.dataset.idx, 10);
     if (i === idx) return;
@@ -376,29 +420,22 @@ function showSlide(p, idx) {
     if (vid) playVideo(p, slide, vid, item);
     else scheduleNext(p);
   } else {
-    // Image — just schedule next
     scheduleNext(p);
   }
 }
 
-// ── Video playback ────────────────────────────────────────────
 function playVideo(p, slideEl, vid, item) {
   var start = item.start || 0;
   var end   = item.end   || null;
   vid.onended = null;
   vid.onloadedmetadata = null;
-
-  // Unmute now that we're playing for real
   vid.muted = false;
-
   try {
     if (isFinite(vid.duration) && start < vid.duration) {
       vid.currentTime = Math.min(start, vid.duration - 0.01);
     }
   } catch(e) {}
-
   vid.play().catch(function() {});
-
   if (end && end > start) {
     var poll = function() {
       if (!slideEl.classList.contains("visible")) return;
@@ -411,7 +448,7 @@ function playVideo(p, slideEl, vid, item) {
   }
 }
 
-// ── YouTube ───────────────────────────────────────────────────
+// YouTube helpers (unchanged)
 function loadYtApi(cb) {
   if (ytApiReady) { cb(); return; }
   pendingYtInits.push(cb);
@@ -488,25 +525,17 @@ function scheduleNext(p) {
   }, interval);
 }
 
-// ── Tab visibility handling ───────────────────────────────────
-// When hidden: pause the current video and freeze the slide timer.
-// When visible again: resume from exactly where we left off —
-// don't re-seek, don't restart the slide, just unpause.
-var hiddenAt      = null;   // timestamp when tab was hidden
-var pausedForHide = false;  // did WE pause the video (vs it was already paused)
-var timerRemainingMs = null; // how much time was left on the slide timer
+// ── Tab visibility handling (unchanged) ───────────────────────
+var hiddenAt      = null;
+var pausedForHide = false;
+var timerRemainingMs = null;
 
 document.addEventListener("visibilitychange", function() {
   if (!presentation) return;
 
   if (document.visibilityState === "hidden") {
-    // ── Going to background ───────────────────────────────────
     hiddenAt = Date.now();
-
-    // Freeze the slide timer so slides don't advance while hidden
     if (slideTimer) {
-      // We can't read how much time is left on a setTimeout, so we track it manually.
-      // scheduleNext() always stores the interval; calculate elapsed since it was set.
       var elapsed = hiddenAt - (timerSetAt || hiddenAt);
       var interval = (presentation.intervalMs || 5000);
       timerRemainingMs = Math.max(0, interval - elapsed);
@@ -516,7 +545,6 @@ document.addEventListener("visibilitychange", function() {
       timerRemainingMs = null;
     }
 
-    // Pause current video
     var slide = canvas.querySelector(".slide[data-idx=\"" + slideIndex + "\"]");
     if (slide) {
       var vid = slide.querySelector("video");
@@ -528,22 +556,18 @@ document.addEventListener("visibilitychange", function() {
       }
     }
 
-    // Pause YouTube
     var ytPl = ytPlayers[slideIndex];
     if (ytPl) { try { ytPl.pauseVideo(); } catch(e) {} }
 
   } else {
-    // ── Coming back to foreground ─────────────────────────────
     var item  = presentation.items[slideIndex];
     var media = item ? mediaCache[item.mediaId] : null;
 
     if (media && media.resource_type !== "image" && media.resource_type !== "youtube") {
-      // Resume video from where it paused — no re-seek, no restart
       var slide2 = canvas.querySelector(".slide[data-idx=\"" + slideIndex + "\"]");
       if (slide2 && pausedForHide) {
         var vid2 = slide2.querySelector("video");
         if (vid2) {
-          // Browser may have dropped buffer — wait for canplay before resuming
           if (vid2.readyState >= 3) {
             vid2.play().catch(function() {});
           } else {
@@ -560,7 +584,6 @@ document.addEventListener("visibilitychange", function() {
 
     pausedForHide = false;
 
-    // Resume the slide timer with only the remaining time
     if (timerRemainingMs !== null) {
       slideTimer = setTimeout(function() {
         showSlide(presentation, (slideIndex + 1) % (presentation.items.length || 1));
