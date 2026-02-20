@@ -498,6 +498,7 @@
                                 <th>Status</th>
                                 <th>Last seen</th>
                                 <th>Resolution</th>
+                                <th>Assigned</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -591,6 +592,19 @@
             let selectedOverlayTxt = "#ffffff";
             let localMonitors = {}; // keyed by encoded monitor name
 
+            // Edit locks to prevent realtime overwrite while user is typing
+            // keys: "interval", "overlayText", "start-<idx>", "end-<idx>", "label-<idx>"
+            const editLocks = new Set();
+            function lock(key) {
+                editLocks.add(key);
+            }
+            function unlock(key) {
+                editLocks.delete(key);
+            }
+            function isLocked(key) {
+                return editLocks.has(key);
+            }
+
             // Utility: escape HTML
             function escHtml(s) {
                 return s ? String(s).replaceAll("<", "&lt;").replaceAll(">", "&gt;") : "";
@@ -613,16 +627,12 @@
                 cont.querySelectorAll(".swatch").forEach((s) => {
                     s.onclick = () => {
                         const color = s.dataset.color || "";
-                        // set input value and trigger input event so all listeners save
                         inputEl.value = color;
-                        // reflect active state
                         setSwatchActive(contId, color);
                         onSelect(color);
-                        // dispatch input event for any other logic
                         inputEl.dispatchEvent(new Event("input", { bubbles: true }));
                     };
                 });
-                // when user picks a color via the color input, clear swatch active highlights and call onSelect
                 inputEl.addEventListener("input", () => {
                     setSwatchActive(contId, inputEl.value);
                     onSelect(inputEl.value);
@@ -758,8 +768,11 @@
                 // Remove monitor mappings to this presentation
                 const monitorsSnap = await get(monitorsRef);
                 const monitorsObj = monitorsSnap.val() || {};
-                for (const [mn, pid] of Object.entries(monitorsObj)) {
-                    if (pid === selectedPresentationId) {
+                for (const [mn, val] of Object.entries(monitorsObj)) {
+                    // handle both string and object types
+                    if (typeof val === "string") {
+                        if (val === selectedPresentationId) await remove(ref(db, `monitors/${mn}`));
+                    } else if (val && (val.presentation === selectedPresentationId || val === selectedPresentationId)) {
                         await remove(ref(db, `monitors/${mn}`));
                     }
                 }
@@ -787,7 +800,13 @@
 
                 // Build reverse mapping: presentationId -> [monitorNames]
                 const rev = {};
-                for (const [mn, pid] of Object.entries(localMonitors || {})) {
+                for (const [mn, val] of Object.entries(localMonitors || {})) {
+                    let pid = null;
+                    if (typeof val === "string") pid = val;
+                    else if (val && typeof val === "object") {
+                        // support either val.presentation or val.assigned or val.pid
+                        pid = val.presentation || val.assigned || val.pid || null;
+                    }
                     if (!pid) continue;
                     rev[pid] = rev[pid] || [];
                     rev[pid].push(decodeURIComponent(mn));
@@ -844,7 +863,7 @@
             ${thumb}
             <div style="flex:1;min-width:0">
                 <input class="rename-input" data-id="${id}" value="${escHtml(m.filename || id)}" title="Click to rename" />
-                <div class="small">${m.resource_type}${m.resource_type === "youtube" ? " · " + m.ytId : ""} · ${new Date(m.uploadedAt).toLocaleDateString()}</div>
+                <div class="small">${m.resource_type}${m.resource_type === "youtube" ? " · " + (m.ytId || "") : ""} · ${new Date(m.uploadedAt).toLocaleDateString()}</div>
                 <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap">
                     <button data-id="${id}" class="addBtn">＋ Add to slide</button>
                     <button data-id="${id}" class="deleteBtn" style="color:#c00;border-color:#fcc">🗑</button>
@@ -917,11 +936,15 @@
                 const p = presentations[selectedPresentationId];
 
                 editorTitle.textContent = p.name || "Presentation";
-                modeEl.value = p.mode || "slideshow";
-                transitionEl.value = p.transition || "fade";
-                intervalSEl.value = Math.round((p.intervalMs || 5000) / 1000);
 
-                overlayTextEl.value = p.overlay?.text || "";
+                // basic fields - skip overwriting while editing
+                if (!isLocked("mode")) modeEl.value = p.mode || "slideshow";
+                if (!isLocked("transition")) transitionEl.value = p.transition || "fade";
+                if (!isLocked("interval")) intervalSEl.value = Math.round((p.intervalMs || 5000) / 1000);
+
+                // overlay
+                if (!isLocked("overlayText")) overlayTextEl.value = p.overlay?.text || "";
+                // overlay visible checkbox always reflect stored state (not locked)
                 overlayVisibleEl.checked = !!p.overlay?.visible;
                 if (p.overlay?.color) {
                     selectedOverlayBg = p.overlay.color;
@@ -941,7 +964,10 @@
                 // Show assigned monitors for this presentation
                 assignedMonitorsList.innerHTML = "";
                 const assigned = [];
-                for (const [mn, pid] of Object.entries(localMonitors || {})) {
+                for (const [mn, val] of Object.entries(localMonitors || {})) {
+                    let pid = null;
+                    if (typeof val === "string") pid = val;
+                    else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
                     if (pid === selectedPresentationId) assigned.push(decodeURIComponent(mn));
                 }
                 assigned.forEach((name) => {
@@ -979,6 +1005,7 @@
                     presentationItemsEl.appendChild(div);
                 });
 
+                // Wire up buttons (remove/reorder)
                 presentationItemsEl.querySelectorAll(".removeBtn").forEach(
                     (b) =>
                         (b.onclick = async () => {
@@ -1007,31 +1034,39 @@
                             await set(pRef, p2);
                         })
                 );
-                presentationItemsEl.querySelectorAll(".itemStart").forEach(
-                    (inp) =>
-                        (inp.onchange = async () => {
-                            const p2 = await getP();
-                            p2.items[+inp.dataset.idx].start = parseFloat(inp.value) || 0;
-                            await set(pRef, p2);
-                        })
-                );
-                presentationItemsEl.querySelectorAll(".itemEnd").forEach(
-                    (inp) =>
-                        (inp.onchange = async () => {
-                            const p2 = await getP();
-                            const v = inp.value;
-                            p2.items[+inp.dataset.idx].end = v === "" ? null : parseFloat(v);
-                            await set(pRef, p2);
-                        })
-                );
-                presentationItemsEl.querySelectorAll(".itemLabel").forEach(
-                    (inp) =>
-                        (inp.onchange = async () => {
-                            const p2 = await getP();
-                            p2.items[+inp.dataset.idx].label = inp.value;
-                            await set(pRef, p2);
-                        })
-                );
+
+                // For editable fields, prevent overwrite while editing:
+                presentationItemsEl.querySelectorAll(".itemStart").forEach((inp) => {
+                    const key = `start-${inp.dataset.idx}`;
+                    inp.addEventListener("focus", () => lock(key));
+                    inp.addEventListener("blur", async () => {
+                        unlock(key);
+                        const p2 = await getP();
+                        p2.items[+inp.dataset.idx].start = parseFloat(inp.value) || 0;
+                        await set(pRef, p2);
+                    });
+                });
+                presentationItemsEl.querySelectorAll(".itemEnd").forEach((inp) => {
+                    const key = `end-${inp.dataset.idx}`;
+                    inp.addEventListener("focus", () => lock(key));
+                    inp.addEventListener("blur", async () => {
+                        unlock(key);
+                        const p2 = await getP();
+                        const v = inp.value;
+                        p2.items[+inp.dataset.idx].end = v === "" ? null : parseFloat(v);
+                        await set(pRef, p2);
+                    });
+                });
+                presentationItemsEl.querySelectorAll(".itemLabel").forEach((inp) => {
+                    const key = `label-${inp.dataset.idx}`;
+                    inp.addEventListener("focus", () => lock(key));
+                    inp.addEventListener("blur", async () => {
+                        unlock(key);
+                        const p2 = await getP();
+                        p2.items[+inp.dataset.idx].label = inp.value;
+                        await set(pRef, p2);
+                    });
+                });
             }
 
             // Save settings button (keeps for manual save but most settings auto-save now)
@@ -1078,14 +1113,31 @@
                 const cur = snap.val() || {};
 
                 // Remove assignments for this presentation that are not in new list
-                for (const [mn, pid] of Object.entries(cur)) {
+                for (const [mn, val] of Object.entries(cur)) {
+                    let pid = null;
+                    if (typeof val === "string") pid = val;
+                    else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
                     if (pid === selectedPresentationId && !keys.includes(mn)) {
-                        await remove(ref(db, `monitors/${mn}`));
+                        // remove just the presentation assignment if object, otherwise remove the entry
+                        if (typeof val === "object") {
+                            await update(ref(db, `monitors/${mn}`), { presentation: null });
+                        } else {
+                            await remove(ref(db, `monitors/${mn}`));
+                        }
                     }
                 }
-                // Assign new names to this presentation
+                // Assign new names to this presentation, preserving existing metadata if possible
                 for (const k of keys) {
-                    await set(ref(db, `monitors/${k}`), selectedPresentationId);
+                    const curSnap = await get(ref(db, `monitors/${k}`));
+                    const curVal = curSnap.val();
+                    if (typeof curVal === "string" || curVal === null) {
+                        // store as object to allow metadata later
+                        await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+                    } else if (curVal && typeof curVal === "object") {
+                        await update(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+                    } else {
+                        await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+                    }
                 }
                 monitorAssignInput.value = "";
                 alert("Monitor assignments updated.");
@@ -1096,9 +1148,16 @@
                 if (!confirm("Clear all monitor assignments that point to this presentation?")) return;
                 const snap = await get(monitorsRef);
                 const cur = snap.val() || {};
-                for (const [mn, pid] of Object.entries(cur)) {
+                for (const [mn, val] of Object.entries(cur)) {
+                    let pid = null;
+                    if (typeof val === "string") pid = val;
+                    else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
                     if (pid === selectedPresentationId) {
-                        await remove(ref(db, `monitors/${mn}`));
+                        if (typeof val === "object") {
+                            await update(ref(db, `monitors/${mn}`), { presentation: null });
+                        } else {
+                            await remove(ref(db, `monitors/${mn}`));
+                        }
                     }
                 }
                 alert("Cleared.");
@@ -1112,13 +1171,27 @@
                 for (const [encodedName, data] of rows) {
                     const name = decodeURIComponent(encodedName);
                     const tr = document.createElement("tr");
-                    const lastSeen = data && data.lastSeen ? data.lastSeen : 0;
-                    const online = now - lastSeen < 15000 && data && data.status === "online";
+
+                    // data may be a string (presentation id) or object with metadata
+                    let lastSeen = 0;
+                    let online = false;
+                    let resolution = "—";
+                    let pid = null;
+                    if (typeof data === "string") {
+                        pid = data;
+                    } else if (data && typeof data === "object") {
+                        lastSeen = data.lastSeen || 0;
+                        online = now - lastSeen < 15000 && data.status === "online";
+                        resolution = data.resolution || "—";
+                        pid = data.presentation || data.assigned || data.pid || null;
+                    }
+
                     tr.innerHTML = `
           <td>${escHtml(name)}</td>
           <td>${online ? '<strong style="color:green">online</strong>' : '<span style="color:#777">offline</span>'}</td>
           <td>${lastSeen ? new Date(lastSeen).toLocaleString() : "—"}</td>
-          <td>${data && data.resolution ? escHtml(data.resolution) : "—"}</td>
+          <td>${escHtml(resolution)}</td>
+          <td>${pid ? escHtml(pid) : "—"}</td>
           <td>
             <button data-name="${encodedName}" class="assignToBtn">Assign</button>
             <button data-name="${encodedName}" class="refreshBtn">Reload</button>
@@ -1139,7 +1212,20 @@
                 monitorsTbody.querySelectorAll(".refreshBtn").forEach((b) => {
                     b.onclick = async () => {
                         const key = b.dataset.name;
-                        await set(ref(db, `monitors/${key}/command`), { cmd: "reloadPresentation", at: Date.now() });
+                        // send a command preserving any existing monitor object structure
+                        const curSnap = await get(ref(db, `monitors/${key}`));
+                        const curVal = curSnap.val();
+                        if (curVal && typeof curVal === "object") {
+                            await update(ref(db, `monitors/${key}`), {
+                                command: { cmd: "reloadPresentation", at: Date.now() }
+                            });
+                        } else {
+                            // if the value is a string, overwrite with object containing presentation=null and command
+                            await set(ref(db, `monitors/${key}`), {
+                                presentation: curVal || null,
+                                command: { cmd: "reloadPresentation", at: Date.now() }
+                            });
+                        }
                         alert("Reload command sent to " + decodeURIComponent(key));
                     };
                 });
@@ -1221,28 +1307,55 @@
 
             // Auto-save listeners for editor fields (so changes don't "revert" while editing)
             modeEl.addEventListener("change", async () => {
+                // lock briefly to avoid race with realtime render
+                lock("mode");
                 await updatePresentationPartial({ mode: modeEl.value });
+                setTimeout(() => unlock("mode"), 250);
             });
             transitionEl.addEventListener("change", async () => {
+                lock("transition");
                 await updatePresentationPartial({ transition: transitionEl.value });
+                setTimeout(() => unlock("transition"), 250);
             });
-            intervalSEl.addEventListener("change", async () => {
+
+            // Interval: save on blur (prevents snapping while typing)
+            intervalSEl.addEventListener("focus", () => lock("interval"));
+            intervalSEl.addEventListener("blur", async () => {
+                unlock("interval");
                 const ms = (parseInt(intervalSEl.value, 10) || 5) * 1000;
                 await updatePresentationPartial({ intervalMs: ms });
             });
 
             // overlay fields - debounce text
             const saveOverlayText = debounce(async () => {
+                // Always save overlay text regardless of visibility state.
+                // Merge with whatever overlay exists on the presentation to avoid wiping other overlay properties.
+                if (!selectedPresentationId) return;
+                const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+                const curOverlay = curSnap.val() || {};
                 await updatePresentationPartial({
-                    overlay: { ...(presentations[selectedPresentationId]?.overlay || {}), text: overlayTextEl.value }
+                    overlay: { ...curOverlay, text: overlayTextEl.value }
                 });
-            }, 400);
-            overlayTextEl.addEventListener("input", saveOverlayText);
+            }, 450);
+
+            overlayTextEl.addEventListener("focus", () => lock("overlayText"));
+            overlayTextEl.addEventListener("input", () => {
+                // when the user is typing, we avoid remote overwrites
+                saveOverlayText();
+            });
+            overlayTextEl.addEventListener("blur", () => {
+                unlock("overlayText");
+                // final save to ensure value persisted
+                saveOverlayText();
+            });
 
             overlayVisibleEl.addEventListener("change", async () => {
+                // toggle visible flag and persist overlay object (keep text even if invisible)
+                const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+                const curOverlay = curSnap.val() || {};
                 await updatePresentationPartial({
                     overlay: {
-                        ...(presentations[selectedPresentationId]?.overlay || {}),
+                        ...curOverlay,
                         visible: !!overlayVisibleEl.checked
                     }
                 });
@@ -1251,19 +1364,20 @@
             overlayBgColorInput.addEventListener("input", async () => {
                 selectedOverlayBg = overlayBgColorInput.value;
                 setSwatchActive("overlayBgSwatches", selectedOverlayBg);
+                const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+                const curOverlay = curSnap.val() || {};
                 await updatePresentationPartial({
-                    overlay: { ...(presentations[selectedPresentationId]?.overlay || {}), color: selectedOverlayBg }
+                    overlay: { ...curOverlay, color: selectedOverlayBg }
                 });
             });
 
             overlayTxtColorInput.addEventListener("input", async () => {
                 selectedOverlayTxt = overlayTxtColorInput.value;
                 setSwatchActive("overlayTxtSwatches", selectedOverlayTxt);
+                const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+                const curOverlay = curSnap.val() || {};
                 await updatePresentationPartial({
-                    overlay: {
-                        ...(presentations[selectedPresentationId]?.overlay || {}),
-                        textColor: selectedOverlayTxt
-                    }
+                    overlay: { ...curOverlay, textColor: selectedOverlayTxt }
                 });
             });
 
