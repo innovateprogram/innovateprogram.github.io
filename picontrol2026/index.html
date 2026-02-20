@@ -1,9 +1,11 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <title>Presentation Editor</title>
+        <meta title="Innovate PI Control" />
+
         <style>
             * {
                 box-sizing: border-box;
@@ -429,8 +431,8 @@
                             </select>
                         </div>
                         <div>
-                            <label>Interval (ms)</label>
-                            <input id="intervalMs" type="number" value="5000" />
+                            <label>Interval (s)</label>
+                            <input id="intervalS" type="number" value="5" min="1" />
                         </div>
                     </div>
 
@@ -439,7 +441,7 @@
 
                     <label>Overlay background colour</label>
                     <div class="swatch-row" id="overlayBgSwatches">
-                        <div class="swatch active" style="background: #cc0000" data-color="#cc0000"></div>
+                        <div class="swatch" style="background: #cc0000" data-color="#cc0000"></div>
                         <div class="swatch" style="background: #e65c00" data-color="#e65c00"></div>
                         <div class="swatch" style="background: #f0b429" data-color="#f0b429"></div>
                         <div class="swatch" style="background: #1a7f37" data-color="#1a7f37"></div>
@@ -457,10 +459,7 @@
 
                     <label>Overlay text colour</label>
                     <div class="swatch-row" id="overlayTxtSwatches">
-                        <div
-                            class="swatch active"
-                            style="background: #fff; border: 1px solid #ccc"
-                            data-color="#ffffff"></div>
+                        <div class="swatch" style="background: #fff; border: 1px solid #ccc" data-color="#ffffff"></div>
                         <div class="swatch" style="background: #000" data-color="#000000"></div>
                         <div class="swatch" style="background: #f0b429" data-color="#f0b429"></div>
                         <div class="swatch" style="background: #ff6b6b" data-color="#ff6b6b"></div>
@@ -562,7 +561,7 @@
             const editorTitle = document.getElementById("editorTitle");
             const modeEl = document.getElementById("mode");
             const transitionEl = document.getElementById("transition");
-            const intervalMsEl = document.getElementById("intervalMs");
+            const intervalSEl = document.getElementById("intervalS");
             const overlayTextEl = document.getElementById("overlayText");
             const overlayVisibleEl = document.getElementById("overlayVisible");
             const overlayBgColorInput = document.getElementById("overlayBgColor");
@@ -594,25 +593,55 @@
             let selectedOverlayTxt = "#ffffff";
             let localMonitors = {}; // keyed by encoded monitor name
 
-            // Swatch setup
-            function setupSwatches(contId, inputId, onSelect) {
+            // Utility: escape HTML
+            function escHtml(s) {
+                return s ? String(s).replaceAll("<", "&lt;").replaceAll(">", "&gt;") : "";
+            }
+
+            // Swatch helpers
+            function setSwatchActive(containerId, color) {
+                const cont = document.getElementById(containerId);
+                if (!cont) return;
+                cont.querySelectorAll(".swatch").forEach((s) => {
+                    if ((s.dataset.color || "").toLowerCase() === (color || "").toLowerCase())
+                        s.classList.add("active");
+                    else s.classList.remove("active");
+                });
+            }
+
+            function setupSwatches(contId, inputEl, onSelect) {
                 const cont = document.getElementById(contId);
-                const inp = document.getElementById(inputId);
+                if (!cont) return;
                 cont.querySelectorAll(".swatch").forEach((s) => {
                     s.onclick = () => {
-                        cont.querySelectorAll(".swatch").forEach((x) => x.classList.remove("active"));
-                        s.classList.add("active");
-                        inp.value = s.dataset.color;
-                        onSelect(s.dataset.color);
+                        const color = s.dataset.color || "";
+                        // set input value and trigger input event so all listeners save
+                        inputEl.value = color;
+                        // reflect active state
+                        setSwatchActive(contId, color);
+                        onSelect(color);
+                        // dispatch input event for any other logic
+                        inputEl.dispatchEvent(new Event("input", { bubbles: true }));
                     };
                 });
-                inp.oninput = () => {
-                    cont.querySelectorAll(".swatch").forEach((x) => x.classList.remove("active"));
-                    onSelect(inp.value);
+                // when user picks a color via the color input, clear swatch active highlights and call onSelect
+                inputEl.addEventListener("input", () => {
+                    setSwatchActive(contId, inputEl.value);
+                    onSelect(inputEl.value);
+                });
+            }
+
+            setupSwatches("overlayBgSwatches", overlayBgColorInput, (c) => (selectedOverlayBg = c));
+            setupSwatches("overlayTxtSwatches", overlayTxtColorInput, (c) => (selectedOverlayTxt = c));
+
+            // Debounce helper for text inputs
+            function debounce(fn, wait = 400) {
+                let t;
+                return (...args) => {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn(...args), wait);
                 };
             }
-            setupSwatches("overlayBgSwatches", "overlayBgColor", (c) => (selectedOverlayBg = c));
-            setupSwatches("overlayTxtSwatches", "overlayTxtColor", (c) => (selectedOverlayTxt = c));
 
             // YouTube ID extractor
             function extractYtId(raw) {
@@ -869,6 +898,20 @@
                 await update(ref(db, `presentations/${selectedPresentationId}`), { items });
             }
 
+            // Helper to update partial presentation fields
+            async function updatePresentationPartial(updates) {
+                if (!selectedPresentationId) return;
+                await update(ref(db, `presentations/${selectedPresentationId}`), updates);
+                // If this is the active presentation, also update "presentations/current"
+                if (selectedPresentationId === activePresentationId) {
+                    const curRef = ref(db, `presentations/current`);
+                    const curSnap = await get(curRef);
+                    const curVal = curSnap.val() || {};
+                    const merged = { ...curVal, ...updates };
+                    await set(curRef, merged);
+                }
+            }
+
             // Render presentation editor panel
             function renderPresentationEditor() {
                 presentationItemsEl.innerHTML = "";
@@ -878,16 +921,23 @@
                 editorTitle.textContent = p.name || "Presentation";
                 modeEl.value = p.mode || "slideshow";
                 transitionEl.value = p.transition || "fade";
-                intervalMsEl.value = p.intervalMs || 5000;
+                intervalSEl.value = Math.round((p.intervalMs || 5000) / 1000);
+
                 overlayTextEl.value = p.overlay?.text || "";
                 overlayVisibleEl.checked = !!p.overlay?.visible;
                 if (p.overlay?.color) {
                     selectedOverlayBg = p.overlay.color;
                     overlayBgColorInput.value = p.overlay.color;
+                    setSwatchActive("overlayBgSwatches", selectedOverlayBg);
+                } else {
+                    setSwatchActive("overlayBgSwatches", overlayBgColorInput.value);
                 }
                 if (p.overlay?.textColor) {
                     selectedOverlayTxt = p.overlay.textColor;
                     overlayTxtColorInput.value = p.overlay.textColor;
+                    setSwatchActive("overlayTxtSwatches", selectedOverlayTxt);
+                } else {
+                    setSwatchActive("overlayTxtSwatches", overlayTxtColorInput.value);
                 }
 
                 // Show assigned monitors for this presentation
@@ -986,7 +1036,7 @@
                 );
             }
 
-            // Save settings button
+            // Save settings button (keeps for manual save but most settings auto-save now)
             savePresentationBtn.onclick = async () => {
                 if (!selectedPresentationId) return;
                 const pRef = ref(db, `presentations/${selectedPresentationId}`);
@@ -995,7 +1045,7 @@
                     ...cur,
                     mode: modeEl.value,
                     transition: transitionEl.value,
-                    intervalMs: parseInt(intervalMsEl.value, 10) || 5000,
+                    intervalMs: (parseInt(intervalSEl.value, 10) || 5) * 1000,
                     overlay: {
                         text: overlayTextEl.value,
                         visible: !!overlayVisibleEl.checked,
@@ -1171,9 +1221,59 @@
                 }
             };
 
-            function escHtml(s) {
-                return s ? String(s).replaceAll("<", "&lt;").replaceAll(">", "&gt;") : "";
-            }
+            // Auto-save listeners for editor fields (so changes don't "revert" while editing)
+            modeEl.addEventListener("change", async () => {
+                await updatePresentationPartial({ mode: modeEl.value });
+            });
+            transitionEl.addEventListener("change", async () => {
+                await updatePresentationPartial({ transition: transitionEl.value });
+            });
+            intervalSEl.addEventListener("change", async () => {
+                const ms = (parseInt(intervalSEl.value, 10) || 5) * 1000;
+                await updatePresentationPartial({ intervalMs: ms });
+            });
+
+            // overlay fields - debounce text
+            const saveOverlayText = debounce(async () => {
+                await updatePresentationPartial({
+                    overlay: { ...(presentations[selectedPresentationId]?.overlay || {}), text: overlayTextEl.value }
+                });
+            }, 400);
+            overlayTextEl.addEventListener("input", saveOverlayText);
+
+            overlayVisibleEl.addEventListener("change", async () => {
+                await updatePresentationPartial({
+                    overlay: {
+                        ...(presentations[selectedPresentationId]?.overlay || {}),
+                        visible: !!overlayVisibleEl.checked
+                    }
+                });
+            });
+
+            overlayBgColorInput.addEventListener("input", async () => {
+                selectedOverlayBg = overlayBgColorInput.value;
+                setSwatchActive("overlayBgSwatches", selectedOverlayBg);
+                await updatePresentationPartial({
+                    overlay: { ...(presentations[selectedPresentationId]?.overlay || {}), color: selectedOverlayBg }
+                });
+            });
+
+            overlayTxtColorInput.addEventListener("input", async () => {
+                selectedOverlayTxt = overlayTxtColorInput.value;
+                setSwatchActive("overlayTxtSwatches", selectedOverlayTxt);
+                await updatePresentationPartial({
+                    overlay: {
+                        ...(presentations[selectedPresentationId]?.overlay || {}),
+                        textColor: selectedOverlayTxt
+                    }
+                });
+            });
+
+            // Render initial swatch active states on load
+            document.addEventListener("DOMContentLoaded", () => {
+                setSwatchActive("overlayBgSwatches", overlayBgColorInput.value);
+                setSwatchActive("overlayTxtSwatches", overlayTxtColorInput.value);
+            });
         </script>
     </body>
 </html>
