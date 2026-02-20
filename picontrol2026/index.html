@@ -1,1391 +1,1183 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <title>Presentation Editor</title>
-        <style>
-            * {
-                box-sizing: border-box;
-            }
-            body {
-                font-family: system-ui, Arial;
-                margin: 0;
-                display: flex;
-                height: 100vh;
-                background: #f0f2f5;
-            }
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Presentation Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0f11;
+  --surface: #16181c;
+  --surface2: #1e2025;
+  --border: #2a2d35;
+  --border2: #343740;
+  --text: #e8eaf0;
+  --text2: #8b8fa8;
+  --text3: #545769;
+  --accent: #5b6fff;
+  --accent2: #4a5de8;
+  --green: #3ecf74;
+  --red: #ff4757;
+  --orange: #ffa535;
+  --yellow: #f5d447;
+  --radius: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+  font-size: 13px;
+}
 
-            .left {
-                width: 380px;
-                min-width: 320px;
-                background: #fff;
-                border-right: 1px solid #ddd;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            .left-inner {
-                overflow-y: auto;
-                padding: 14px;
-                flex: 1;
-            }
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-            .right {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
+/* LEFT PANEL */
+.sidebar {
+  width: 320px;
+  min-width: 280px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-header {
+  padding: 20px 20px 0;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+.sidebar-header h2 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 12px;
+}
+.sidebar-inner { overflow-y: auto; padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
 
-            .tabs-bar {
-                background: #fff;
-                border-bottom: 2px solid #ddd;
-                display: flex;
-                align-items: flex-end;
-                padding: 0 12px;
-                gap: 4px;
-                overflow-x: auto;
-                white-space: nowrap;
-                min-height: 46px;
-            }
-            .tab {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                padding: 8px 14px;
-                border: 1px solid transparent;
-                border-bottom: none;
-                border-radius: 6px 6px 0 0;
-                background: #f0f2f5;
-                cursor: pointer;
-                font-size: 13px;
-                transition: background 0.15s;
-                position: relative;
-                top: 2px;
-                user-select: none;
-            }
-            .tab:hover {
-                background: #e4e8f0;
-            }
-            .tab.active {
-                background: #fff;
-                border-color: #ddd;
-                font-weight: 600;
-            }
-            .tab .tab-close {
-                color: #999;
-                font-size: 16px;
-                line-height: 1;
-                padding: 0 2px;
-                cursor: pointer;
-            }
-            .tab .tab-close:hover {
-                color: #c00;
-            }
-            .tab-add {
-                padding: 6px 10px;
-                font-size: 20px;
-                cursor: pointer;
-                color: #555;
-                border-radius: 6px;
-                user-select: none;
-                margin-bottom: 4px;
-            }
-            .tab-add:hover {
-                background: #e4e8f0;
-            }
-            .active-badge {
-                font-size: 10px;
-                background: #1a73e8;
-                color: #fff;
-                border-radius: 4px;
-                padding: 1px 5px;
-                margin-left: 4px;
-                vertical-align: middle;
-            }
+/* MAIN */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
 
-            .editor-area {
-                flex: 1;
-                overflow-y: auto;
-                padding: 14px;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
+/* TABS */
+.tabs-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: stretch;
+  padding: 0 16px;
+  gap: 2px;
+  height: 48px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  height: 48px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text2);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  user-select: none;
+  position: relative;
+  flex-shrink: 0;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
+.tab-close {
+  width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4px;
+  color: var(--text3);
+  font-size: 14px;
+  line-height: 1;
+  transition: background 0.1s, color 0.1s;
+}
+.tab-close:hover { background: rgba(255,71,87,0.15); color: var(--red); }
+.tab-add {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 48px;
+  cursor: pointer; color: var(--text3);
+  font-size: 18px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.tab-add:hover { color: var(--accent); }
+.live-badge {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.08em;
+  background: var(--green);
+  color: #000;
+  border-radius: 3px;
+  padding: 2px 5px;
+  text-transform: uppercase;
+}
 
-            .card {
-                background: #fff;
-                border: 1px solid #e0e0e0;
-                padding: 12px;
-                border-radius: 8px;
-                margin-bottom: 8px;
-            }
-            .media-list {
-                max-height: 36vh;
-                overflow-y: auto;
-            }
-            .media-item {
-                display: flex;
-                gap: 8px;
-                align-items: flex-start;
-                padding: 8px 4px;
-                border-bottom: 1px solid #eee;
-            }
-            .media-item img,
-            .media-item video {
-                width: 72px;
-                height: 48px;
-                object-fit: cover;
-                border-radius: 4px;
-                flex-shrink: 0;
-            }
-            .media-thumb-yt {
-                width: 72px;
-                height: 48px;
-                border-radius: 4px;
-                flex-shrink: 0;
-                background: #e00;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 24px;
-                color: #fff;
-            }
-            .rename-input {
-                font-weight: 600;
-                font-size: 13px;
-                border: 1px solid transparent;
-                background: transparent;
-                width: 100%;
-                padding: 2px 5px;
-                border-radius: 4px;
-                cursor: text;
-                display: block;
-                margin-bottom: 2px;
-            }
-            .rename-input:hover {
-                border-color: #ccc;
-            }
-            .rename-input:focus {
-                background: #f0f4ff;
-                border-color: #4a90e2;
-                outline: none;
-            }
+/* EDITOR AREA */
+.editor-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.editor-header h1 { font-size: 18px; font-weight: 600; color: var(--text); }
 
-            label {
-                display: block;
-                margin-top: 8px;
-                font-weight: 600;
-                font-size: 13px;
-            }
-            input[type="text"],
-            input[type="number"],
-            select,
-            textarea {
-                width: 100%;
-                padding: 7px 9px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                margin-top: 4px;
-                font-size: 13px;
-            }
-            input:focus,
-            select:focus {
-                outline: none;
-                border-color: #4a90e2;
-            }
-            button {
-                padding: 7px 11px;
-                margin-top: 8px;
-                border-radius: 5px;
-                border: 1px solid #bbb;
-                background: #f5f5f5;
-                cursor: pointer;
-                font-size: 13px;
-            }
-            button:hover {
-                background: #e8e8e8;
-            }
-            button.primary {
-                background: #1a73e8;
-                color: #fff;
-                border-color: #1a73e8;
-            }
-            button.primary:hover {
-                background: #1558b0;
-            }
-            button.danger {
-                background: #d93025;
-                color: #fff;
-                border-color: #d93025;
-            }
-            button.danger:hover {
-                background: #a50e0e;
-            }
-            .small {
-                font-size: 12px;
-                color: #777;
-            }
-            .row {
-                display: flex;
-                gap: 8px;
-            }
-            .row > * {
-                flex: 1;
-            }
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 14px;
+}
 
-            #progressWrap {
-                display: none;
-                margin-top: 10px;
-            }
-            #progressBar {
-                width: 100%;
-                height: 14px;
-                border-radius: 7px;
-                overflow: hidden;
-                background: #e0e0e0;
-                margin-top: 4px;
-            }
-            #progressFill {
-                height: 100%;
-                width: 0%;
-                background: linear-gradient(90deg, #4caf50, #81c784);
-                border-radius: 7px;
-                transition: width 0.2s ease;
-            }
-            #progressPct {
-                font-size: 12px;
-                color: #333;
-                margin-top: 3px;
-                text-align: right;
-            }
+/* Form elements */
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 5px;
+  letter-spacing: 0.03em;
+}
+input[type="text"], input[type="number"], select, textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+input[type="text"]:focus, input[type="number"]:focus, select:focus { outline: none; border-color: var(--accent); }
+select option { background: var(--surface2); }
 
-            .swatch-row {
-                display: flex;
-                gap: 6px;
-                flex-wrap: wrap;
-                margin-top: 8px;
-            }
-            .swatch {
-                width: 26px;
-                height: 26px;
-                border-radius: 50%;
-                cursor: pointer;
-                border: 2px solid transparent;
-                transition: border-color 0.15s;
-                flex-shrink: 0;
-            }
-            .swatch.active {
-                border-color: #000;
-            }
+.field { margin-bottom: 12px; }
+.row { display: flex; gap: 10px; }
+.row > .field { flex: 1; }
 
-            h3 {
-                margin: 12px 0 6px;
-                font-size: 14px;
-            }
-            h2 {
-                margin: 0;
-                font-size: 16px;
-            }
-            .section-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                flex-wrap: wrap;
-                gap: 6px;
-            }
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--border); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { background: var(--accent2); }
+.btn.danger { background: rgba(255,71,87,0.12); border-color: rgba(255,71,87,0.3); color: var(--red); }
+.btn.danger:hover { background: rgba(255,71,87,0.2); }
+.btn.sm { padding: 5px 10px; font-size: 11px; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 
-            .item-card {
-                background: #fafafa;
-                border: 1px solid #e4e4e4;
-                border-radius: 6px;
-                padding: 10px;
-                margin-bottom: 8px;
-            }
-            .item-title {
-                font-weight: 600;
-                font-size: 13px;
-            }
+/* Media items */
+.media-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  margin-bottom: 8px;
+}
+.media-thumb {
+  width: 64px; height: 42px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--border);
+}
+.media-thumb-yt {
+  width: 64px; height: 42px;
+  border-radius: 4px;
+  background: #c00;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.media-info { flex: 1; min-width: 0; }
+.media-name {
+  font-size: 12px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 4px;
+  width: 100%;
+  font-family: inherit;
+  cursor: text;
+  transition: border-color 0.15s, background 0.15s;
+  display: block;
+}
+.media-name:hover { border-color: var(--border2); }
+.media-name:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+.media-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
 
-            .monitors-list {
-                display: flex;
-                gap: 6px;
-                flex-wrap: wrap;
-                margin-top: 6px;
-            }
-            .monitor-badge {
-                background: #eee;
-                padding: 4px 8px;
-                border-radius: 12px;
-                font-size: 12px;
-                color: #333;
-                border: 1px solid #ddd;
-            }
+/* Upload progress */
+.progress-wrap { margin-top: 10px; display: none; }
+.progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.2s; }
+.progress-label { font-size: 11px; color: var(--text2); margin-top: 4px; }
 
-            /* Active monitors table */
-            .monitors-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 8px;
-            }
-            .monitors-table th,
-            .monitors-table td {
-                border: 1px solid #eee;
-                padding: 8px;
-                text-align: left;
-                font-size: 13px;
-            }
-            .monitors-table th {
-                background: #fafafa;
-                font-weight: 600;
-            }
-        </style>
-    </head>
-    <body>
-        <!-- LEFT: media library -->
-        <div class="left">
-            <div class="left-inner">
-                <h3>Upload media</h3>
-                <div class="card">
-                    <input id="file" type="file" accept="image/*,video/*" />
-                    <label>Display name (optional)</label>
-                    <input id="fname" type="text" placeholder="Label for this file" />
-                    <label>Add to current presentation after upload?</label>
-                    <select id="showNow">
-                        <option value="no">No</option>
-                        <option value="append">Append</option>
-                        <option value="replace">Replace</option>
-                    </select>
-                    <button id="uploadBtn" class="primary" style="width: 100%">⬆ Upload to Cloudinary</button>
-                    <div id="progressWrap">
-                        <label>Upload progress</label>
-                        <div id="progressBar"><div id="progressFill"></div></div>
-                        <div id="progressPct">0%</div>
-                    </div>
-                    <div id="uploadStatus" class="small" style="margin-top: 6px"></div>
-                </div>
+/* Swatches */
+.swatch-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
+.swatch {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.1s, border-color 0.1s;
+}
+.swatch:hover { transform: scale(1.15); }
+.swatch.active { border-color: #fff; transform: scale(1.1); }
 
-                <h3>Add YouTube video</h3>
-                <div class="card">
-                    <label>YouTube URL or Video ID</label>
-                    <input id="ytUrl" type="text" placeholder="https://youtube.com/watch?v=... or xxxxxxxxxxx" />
-                    <label>Display name</label>
-                    <input id="ytName" type="text" placeholder="e.g. Welcome video" />
-                    <div class="row">
-                        <div>
-                            <label>Start (s)</label>
-                            <input id="ytStart" type="number" value="0" min="0" />
-                        </div>
-                        <div>
-                            <label>End (s) optional</label>
-                            <input id="ytEnd" type="number" placeholder="auto" min="0" />
-                        </div>
-                    </div>
-                    <button id="ytSaveBtn" class="primary" style="width: 100%; margin-top: 8px">
-                        💾 Save YouTube video
-                    </button>
-                    <div id="ytStatus" class="small" style="margin-top: 6px"></div>
-                </div>
+/* Slide items */
+.slide-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 8px;
+  position: relative;
+}
+.slide-card-header {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 8px; margin-bottom: 10px;
+}
+.slide-card-title { font-size: 12px; font-weight: 500; color: var(--text); }
+.slide-card-type { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; }
 
-                <h3>Stored media <span class="small">(click name to rename)</span></h3>
-                <div class="card media-list" id="mediaList"></div>
-            </div>
+/* Monitors table */
+.monitors-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.monitors-table th {
+  text-align: left; padding: 8px 10px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+}
+.monitors-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text2); }
+.monitors-table tr:last-child td { border-bottom: none; }
+.online-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 5px; box-shadow: 0 0 6px var(--green); }
+.offline-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--border2); margin-right: 5px; }
+
+/* Monitor badges */
+.monitor-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 4px 9px;
+  font-size: 11px;
+  color: var(--text2);
+  margin: 2px;
+}
+
+/* Assigned monitors area */
+.assigned-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; min-height: 24px; }
+
+/* Status text */
+.status-text { font-size: 11px; color: var(--green); margin-top: 4px; }
+.status-text.err { color: var(--red); }
+
+/* Section divider */
+.section-divider {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 10px; margin-top: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Checkbox */
+.check-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text2);
+  cursor: pointer; margin-top: 8px;
+}
+input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
+
+/* File input */
+input[type="file"] {
+  background: var(--surface2);
+  border: 1px dashed var(--border2);
+  border-radius: 6px;
+  padding: 10px;
+  color: var(--text2);
+  width: 100%;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+}
+input[type="file"]:hover { border-color: var(--accent); }
+
+/* Overlay preview */
+.overlay-preview {
+  margin-top: 10px;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  display: none;
+  word-break: break-word;
+}
+
+/* Color input */
+input[type="color"] {
+  width: 100%; height: 28px; padding: 2px; cursor: pointer;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface2);
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h2>Media Library</h2>
+  </div>
+  <div class="sidebar-inner">
+
+    <!-- Upload -->
+    <div>
+      <div class="section-divider">Upload File</div>
+      <div class="card">
+        <div class="field"><input id="file" type="file" accept="image/*,video/*" /></div>
+        <div class="field">
+          <label>Label (optional)</label>
+          <input id="fname" type="text" placeholder="Display name" />
         </div>
-
-        <!-- RIGHT: multi-presentation editor -->
-        <div class="right">
-            <div class="tabs-bar" id="tabsBar">
-                <div class="tab-add" id="addPresentationBtn" title="New presentation">＋</div>
-            </div>
-
-            <div class="editor-area" id="editorArea">
-                <div class="section-header">
-                    <h2 id="editorTitle">Presentation Editor</h2>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px">
-                        <button id="setActiveBtn" class="primary" title="Make this the live presentation">
-                            ⚡ Set as Live
-                        </button>
-                        <button id="refreshViewBtn" title="Hard refresh all view pages">🔄 Refresh Displays</button>
-                        <button id="renamePresentationBtn">✏ Rename</button>
-                        <button id="deletePresentationBtn" class="danger">🗑 Delete</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="row">
-                        <div>
-                            <label>Mode</label>
-                            <select id="mode">
-                                <option value="slideshow">Slideshow</option>
-                                <option value="single">Single slide</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Transition</label>
-                            <select id="transition">
-                                <option value="fade">Fade</option>
-                                <option value="cut">Cut</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Interval (s)</label>
-                            <input id="intervalS" type="number" value="5" min="1" />
-                        </div>
-                    </div>
-
-                    <label>Overlay text</label>
-                    <input id="overlayText" placeholder="e.g. Innovate room closed today!" />
-
-                    <label>Overlay background colour</label>
-                    <div class="swatch-row" id="overlayBgSwatches">
-                        <div class="swatch" style="background: #cc0000" data-color="#cc0000"></div>
-                        <div class="swatch" style="background: #e65c00" data-color="#e65c00"></div>
-                        <div class="swatch" style="background: #f0b429" data-color="#f0b429"></div>
-                        <div class="swatch" style="background: #1a7f37" data-color="#1a7f37"></div>
-                        <div class="swatch" style="background: #1a73e8" data-color="#1a73e8"></div>
-                        <div class="swatch" style="background: #6a0dad" data-color="#6a0dad"></div>
-                        <div class="swatch" style="background: #00bcd4" data-color="#00bcd4"></div>
-                        <div class="swatch" style="background: #212121" data-color="#212121"></div>
-                        <div class="swatch" style="background: #fff; border: 1px solid #ccc" data-color="#ffffff"></div>
-                    </div>
-                    <input
-                        id="overlayBgColor"
-                        type="color"
-                        value="#cc0000"
-                        style="margin-top: 6px; height: 30px; cursor: pointer; width: 100%" />
-
-                    <label>Overlay text colour</label>
-                    <div class="swatch-row" id="overlayTxtSwatches">
-                        <div class="swatch" style="background: #fff; border: 1px solid #ccc" data-color="#ffffff"></div>
-                        <div class="swatch" style="background: #000" data-color="#000000"></div>
-                        <div class="swatch" style="background: #f0b429" data-color="#f0b429"></div>
-                        <div class="swatch" style="background: #ff6b6b" data-color="#ff6b6b"></div>
-                    </div>
-                    <input
-                        id="overlayTxtColor"
-                        type="color"
-                        value="#ffffff"
-                        style="margin-top: 6px; height: 30px; cursor: pointer; width: 100%" />
-
-                    <label><input id="overlayVisible" type="checkbox" /> Overlay visible</label>
-
-                    <div style="margin-top: 10px">
-                        <label>Assigned monitors (comma-separated)</label>
-                        <input id="monitorAssign" placeholder="e.g. Lobby Screen, Room A, 42" />
-                        <div style="display: flex; gap: 8px; margin-top: 8px">
-                            <button id="assignMonitorsBtn" class="primary">Assign to monitors</button>
-                            <button id="clearMonitorAssignments" style="background: #fff; border-color: #bbb">
-                                Clear assignments
-                            </button>
-                        </div>
-                        <div class="monitors-list" id="assignedMonitorsList" style="margin-top: 8px"></div>
-                    </div>
-
-                    <div class="row" style="margin-top: 10px">
-                        <button id="savePresentation" class="primary">💾 Save settings</button>
-                        <button id="clearPresentation">🗑 Clear all slides</button>
-                    </div>
-                </div>
-
-                <h3>Active monitors</h3>
-                <div class="card">
-                    <div class="small">Monitors report presence via heartbeat. "Online" if last seen within 15s.</div>
-                    <table class="monitors-table" id="monitorsTable">
-                        <thead>
-                            <tr>
-                                <th>Monitor</th>
-                                <th>Status</th>
-                                <th>Last seen</th>
-                                <th>Resolution</th>
-                                <th>Assigned</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="monitorsTbody"></tbody>
-                    </table>
-                </div>
-
-                <h3>Slides <span class="small">— click ＋ Add to slide in the media library to add items</span></h3>
-                <div id="presentationItems"></div>
-            </div>
+        <div class="field">
+          <label>Add to current presentation</label>
+          <select id="showNow">
+            <option value="no">Don't add</option>
+            <option value="append">Append to slides</option>
+            <option value="replace">Replace slides</option>
+          </select>
         </div>
+        <button id="uploadBtn" class="btn primary" style="width:100%">↑ Upload to Cloudinary</button>
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-label" id="progressPct">0%</div>
+        </div>
+        <div id="uploadStatus" class="status-text"></div>
+      </div>
+    </div>
 
-        <script type="module">
-            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-            import {
-                getDatabase,
-                ref,
-                push,
-                set,
-                onValue,
-                remove,
-                get,
-                update
-            } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    <!-- YouTube -->
+    <div>
+      <div class="section-divider">YouTube Video</div>
+      <div class="card">
+        <div class="field">
+          <label>URL or Video ID</label>
+          <input id="ytUrl" type="text" placeholder="youtube.com/watch?v=... or video ID" />
+        </div>
+        <div class="field">
+          <label>Label</label>
+          <input id="ytName" type="text" placeholder="Display name" />
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Start (s)</label>
+            <input id="ytStart" type="number" value="0" min="0" />
+          </div>
+          <div class="field">
+            <label>End (s)</label>
+            <input id="ytEnd" type="number" placeholder="auto" min="0" />
+          </div>
+        </div>
+        <button id="ytSaveBtn" class="btn primary" style="width:100%;margin-top:2px">Save YouTube video</button>
+        <div id="ytStatus" class="status-text"></div>
+      </div>
+    </div>
 
-            const firebaseConfig = {
-                apiKey: "AIzaSyBgV9PoUFut3FPc0iChFNm2-h6-Uc5z6s0",
-                authDomain: "infinity-service-b2f10.firebaseapp.com",
-                databaseURL: "https://infinity-service-b2f10-default-rtdb.firebaseio.com",
-                projectId: "infinity-service-b2f10",
-                storageBucket: "infinity-service-b2f10.firebasestorage.app",
-                messagingSenderId: "805770674259",
-                appId: "1:805770674259:web:bcc520979e6772fda5c6a6"
-            };
-            const CLOUD_NAME = "dgrmpcha9";
-            const UPLOAD_PRESET = "Innovate";
+    <!-- Media list -->
+    <div>
+      <div class="section-divider">Stored Media</div>
+      <div id="mediaList"></div>
+    </div>
 
-            const app = initializeApp(firebaseConfig);
-            const db = getDatabase(app);
-            const mediaRef = ref(db, "media");
-            const presentationsRef = ref(db, "presentations");
-            const activeRef = ref(db, "activePresentation");
-            const refreshRef = ref(db, "refreshSignal");
-            const monitorsRef = ref(db, "monitors");
+  </div>
+</div>
 
-            // DOM
-            const fileInput = document.getElementById("file");
-            const uploadBtn = document.getElementById("uploadBtn");
-            const uploadStatus = document.getElementById("uploadStatus");
-            const fname = document.getElementById("fname");
-            const showNow = document.getElementById("showNow");
-            const progressWrap = document.getElementById("progressWrap");
-            const progressFill = document.getElementById("progressFill");
-            const progressPct = document.getElementById("progressPct");
-            const mediaListEl = document.getElementById("mediaList");
-            const presentationItemsEl = document.getElementById("presentationItems");
-            const tabsBar = document.getElementById("tabsBar");
-            const addPresentationBtn = document.getElementById("addPresentationBtn");
-            const editorTitle = document.getElementById("editorTitle");
-            const modeEl = document.getElementById("mode");
-            const transitionEl = document.getElementById("transition");
-            const intervalSEl = document.getElementById("intervalS");
-            const overlayTextEl = document.getElementById("overlayText");
-            const overlayVisibleEl = document.getElementById("overlayVisible");
-            const overlayBgColorInput = document.getElementById("overlayBgColor");
-            const overlayTxtColorInput = document.getElementById("overlayTxtColor");
-            const savePresentationBtn = document.getElementById("savePresentation");
-            const clearPresentationBtn = document.getElementById("clearPresentation");
-            const setActiveBtn = document.getElementById("setActiveBtn");
-            const refreshViewBtn = document.getElementById("refreshViewBtn");
-            const renamePresentationBtn = document.getElementById("renamePresentationBtn");
-            const deletePresentationBtn = document.getElementById("deletePresentationBtn");
-            const ytUrlEl = document.getElementById("ytUrl");
-            const ytNameEl = document.getElementById("ytName");
-            const ytStartEl = document.getElementById("ytStart");
-            const ytEndEl = document.getElementById("ytEnd");
-            const ytSaveBtn = document.getElementById("ytSaveBtn");
-            const ytStatus = document.getElementById("ytStatus");
-            const monitorAssignInput = document.getElementById("monitorAssign");
-            const assignMonitorsBtn = document.getElementById("assignMonitorsBtn");
-            const assignedMonitorsList = document.getElementById("assignedMonitorsList");
-            const clearMonitorAssignmentsBtn = document.getElementById("clearMonitorAssignments");
-            const monitorsTbody = document.getElementById("monitorsTbody");
+<!-- MAIN -->
+<div class="main">
+  <div class="tabs-bar" id="tabsBar">
+    <div class="tab-add" id="addPresentationBtn" title="New presentation">+</div>
+  </div>
 
-            // State
-            let localMedia = {};
-            let presentations = {};
-            let activePresentationId = null;
-            let selectedPresentationId = null;
-            let selectedOverlayBg = "#cc0000";
-            let selectedOverlayTxt = "#ffffff";
-            let localMonitors = {}; // keyed by encoded monitor name
+  <div class="editor-area" id="editorArea">
+    <div class="editor-header">
+      <h1 id="editorTitle">Select a Presentation</h1>
+      <div class="btn-row">
+        <button id="setActiveBtn" class="btn primary">⚡ Set Live</button>
+        <button id="refreshViewBtn" class="btn">↺ Refresh Displays</button>
+        <button id="renamePresentationBtn" class="btn">Rename</button>
+        <button id="deletePresentationBtn" class="btn danger">Delete</button>
+      </div>
+    </div>
 
-            // Edit locks to prevent realtime overwrite while user is typing
-            // keys: "interval", "overlayText", "start-<idx>", "end-<idx>", "label-<idx>"
-            const editLocks = new Set();
-            function lock(key) {
-                editLocks.add(key);
-            }
-            function unlock(key) {
-                editLocks.delete(key);
-            }
-            function isLocked(key) {
-                return editLocks.has(key);
-            }
+    <!-- Settings card -->
+    <div class="card">
+      <div class="card-title">Playback Settings</div>
+      <div class="row">
+        <div class="field">
+          <label>Mode</label>
+          <select id="mode">
+            <option value="slideshow">Slideshow</option>
+            <option value="single">Single slide</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Transition</label>
+          <select id="transition">
+            <option value="fade">Fade</option>
+            <option value="cut">Cut</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Interval (s)</label>
+          <input id="intervalS" type="number" value="5" min="1" />
+        </div>
+      </div>
+    </div>
 
-            // Utility: escape HTML
-            function escHtml(s) {
-                return s ? String(s).replaceAll("<", "&lt;").replaceAll(">", "&gt;") : "";
-            }
+    <!-- Overlay card -->
+    <div class="card">
+      <div class="card-title">Overlay Banner</div>
+      <div class="field">
+        <label>Message text</label>
+        <input id="overlayText" placeholder="e.g. Room closed today" />
+      </div>
+      <label class="check-label">
+        <input id="overlayVisible" type="checkbox" />
+        Show overlay on display
+      </label>
+      <div id="overlayPreview" class="overlay-preview"></div>
+      <div class="row" style="margin-top:12px">
+        <div class="field">
+          <label>Background</label>
+          <div class="swatch-row" id="overlayBgSwatches">
+            <div class="swatch" style="background:#cc0000" data-color="#cc0000"></div>
+            <div class="swatch" style="background:#e65c00" data-color="#e65c00"></div>
+            <div class="swatch" style="background:#f0b429" data-color="#f0b429"></div>
+            <div class="swatch" style="background:#1a7f37" data-color="#1a7f37"></div>
+            <div class="swatch" style="background:#1a73e8" data-color="#1a73e8"></div>
+            <div class="swatch" style="background:#6a0dad" data-color="#6a0dad"></div>
+            <div class="swatch" style="background:#212121" data-color="#212121"></div>
+            <div class="swatch" style="background:#f5f5f5;border:1px solid #444" data-color="#f5f5f5"></div>
+          </div>
+          <input id="overlayBgColor" type="color" value="#cc0000" />
+        </div>
+        <div class="field">
+          <label>Text colour</label>
+          <div class="swatch-row" id="overlayTxtSwatches">
+            <div class="swatch" style="background:#ffffff;border:1px solid #444" data-color="#ffffff"></div>
+            <div class="swatch" style="background:#000000" data-color="#000000"></div>
+            <div class="swatch" style="background:#f0b429" data-color="#f0b429"></div>
+            <div class="swatch" style="background:#ff6b6b" data-color="#ff6b6b"></div>
+          </div>
+          <input id="overlayTxtColor" type="color" value="#ffffff" />
+        </div>
+      </div>
+    </div>
 
-            // Swatch helpers
-            function setSwatchActive(containerId, color) {
-                const cont = document.getElementById(containerId);
-                if (!cont) return;
-                cont.querySelectorAll(".swatch").forEach((s) => {
-                    if ((s.dataset.color || "").toLowerCase() === (color || "").toLowerCase())
-                        s.classList.add("active");
-                    else s.classList.remove("active");
-                });
-            }
+    <!-- Monitor assignment card -->
+    <div class="card">
+      <div class="card-title">Monitor Assignment</div>
+      <div class="field">
+        <label>Assign monitor names (comma-separated)</label>
+        <input id="monitorAssign" placeholder="e.g. Lobby Screen, Room A" />
+      </div>
+      <div class="btn-row">
+        <button id="assignMonitorsBtn" class="btn primary">Assign</button>
+        <button id="clearMonitorAssignments" class="btn danger">Clear All</button>
+      </div>
+      <div class="assigned-wrap" id="assignedMonitorsList"></div>
+    </div>
 
-            function setupSwatches(contId, inputEl, onSelect) {
-                const cont = document.getElementById(contId);
-                if (!cont) return;
-                cont.querySelectorAll(".swatch").forEach((s) => {
-                    s.onclick = () => {
-                        const color = s.dataset.color || "";
-                        inputEl.value = color;
-                        setSwatchActive(contId, color);
-                        onSelect(color);
-                        inputEl.dispatchEvent(new Event("input", { bubbles: true }));
-                    };
-                });
-                inputEl.addEventListener("input", () => {
-                    setSwatchActive(contId, inputEl.value);
-                    onSelect(inputEl.value);
-                });
-            }
+    <!-- Active monitors -->
+    <div class="card">
+      <div class="card-title">Active Monitors <span style="font-size:10px;color:var(--text3);text-transform:none;font-weight:400">(online if heartbeat within 15s)</span></div>
+      <table class="monitors-table">
+        <thead>
+          <tr>
+            <th>Monitor</th>
+            <th>Status</th>
+            <th>Last seen</th>
+            <th>Resolution</th>
+            <th>Assigned Presentation</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="monitorsTbody"></tbody>
+      </table>
+    </div>
 
-            setupSwatches("overlayBgSwatches", overlayBgColorInput, (c) => (selectedOverlayBg = c));
-            setupSwatches("overlayTxtSwatches", overlayTxtColorInput, (c) => (selectedOverlayTxt = c));
+    <!-- Slides -->
+    <div>
+      <div class="section-divider" style="margin-top:4px">Slides — add from media library</div>
+      <div id="presentationItems"></div>
+    </div>
 
-            // Debounce helper for text inputs
-            function debounce(fn, wait = 400) {
-                let t;
-                return (...args) => {
-                    clearTimeout(t);
-                    t = setTimeout(() => fn(...args), wait);
-                };
-            }
+  </div>
+</div>
 
-            // YouTube ID extractor
-            function extractYtId(raw) {
-                raw = (raw || "").trim();
-                if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
-                try {
-                    const u = new URL(raw);
-                    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1).split("?")[0].slice(0, 11);
-                    return u.searchParams.get("v") || null;
-                } catch {
-                    return null;
-                }
-            }
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, remove, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-            ytSaveBtn.onclick = async () => {
-                const raw = ytUrlEl.value.trim();
-                if (!raw) return alert("Enter a YouTube URL or video ID");
-                const videoId = extractYtId(raw);
-                if (!videoId)
-                    return alert(
-                        "Could not parse a YouTube video ID from that URL.\nTry pasting just the 11-character video ID."
-                    );
-                const name = ytNameEl.value.trim() || `YouTube: ${videoId}`;
-                const start = parseFloat(ytStartEl.value) || 0;
-                const endVal = ytEndEl.value.trim();
-                const end = endVal ? parseFloat(endVal) : null;
-                const mobj = {
-                    resource_type: "youtube",
-                    ytId: videoId,
-                    filename: name,
-                    uploadedAt: Date.now(),
-                    start,
-                    end,
-                    duration: end || null
-                };
-                const newRef = push(mediaRef);
-                await set(newRef, mobj);
-                ytUrlEl.value = "";
-                ytNameEl.value = "";
-                ytStartEl.value = "0";
-                ytEndEl.value = "";
-                ytStatus.textContent = "✅ Saved.";
-                setTimeout(() => (ytStatus.textContent = ""), 3000);
-            };
+const firebaseConfig = {
+  apiKey: "AIzaSyBgV9PoUFut3FPc0iChFNm2-h6-Uc5z6s0",
+  authDomain: "infinity-service-b2f10.firebaseapp.com",
+  databaseURL: "https://infinity-service-b2f10-default-rtdb.firebaseio.com",
+  projectId: "infinity-service-b2f10",
+  storageBucket: "infinity-service-b2f10.firebasestorage.app",
+  messagingSenderId: "805770674259",
+  appId: "1:805770674259:web:bcc520979e6772fda5c6a6"
+};
+const CLOUD_NAME = "dgrmpcha9";
+const UPLOAD_PRESET = "Innovate";
 
-            // Firebase listeners
-            onValue(mediaRef, (snap) => {
-                localMedia = snap.val() || {};
-                renderMediaList();
-                if (selectedPresentationId) renderPresentationEditor();
-            });
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const mediaRef = ref(db, "media");
+const presentationsRef = ref(db, "presentations");
+const activeRef = ref(db, "activePresentation");
+const refreshRef = ref(db, "refreshSignal");
+const monitorsRef = ref(db, "monitors");
 
-            onValue(presentationsRef, (snap) => {
-                const raw = snap.val() || {};
-                presentations = {};
-                for (const [k, v] of Object.entries(raw)) {
-                    if (k !== "current") presentations[k] = v;
-                }
-                if (Object.keys(presentations).length === 0) {
-                    createPresentation("Main");
-                    return;
-                }
-                if (!selectedPresentationId || !presentations[selectedPresentationId]) {
-                    selectedPresentationId = Object.keys(presentations)[0];
-                }
-                renderTabs();
-                renderPresentationEditor();
-            });
+// DOM refs
+const fileInput = document.getElementById("file");
+const uploadBtn = document.getElementById("uploadBtn");
+const uploadStatus = document.getElementById("uploadStatus");
+const fname = document.getElementById("fname");
+const showNow = document.getElementById("showNow");
+const progressWrap = document.getElementById("progressWrap");
+const progressFill = document.getElementById("progressFill");
+const progressPct = document.getElementById("progressPct");
+const mediaListEl = document.getElementById("mediaList");
+const presentationItemsEl = document.getElementById("presentationItems");
+const tabsBar = document.getElementById("tabsBar");
+const addPresentationBtn = document.getElementById("addPresentationBtn");
+const editorTitle = document.getElementById("editorTitle");
+const modeEl = document.getElementById("mode");
+const transitionEl = document.getElementById("transition");
+const intervalSEl = document.getElementById("intervalS");
+const overlayTextEl = document.getElementById("overlayText");
+const overlayVisibleEl = document.getElementById("overlayVisible");
+const overlayBgColorInput = document.getElementById("overlayBgColor");
+const overlayTxtColorInput = document.getElementById("overlayTxtColor");
+const overlayPreviewEl = document.getElementById("overlayPreview");
+const setActiveBtn = document.getElementById("setActiveBtn");
+const refreshViewBtn = document.getElementById("refreshViewBtn");
+const renamePresentationBtn = document.getElementById("renamePresentationBtn");
+const deletePresentationBtn = document.getElementById("deletePresentationBtn");
+const ytUrlEl = document.getElementById("ytUrl");
+const ytNameEl = document.getElementById("ytName");
+const ytStartEl = document.getElementById("ytStart");
+const ytEndEl = document.getElementById("ytEnd");
+const ytSaveBtn = document.getElementById("ytSaveBtn");
+const ytStatus = document.getElementById("ytStatus");
+const monitorAssignInput = document.getElementById("monitorAssign");
+const assignMonitorsBtn = document.getElementById("assignMonitorsBtn");
+const assignedMonitorsList = document.getElementById("assignedMonitorsList");
+const clearMonitorAssignmentsBtn = document.getElementById("clearMonitorAssignments");
+const monitorsTbody = document.getElementById("monitorsTbody");
 
-            onValue(activeRef, (snap) => {
-                activePresentationId = snap.val() || null;
-                renderTabs();
-            });
+let localMedia = {};
+let presentations = {};
+let activePresentationId = null;
+let selectedPresentationId = null;
+let selectedOverlayBg = "#cc0000";
+let selectedOverlayTxt = "#ffffff";
+let localMonitors = {};
 
-            // Monitors listener
-            onValue(monitorsRef, (snap) => {
-                localMonitors = snap.val() || {};
-                renderTabs();
-                renderMonitorsTable();
-                renderPresentationEditor();
-            });
+const editLocks = new Set();
+const lock = k => editLocks.add(k);
+const unlock = k => editLocks.delete(k);
+const isLocked = k => editLocks.has(k);
 
-            // Create presentation
-            async function createPresentation(name) {
-                const newRef = push(presentationsRef);
-                const id = newRef.key;
-                await set(newRef, {
-                    name: name || "New Presentation",
-                    items: [],
-                    mode: "slideshow",
-                    intervalMs: 5000,
-                    transition: "fade",
-                    overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" }
-                });
-                selectedPresentationId = id;
-            }
+function escHtml(s) { return s ? String(s).replaceAll("<","&lt;").replaceAll(">","&gt;") : ""; }
 
-            addPresentationBtn.onclick = async () => {
-                const name = prompt("New presentation name:", "New Presentation");
-                if (name) await createPresentation(name);
-            };
+function debounce(fn, wait=400) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+}
 
-            renamePresentationBtn.onclick = async () => {
-                if (!selectedPresentationId) return;
-                const cur = presentations[selectedPresentationId]?.name || "";
-                const name = prompt("Rename presentation:", cur);
-                if (!name) return;
-                await update(ref(db, `presentations/${selectedPresentationId}`), { name });
-            };
+function extractYtId(raw) {
+  raw = (raw||"").trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
+  try {
+    const u = new URL(raw);
+    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1).split("?")[0].slice(0,11);
+    return u.searchParams.get("v") || null;
+  } catch { return null; }
+}
 
-            deletePresentationBtn.onclick = async () => {
-                if (!selectedPresentationId) return;
-                if (Object.keys(presentations).length <= 1) return alert("You need at least one presentation.");
-                const name = presentations[selectedPresentationId]?.name;
-                if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-                // Remove monitor mappings to this presentation
-                const monitorsSnap = await get(monitorsRef);
-                const monitorsObj = monitorsSnap.val() || {};
-                for (const [mn, val] of Object.entries(monitorsObj)) {
-                    // handle both string and object types
-                    if (typeof val === "string") {
-                        if (val === selectedPresentationId) await remove(ref(db, `monitors/${mn}`));
-                    } else if (val && (val.presentation === selectedPresentationId || val === selectedPresentationId)) {
-                        await remove(ref(db, `monitors/${mn}`));
-                    }
-                }
-                await remove(ref(db, `presentations/${selectedPresentationId}`));
-                selectedPresentationId = null;
-            };
+// Swatches
+function setSwatchActive(containerId, color) {
+  const cont = document.getElementById(containerId);
+  if (!cont) return;
+  cont.querySelectorAll(".swatch").forEach(s => {
+    s.classList.toggle("active", (s.dataset.color||"").toLowerCase() === (color||"").toLowerCase());
+  });
+}
+function setupSwatches(contId, inputEl, onSelect) {
+  const cont = document.getElementById(contId);
+  if (!cont) return;
+  cont.querySelectorAll(".swatch").forEach(s => {
+    s.onclick = () => {
+      const color = s.dataset.color||"";
+      inputEl.value = color;
+      setSwatchActive(contId, color);
+      onSelect(color);
+    };
+  });
+  inputEl.addEventListener("input", () => { setSwatchActive(contId, inputEl.value); onSelect(inputEl.value); });
+}
+setupSwatches("overlayBgSwatches", overlayBgColorInput, c => { selectedOverlayBg = c; updateOverlayPreview(); });
+setupSwatches("overlayTxtSwatches", overlayTxtColorInput, c => { selectedOverlayTxt = c; updateOverlayPreview(); });
 
-            setActiveBtn.onclick = async () => {
-                if (!selectedPresentationId) return;
-                await set(activeRef, selectedPresentationId);
-                const p = (await get(ref(db, `presentations/${selectedPresentationId}`))).val();
-                if (p) await set(ref(db, "presentations/current"), { ...p, id: "current" });
-                alert(`"${p?.name}" is now live on the display.`);
-            };
+function updateOverlayPreview() {
+  const txt = overlayTextEl.value;
+  if (txt && overlayVisibleEl.checked) {
+    overlayPreviewEl.style.display = "block";
+    overlayPreviewEl.style.background = selectedOverlayBg;
+    overlayPreviewEl.style.color = selectedOverlayTxt;
+    overlayPreviewEl.textContent = txt;
+  } else {
+    overlayPreviewEl.style.display = "none";
+  }
+}
 
-            refreshViewBtn.onclick = async () => {
-                // global refresh signal (all views listening to refreshSignal will reload)
-                await set(refreshRef, Date.now());
-            };
+// Firebase
+onValue(mediaRef, snap => { localMedia = snap.val()||{}; renderMediaList(); if (selectedPresentationId) renderPresentationEditor(); });
+onValue(presentationsRef, snap => {
+  const raw = snap.val()||{};
+  presentations = {};
+  for (const [k,v] of Object.entries(raw)) { if (k !== "current") presentations[k] = v; }
+  if (Object.keys(presentations).length === 0) { createPresentation("Main"); return; }
+  if (!selectedPresentationId || !presentations[selectedPresentationId]) {
+    selectedPresentationId = Object.keys(presentations)[0];
+  }
+  renderTabs(); renderPresentationEditor();
+});
+onValue(activeRef, snap => { activePresentationId = snap.val()||null; renderTabs(); });
+onValue(monitorsRef, snap => { localMonitors = snap.val()||{}; renderTabs(); renderMonitorsTable(); renderPresentationEditor(); });
 
-            // Render tabs
-            function renderTabs() {
-                tabsBar.querySelectorAll(".tab").forEach((t) => t.remove());
-                const addBtn = document.getElementById("addPresentationBtn");
+async function createPresentation(name) {
+  const newRef = push(presentationsRef);
+  const id = newRef.key;
+  await set(newRef, { name: name||"New Presentation", items: [], mode: "slideshow", intervalMs: 5000, transition: "fade", overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" } });
+  selectedPresentationId = id;
+}
 
-                // Build reverse mapping: presentationId -> [monitorNames]
-                const rev = {};
-                for (const [mn, val] of Object.entries(localMonitors || {})) {
-                    let pid = null;
-                    if (typeof val === "string") pid = val;
-                    else if (val && typeof val === "object") {
-                        // support either val.presentation or val.assigned or val.pid
-                        pid = val.presentation || val.assigned || val.pid || null;
-                    }
-                    if (!pid) continue;
-                    rev[pid] = rev[pid] || [];
-                    rev[pid].push(decodeURIComponent(mn));
-                }
+addPresentationBtn.onclick = async () => {
+  const name = prompt("New presentation name:", "New Presentation");
+  if (name) await createPresentation(name);
+};
 
-                Object.entries(presentations).forEach(([id, p]) => {
-                    const isSelected = id === selectedPresentationId;
-                    const isLive = id === activePresentationId;
-                    const assigned = rev[id] || [];
-                    const tab = document.createElement("div");
-                    tab.className = "tab" + (isSelected ? " active" : "");
-                    tab.innerHTML = `<span>${escHtml(p.name || "Untitled")}${isLive ? '<span class="active-badge">LIVE</span>' : ""}</span><span class="tab-close" title="Delete">×</span>`;
-                    if (assigned.length) {
-                        const small = document.createElement("div");
-                        small.style.fontSize = "11px";
-                        small.style.marginTop = "4px";
-                        small.style.opacity = "0.8";
-                        small.textContent = "Monitors: " + assigned.join(", ");
-                        tab.appendChild(small);
-                    }
-                    tab.addEventListener("click", (e) => {
-                        if (e.target.classList.contains("tab-close")) return;
-                        selectedPresentationId = id;
-                        renderTabs();
-                        renderPresentationEditor();
-                    });
-                    tab.querySelector(".tab-close").addEventListener("click", async (e) => {
-                        e.stopPropagation();
-                        if (Object.keys(presentations).length <= 1)
-                            return alert("Must have at least one presentation.");
-                        if (!confirm(`Delete "${p.name}"?`)) return;
-                        await remove(ref(db, `presentations/${id}`));
-                    });
-                    tabsBar.insertBefore(tab, addBtn);
-                });
-            }
+renamePresentationBtn.onclick = async () => {
+  if (!selectedPresentationId) return;
+  const cur = presentations[selectedPresentationId]?.name||"";
+  const name = prompt("Rename:", cur);
+  if (!name) return;
+  await update(ref(db, `presentations/${selectedPresentationId}`), { name });
+};
 
-            // Render media library
-            function renderMediaList() {
-                mediaListEl.innerHTML = "";
-                const keys = Object.keys(localMedia).sort(
-                    (a, b) => localMedia[a].uploadedAt - localMedia[b].uploadedAt
-                );
-                for (const id of keys) {
-                    const m = localMedia[id];
-                    const div = document.createElement("div");
-                    div.className = "media-item";
-                    let thumb = "";
-                    if (m.resource_type === "youtube") thumb = `<div class="media-thumb-yt">▶</div>`;
-                    else if (m.resource_type === "image") thumb = `<img src="${m.url}" />`;
-                    else thumb = `<video src="${m.url}" muted playsinline></video>`;
+deletePresentationBtn.onclick = async () => {
+  if (!selectedPresentationId) return;
+  if (Object.keys(presentations).length <= 1) return alert("You need at least one presentation.");
+  const name = presentations[selectedPresentationId]?.name;
+  if (!confirm(`Delete "${name}"?`)) return;
+  await remove(ref(db, `presentations/${selectedPresentationId}`));
+  selectedPresentationId = null;
+};
 
-                    div.innerHTML = `
-            ${thumb}
-            <div style="flex:1;min-width:0">
-                <input class="rename-input" data-id="${id}" value="${escHtml(m.filename || id)}" title="Click to rename" />
-                <div class="small">${m.resource_type}${m.resource_type === "youtube" ? " · " + (m.ytId || "") : ""} · ${new Date(m.uploadedAt).toLocaleDateString()}</div>
-                <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap">
-                    <button data-id="${id}" class="addBtn">＋ Add to slide</button>
-                    <button data-id="${id}" class="deleteBtn" style="color:#c00;border-color:#fcc">🗑</button>
-                </div>
-            </div>
-        `;
-                    mediaListEl.appendChild(div);
-                }
+setActiveBtn.onclick = async () => {
+  if (!selectedPresentationId) return;
+  await set(activeRef, selectedPresentationId);
+  const p = (await get(ref(db, `presentations/${selectedPresentationId}`))).val();
+  if (p) await set(ref(db, "presentations/current"), { ...p, id: "current" });
+  alert(`"${p?.name}" is now live.`);
+};
 
-                mediaListEl.querySelectorAll(".rename-input").forEach((inp) => {
-                    const save = async () => {
-                        const id = inp.dataset.id;
-                        const val = inp.value.trim();
-                        if (!val || val === (localMedia[id]?.filename || "")) return;
-                        await update(ref(db, `media/${id}`), { filename: val });
-                    };
-                    inp.addEventListener("blur", save);
-                    inp.addEventListener("keydown", (e) => {
-                        if (e.key === "Enter") inp.blur();
-                    });
-                });
+refreshViewBtn.onclick = async () => { await set(refreshRef, Date.now()); };
 
-                mediaListEl
-                    .querySelectorAll(".addBtn")
-                    .forEach((b) => (b.onclick = () => addToPresentation(b.dataset.id)));
-                mediaListEl.querySelectorAll(".deleteBtn").forEach((b) => {
-                    b.onclick = async () => {
-                        if (!confirm("Delete this media permanently from all presentations?")) return;
-                        await remove(ref(db, "media/" + b.dataset.id));
-                        for (const [pid, p] of Object.entries(presentations)) {
-                            if (!p.items) continue;
-                            const filtered = p.items.filter((it) => it.mediaId !== b.dataset.id);
-                            if (filtered.length !== p.items.length)
-                                await update(ref(db, `presentations/${pid}`), { items: filtered });
-                        }
-                    };
-                });
-            }
+ytSaveBtn.onclick = async () => {
+  const raw = ytUrlEl.value.trim();
+  if (!raw) return alert("Enter a YouTube URL or video ID");
+  const videoId = extractYtId(raw);
+  if (!videoId) return alert("Couldn't parse a YouTube video ID.");
+  const name = ytNameEl.value.trim() || `YouTube: ${videoId}`;
+  const start = parseFloat(ytStartEl.value)||0;
+  const endVal = ytEndEl.value.trim();
+  const end = endVal ? parseFloat(endVal) : null;
+  const newRef = push(mediaRef);
+  await set(newRef, { resource_type: "youtube", ytId: videoId, filename: name, uploadedAt: Date.now(), start, end, duration: end||null });
+  ytUrlEl.value = ""; ytNameEl.value = ""; ytStartEl.value = "0"; ytEndEl.value = "";
+  ytStatus.textContent = "✓ Saved"; ytStatus.className = "status-text";
+  setTimeout(() => ytStatus.textContent = "", 3000);
+};
 
-            // Add media item to selected presentation
-            async function addToPresentation(mediaId) {
-                if (!selectedPresentationId) return alert("Select a presentation tab first");
-                const m = localMedia[mediaId];
-                if (!m) return;
-                const pSnap = await get(ref(db, `presentations/${selectedPresentationId}`));
-                const p = pSnap.val() || {};
-                const items = p.items || [];
-                items.push({ mediaId, start: m.start || 0, end: m.end || m.duration || null, label: m.filename || "" });
-                await update(ref(db, `presentations/${selectedPresentationId}`), { items });
-            }
+function renderTabs() {
+  tabsBar.querySelectorAll(".tab").forEach(t => t.remove());
+  const addBtn = document.getElementById("addPresentationBtn");
+  const rev = {};
+  for (const [mn, val] of Object.entries(localMonitors||{})) {
+    let pid = null;
+    if (typeof val === "string") pid = val;
+    else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
+    if (!pid) continue;
+    rev[pid] = rev[pid]||[];
+    rev[pid].push(decodeURIComponent(mn));
+  }
+  Object.entries(presentations).forEach(([id, p]) => {
+    const isSelected = id === selectedPresentationId;
+    const isLive = id === activePresentationId;
+    const tab = document.createElement("div");
+    tab.className = "tab" + (isSelected ? " active" : "");
+    tab.innerHTML = `<span>${escHtml(p.name||"Untitled")}${isLive ? '<span class="live-badge" style="margin-left:6px">LIVE</span>' : ""}</span><span class="tab-close">×</span>`;
+    tab.addEventListener("click", e => {
+      if (e.target.classList.contains("tab-close")) return;
+      selectedPresentationId = id; renderTabs(); renderPresentationEditor();
+    });
+    tab.querySelector(".tab-close").addEventListener("click", async e => {
+      e.stopPropagation();
+      if (Object.keys(presentations).length <= 1) return alert("Need at least one presentation.");
+      if (!confirm(`Delete "${p.name}"?`)) return;
+      await remove(ref(db, `presentations/${id}`));
+    });
+    tabsBar.insertBefore(tab, addBtn);
+  });
+}
 
-            // Helper to update partial presentation fields
-            async function updatePresentationPartial(updates) {
-                if (!selectedPresentationId) return;
-                await update(ref(db, `presentations/${selectedPresentationId}`), updates);
-                // If this is the active presentation, also update "presentations/current"
-                if (selectedPresentationId === activePresentationId) {
-                    const curRef = ref(db, `presentations/current`);
-                    const curSnap = await get(curRef);
-                    const curVal = curSnap.val() || {};
-                    const merged = { ...curVal, ...updates };
-                    await set(curRef, merged);
-                }
-            }
+function renderMediaList() {
+  mediaListEl.innerHTML = "";
+  Object.keys(localMedia).sort((a,b) => localMedia[a].uploadedAt - localMedia[b].uploadedAt).forEach(id => {
+    const m = localMedia[id];
+    const div = document.createElement("div");
+    div.className = "media-item";
+    let thumb = "";
+    if (m.resource_type === "youtube") thumb = `<div class="media-thumb-yt">▶</div>`;
+    else if (m.resource_type === "image") thumb = `<img class="media-thumb" src="${m.url}" />`;
+    else thumb = `<video class="media-thumb" src="${m.url}" muted playsinline></video>`;
+    div.innerHTML = `
+      ${thumb}
+      <div class="media-info">
+        <input class="media-name rename-input" data-id="${id}" value="${escHtml(m.filename||id)}" />
+        <div class="media-meta">${m.resource_type}${m.resource_type==="youtube"?" · "+m.ytId:""}</div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <button data-id="${id}" class="btn sm primary addBtn">+ Add to slide</button>
+          <button data-id="${id}" class="btn sm danger deleteBtn">Remove</button>
+        </div>
+      </div>`;
+    mediaListEl.appendChild(div);
+  });
 
-            // Render presentation editor panel
-            function renderPresentationEditor() {
-                presentationItemsEl.innerHTML = "";
-                if (!selectedPresentationId || !presentations[selectedPresentationId]) return;
-                const p = presentations[selectedPresentationId];
+  mediaListEl.querySelectorAll(".rename-input").forEach(inp => {
+    const save = async () => {
+      const id = inp.dataset.id;
+      const val = inp.value.trim();
+      if (!val || val === (localMedia[id]?.filename||"")) return;
+      await update(ref(db, `media/${id}`), { filename: val });
+    };
+    inp.addEventListener("blur", save);
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
+  });
+  mediaListEl.querySelectorAll(".addBtn").forEach(b => b.onclick = () => addToPresentation(b.dataset.id));
+  mediaListEl.querySelectorAll(".deleteBtn").forEach(b => {
+    b.onclick = async () => {
+      if (!confirm("Delete this media from all presentations?")) return;
+      await remove(ref(db, "media/"+b.dataset.id));
+      for (const [pid, p] of Object.entries(presentations)) {
+        if (!p.items) continue;
+        const filtered = p.items.filter(it => it.mediaId !== b.dataset.id);
+        if (filtered.length !== p.items.length) await update(ref(db, `presentations/${pid}`), { items: filtered });
+      }
+    };
+  });
+}
 
-                editorTitle.textContent = p.name || "Presentation";
+async function addToPresentation(mediaId) {
+  if (!selectedPresentationId) return alert("Select a presentation tab first");
+  const m = localMedia[mediaId];
+  if (!m) return;
+  const pSnap = await get(ref(db, `presentations/${selectedPresentationId}`));
+  const p = pSnap.val()||{};
+  const items = p.items||[];
+  items.push({ mediaId, start: m.start||0, end: m.end||m.duration||null, label: m.filename||"" });
+  await update(ref(db, `presentations/${selectedPresentationId}`), { items });
+}
 
-                // basic fields - skip overwriting while editing
-                if (!isLocked("mode")) modeEl.value = p.mode || "slideshow";
-                if (!isLocked("transition")) transitionEl.value = p.transition || "fade";
-                if (!isLocked("interval")) intervalSEl.value = Math.round((p.intervalMs || 5000) / 1000);
+async function updatePresentationPartial(updates) {
+  if (!selectedPresentationId) return;
+  await update(ref(db, `presentations/${selectedPresentationId}`), updates);
+  if (selectedPresentationId === activePresentationId) {
+    const curRef = ref(db, "presentations/current");
+    const curSnap = await get(curRef);
+    const curVal = curSnap.val()||{};
+    await set(curRef, { ...curVal, ...updates });
+  }
+}
 
-                // overlay
-                if (!isLocked("overlayText")) overlayTextEl.value = p.overlay?.text || "";
-                // overlay visible checkbox always reflect stored state (not locked)
-                overlayVisibleEl.checked = !!p.overlay?.visible;
-                if (p.overlay?.color) {
-                    selectedOverlayBg = p.overlay.color;
-                    overlayBgColorInput.value = p.overlay.color;
-                    setSwatchActive("overlayBgSwatches", selectedOverlayBg);
-                } else {
-                    setSwatchActive("overlayBgSwatches", overlayBgColorInput.value);
-                }
-                if (p.overlay?.textColor) {
-                    selectedOverlayTxt = p.overlay.textColor;
-                    overlayTxtColorInput.value = p.overlay.textColor;
-                    setSwatchActive("overlayTxtSwatches", selectedOverlayTxt);
-                } else {
-                    setSwatchActive("overlayTxtSwatches", overlayTxtColorInput.value);
-                }
+function renderPresentationEditor() {
+  presentationItemsEl.innerHTML = "";
+  if (!selectedPresentationId || !presentations[selectedPresentationId]) return;
+  const p = presentations[selectedPresentationId];
+  editorTitle.textContent = p.name||"Presentation";
+  if (!isLocked("mode")) modeEl.value = p.mode||"slideshow";
+  if (!isLocked("transition")) transitionEl.value = p.transition||"fade";
+  if (!isLocked("interval")) intervalSEl.value = Math.round((p.intervalMs||5000)/1000);
+  if (!isLocked("overlayText")) overlayTextEl.value = p.overlay?.text||"";
+  overlayVisibleEl.checked = !!p.overlay?.visible;
+  if (p.overlay?.color) { selectedOverlayBg = p.overlay.color; overlayBgColorInput.value = p.overlay.color; setSwatchActive("overlayBgSwatches", selectedOverlayBg); }
+  if (p.overlay?.textColor) { selectedOverlayTxt = p.overlay.textColor; overlayTxtColorInput.value = p.overlay.textColor; setSwatchActive("overlayTxtSwatches", selectedOverlayTxt); }
+  updateOverlayPreview();
 
-                // Show assigned monitors for this presentation
-                assignedMonitorsList.innerHTML = "";
-                const assigned = [];
-                for (const [mn, val] of Object.entries(localMonitors || {})) {
-                    let pid = null;
-                    if (typeof val === "string") pid = val;
-                    else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
-                    if (pid === selectedPresentationId) assigned.push(decodeURIComponent(mn));
-                }
-                assigned.forEach((name) => {
-                    const el = document.createElement("div");
-                    el.className = "monitor-badge";
-                    el.textContent = name;
-                    assignedMonitorsList.appendChild(el);
-                });
+  // Assigned monitors
+  assignedMonitorsList.innerHTML = "";
+  const assigned = [];
+  for (const [mn, val] of Object.entries(localMonitors||{})) {
+    let pid = null;
+    if (typeof val === "string") pid = val;
+    else if (val && typeof val === "object") pid = val.presentation||val.assigned||val.pid||null;
+    if (pid === selectedPresentationId) assigned.push(decodeURIComponent(mn));
+  }
+  if (assigned.length === 0) {
+    assignedMonitorsList.innerHTML = '<span style="font-size:11px;color:var(--text3)">No monitors assigned</span>';
+  }
+  assigned.forEach(name => {
+    const el = document.createElement("div");
+    el.className = "monitor-badge";
+    el.innerHTML = `<span style="color:var(--green);font-size:8px">●</span> ${escHtml(name)}`;
+    assignedMonitorsList.appendChild(el);
+  });
 
-                const pRef = ref(db, `presentations/${selectedPresentationId}`);
-                const getP = async () => (await get(pRef)).val();
+  const pRef = ref(db, `presentations/${selectedPresentationId}`);
+  const getP = async () => (await get(pRef)).val();
 
-                (p.items || []).forEach((it, index) => {
-                    const m = localMedia[it.mediaId] || {};
-                    const isYt = m.resource_type === "youtube";
-                    const div = document.createElement("div");
-                    div.className = "item-card";
-                    div.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-                <span class="item-title">${isYt ? "▶ " : ""}${escHtml(m.filename || it.mediaId || "(missing)")}</span>
-                <div style="display:flex;gap:4px;flex-shrink:0">
-                    <button data-idx="${index}" class="upBtn" style="padding:4px 8px">▲</button>
-                    <button data-idx="${index}" class="downBtn" style="padding:4px 8px">▼</button>
-                    <button data-idx="${index}" class="removeBtn" style="color:#c00;padding:4px 8px">✕</button>
-                </div>
-            </div>
-            <div class="small" style="margin:3px 0">${m.resource_type || "?"} · mediaId: ${it.mediaId}</div>
-            <label>Label</label>
-            <input data-idx="${index}" class="itemLabel" value="${escHtml(it.label || "")}" />
-            <div class="row">
-                <div><label>Start (s)</label><input type="number" data-idx="${index}" class="itemStart" value="${it.start || 0}" /></div>
-                <div><label>End (s) — blank = auto</label><input type="number" data-idx="${index}" class="itemEnd" value="${it.end == null ? "" : it.end}" /></div>
-            </div>
-        `;
-                    presentationItemsEl.appendChild(div);
-                });
+  if (!p.items || p.items.length === 0) {
+    presentationItemsEl.innerHTML = `<div class="card" style="text-align:center;color:var(--text3);padding:24px">No slides yet — add media from the library →</div>`;
+    return;
+  }
 
-                // Wire up buttons (remove/reorder)
-                presentationItemsEl.querySelectorAll(".removeBtn").forEach(
-                    (b) =>
-                        (b.onclick = async () => {
-                            const p2 = await getP();
-                            p2.items.splice(+b.dataset.idx, 1);
-                            await set(pRef, p2);
-                        })
-                );
-                presentationItemsEl.querySelectorAll(".upBtn").forEach(
-                    (b) =>
-                        (b.onclick = async () => {
-                            const p2 = await getP();
-                            const i = +b.dataset.idx;
-                            if (i <= 0) return;
-                            [p2.items[i - 1], p2.items[i]] = [p2.items[i], p2.items[i - 1]];
-                            await set(pRef, p2);
-                        })
-                );
-                presentationItemsEl.querySelectorAll(".downBtn").forEach(
-                    (b) =>
-                        (b.onclick = async () => {
-                            const p2 = await getP();
-                            const i = +b.dataset.idx;
-                            if (i >= p2.items.length - 1) return;
-                            [p2.items[i + 1], p2.items[i]] = [p2.items[i], p2.items[i + 1]];
-                            await set(pRef, p2);
-                        })
-                );
+  p.items.forEach((it, index) => {
+    const m = localMedia[it.mediaId]||{};
+    const isYt = m.resource_type === "youtube";
+    const div = document.createElement("div");
+    div.className = "slide-card";
+    div.innerHTML = `
+      <div class="slide-card-header">
+        <div>
+          <div class="slide-card-title">${isYt?"▶ ":""}${escHtml(m.filename||it.mediaId||"(missing)")}</div>
+          <div class="slide-card-type">${m.resource_type||"?"}</div>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button data-idx="${index}" class="btn sm upBtn">▲</button>
+          <button data-idx="${index}" class="btn sm downBtn">▼</button>
+          <button data-idx="${index}" class="btn sm danger removeBtn">Remove</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Label</label>
+          <input data-idx="${index}" class="itemLabel" value="${escHtml(it.label||"")}" />
+        </div>
+        <div class="field">
+          <label>Start (s)</label>
+          <input type="number" data-idx="${index}" class="itemStart" value="${it.start||0}" />
+        </div>
+        <div class="field">
+          <label>End (s)</label>
+          <input type="number" data-idx="${index}" class="itemEnd" value="${it.end==null?"":it.end}" placeholder="auto" />
+        </div>
+      </div>`;
+    presentationItemsEl.appendChild(div);
+  });
 
-                // For editable fields, prevent overwrite while editing:
-                presentationItemsEl.querySelectorAll(".itemStart").forEach((inp) => {
-                    const key = `start-${inp.dataset.idx}`;
-                    inp.addEventListener("focus", () => lock(key));
-                    inp.addEventListener("blur", async () => {
-                        unlock(key);
-                        const p2 = await getP();
-                        p2.items[+inp.dataset.idx].start = parseFloat(inp.value) || 0;
-                        await set(pRef, p2);
-                    });
-                });
-                presentationItemsEl.querySelectorAll(".itemEnd").forEach((inp) => {
-                    const key = `end-${inp.dataset.idx}`;
-                    inp.addEventListener("focus", () => lock(key));
-                    inp.addEventListener("blur", async () => {
-                        unlock(key);
-                        const p2 = await getP();
-                        const v = inp.value;
-                        p2.items[+inp.dataset.idx].end = v === "" ? null : parseFloat(v);
-                        await set(pRef, p2);
-                    });
-                });
-                presentationItemsEl.querySelectorAll(".itemLabel").forEach((inp) => {
-                    const key = `label-${inp.dataset.idx}`;
-                    inp.addEventListener("focus", () => lock(key));
-                    inp.addEventListener("blur", async () => {
-                        unlock(key);
-                        const p2 = await getP();
-                        p2.items[+inp.dataset.idx].label = inp.value;
-                        await set(pRef, p2);
-                    });
-                });
-            }
+  presentationItemsEl.querySelectorAll(".removeBtn").forEach(b => b.onclick = async () => {
+    const p2 = await getP(); p2.items.splice(+b.dataset.idx, 1); await set(pRef, p2);
+  });
+  presentationItemsEl.querySelectorAll(".upBtn").forEach(b => b.onclick = async () => {
+    const p2 = await getP(); const i = +b.dataset.idx; if (i <= 0) return;
+    [p2.items[i-1],p2.items[i]] = [p2.items[i],p2.items[i-1]]; await set(pRef, p2);
+  });
+  presentationItemsEl.querySelectorAll(".downBtn").forEach(b => b.onclick = async () => {
+    const p2 = await getP(); const i = +b.dataset.idx; if (i >= p2.items.length-1) return;
+    [p2.items[i+1],p2.items[i]] = [p2.items[i],p2.items[i+1]]; await set(pRef, p2);
+  });
 
-            // Save settings button (keeps for manual save but most settings auto-save now)
-            savePresentationBtn.onclick = async () => {
-                if (!selectedPresentationId) return;
-                const pRef = ref(db, `presentations/${selectedPresentationId}`);
-                const cur = (await get(pRef)).val() || {};
-                const updated = {
-                    ...cur,
-                    mode: modeEl.value,
-                    transition: transitionEl.value,
-                    intervalMs: (parseInt(intervalSEl.value, 10) || 5) * 1000,
-                    overlay: {
-                        text: overlayTextEl.value,
-                        visible: !!overlayVisibleEl.checked,
-                        color: selectedOverlayBg,
-                        textColor: selectedOverlayTxt
-                    }
-                };
-                await set(pRef, updated);
-                if (selectedPresentationId === activePresentationId) {
-                    await set(ref(db, "presentations/current"), { ...updated, id: "current" });
-                }
-                alert("Settings saved.");
-            };
+  const wireEdit = (sel, key, getter) => {
+    presentationItemsEl.querySelectorAll(sel).forEach(inp => {
+      const k = `${key}-${inp.dataset.idx}`;
+      inp.addEventListener("focus", () => lock(k));
+      inp.addEventListener("blur", async () => {
+        unlock(k);
+        const p2 = await getP();
+        p2.items[+inp.dataset.idx][key.replace("item","")] = getter(inp.value);
+        await set(pRef, p2);
+      });
+    });
+  };
+  // Wire start/end/label
+  presentationItemsEl.querySelectorAll(".itemStart").forEach(inp => {
+    const k = `start-${inp.dataset.idx}`; inp.addEventListener("focus", () => lock(k));
+    inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].start = parseFloat(inp.value)||0; await set(pRef,p2); });
+  });
+  presentationItemsEl.querySelectorAll(".itemEnd").forEach(inp => {
+    const k = `end-${inp.dataset.idx}`; inp.addEventListener("focus", () => lock(k));
+    inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].end = inp.value===""?null:parseFloat(inp.value); await set(pRef,p2); });
+  });
+  presentationItemsEl.querySelectorAll(".itemLabel").forEach(inp => {
+    const k = `label-${inp.dataset.idx}`; inp.addEventListener("focus", () => lock(k));
+    inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].label = inp.value; await set(pRef,p2); });
+  });
+}
 
-            clearPresentationBtn.onclick = async () => {
-                if (!confirm("Remove all slides from this presentation?")) return;
-                await update(ref(db, `presentations/${selectedPresentationId}`), { items: [] });
-            };
+// Auto-save listeners
+modeEl.addEventListener("change", async () => { lock("mode"); await updatePresentationPartial({ mode: modeEl.value }); setTimeout(() => unlock("mode"), 250); });
+transitionEl.addEventListener("change", async () => { lock("transition"); await updatePresentationPartial({ transition: transitionEl.value }); setTimeout(() => unlock("transition"), 250); });
+intervalSEl.addEventListener("focus", () => lock("interval"));
+intervalSEl.addEventListener("blur", async () => { unlock("interval"); await updatePresentationPartial({ intervalMs: (parseInt(intervalSEl.value,10)||5)*1000 }); });
 
-            // Monitor assignment logic
-            assignMonitorsBtn.onclick = async () => {
-                if (!selectedPresentationId) return alert("Select a presentation first.");
-                const raw = monitorAssignInput.value.trim();
-                const names = raw
-                    ? raw
-                          .split(",")
-                          .map((s) => s.trim())
-                          .filter(Boolean)
-                    : [];
-                const keys = names.map((n) => encodeURIComponent(n));
-                const snap = await get(monitorsRef);
-                const cur = snap.val() || {};
+const saveOverlayText = debounce(async () => {
+  if (!selectedPresentationId) return;
+  const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+  const curOverlay = curSnap.val()||{};
+  await updatePresentationPartial({ overlay: { ...curOverlay, text: overlayTextEl.value } });
+}, 450);
 
-                // Remove assignments for this presentation that are not in new list
-                for (const [mn, val] of Object.entries(cur)) {
-                    let pid = null;
-                    if (typeof val === "string") pid = val;
-                    else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
-                    if (pid === selectedPresentationId && !keys.includes(mn)) {
-                        // remove just the presentation assignment if object, otherwise remove the entry
-                        if (typeof val === "object") {
-                            await update(ref(db, `monitors/${mn}`), { presentation: null });
-                        } else {
-                            await remove(ref(db, `monitors/${mn}`));
-                        }
-                    }
-                }
-                // Assign new names to this presentation, preserving existing metadata if possible
-                for (const k of keys) {
-                    const curSnap = await get(ref(db, `monitors/${k}`));
-                    const curVal = curSnap.val();
-                    if (typeof curVal === "string" || curVal === null) {
-                        // store as object to allow metadata later
-                        await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
-                    } else if (curVal && typeof curVal === "object") {
-                        await update(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
-                    } else {
-                        await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
-                    }
-                }
-                monitorAssignInput.value = "";
-                alert("Monitor assignments updated.");
-            };
+overlayTextEl.addEventListener("focus", () => lock("overlayText"));
+overlayTextEl.addEventListener("input", () => { updateOverlayPreview(); saveOverlayText(); });
+overlayTextEl.addEventListener("blur", () => { unlock("overlayText"); saveOverlayText(); });
 
-            clearMonitorAssignmentsBtn.onclick = async () => {
-                if (!selectedPresentationId) return;
-                if (!confirm("Clear all monitor assignments that point to this presentation?")) return;
-                const snap = await get(monitorsRef);
-                const cur = snap.val() || {};
-                for (const [mn, val] of Object.entries(cur)) {
-                    let pid = null;
-                    if (typeof val === "string") pid = val;
-                    else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
-                    if (pid === selectedPresentationId) {
-                        if (typeof val === "object") {
-                            await update(ref(db, `monitors/${mn}`), { presentation: null });
-                        } else {
-                            await remove(ref(db, `monitors/${mn}`));
-                        }
-                    }
-                }
-                alert("Cleared.");
-            };
+overlayVisibleEl.addEventListener("change", async () => {
+  updateOverlayPreview();
+  const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+  const curOverlay = curSnap.val()||{};
+  await updatePresentationPartial({ overlay: { ...curOverlay, visible: !!overlayVisibleEl.checked } });
+});
 
-            // Render monitors table
-            function renderMonitorsTable() {
-                monitorsTbody.innerHTML = "";
-                const rows = Object.entries(localMonitors || {}).sort((a, b) => a[0].localeCompare(b[0]));
-                const now = Date.now();
-                for (const [encodedName, data] of rows) {
-                    const name = decodeURIComponent(encodedName);
-                    const tr = document.createElement("tr");
+overlayBgColorInput.addEventListener("input", async () => {
+  selectedOverlayBg = overlayBgColorInput.value; setSwatchActive("overlayBgSwatches", selectedOverlayBg); updateOverlayPreview();
+  const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+  const curOverlay = curSnap.val()||{};
+  await updatePresentationPartial({ overlay: { ...curOverlay, color: selectedOverlayBg } });
+});
+overlayTxtColorInput.addEventListener("input", async () => {
+  selectedOverlayTxt = overlayTxtColorInput.value; setSwatchActive("overlayTxtSwatches", selectedOverlayTxt); updateOverlayPreview();
+  const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+  const curOverlay = curSnap.val()||{};
+  await updatePresentationPartial({ overlay: { ...curOverlay, textColor: selectedOverlayTxt } });
+});
 
-                    // data may be a string (presentation id) or object with metadata
-                    let lastSeen = 0;
-                    let online = false;
-                    let resolution = "—";
-                    let pid = null;
-                    if (typeof data === "string") {
-                        pid = data;
-                    } else if (data && typeof data === "object") {
-                        lastSeen = data.lastSeen || 0;
-                        online = now - lastSeen < 15000 && data.status === "online";
-                        resolution = data.resolution || "—";
-                        pid = data.presentation || data.assigned || data.pid || null;
-                    }
+// Monitor assignment - improved
+assignMonitorsBtn.onclick = async () => {
+  if (!selectedPresentationId) return alert("Select a presentation first.");
+  const raw = monitorAssignInput.value.trim();
+  const names = raw ? raw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const keys = names.map(n => encodeURIComponent(n));
+  const snap = await get(monitorsRef);
+  const cur = snap.val()||{};
 
-                    tr.innerHTML = `
-          <td>${escHtml(name)}</td>
-          <td>${online ? '<strong style="color:green">online</strong>' : '<span style="color:#777">offline</span>'}</td>
-          <td>${lastSeen ? new Date(lastSeen).toLocaleString() : "—"}</td>
-          <td>${escHtml(resolution)}</td>
-          <td>${pid ? escHtml(pid) : "—"}</td>
-          <td>
-            <button data-name="${encodedName}" class="assignToBtn">Assign</button>
-            <button data-name="${encodedName}" class="refreshBtn">Reload</button>
-            <button data-name="${encodedName}" class="removeBtn" style="color:#c00">Remove</button>
-          </td>
-        `;
-                    monitorsTbody.appendChild(tr);
-                }
+  // Remove this presentation from monitors no longer in list
+  for (const [mn, val] of Object.entries(cur)) {
+    let pid = null;
+    if (typeof val === "string") pid = val;
+    else if (val && typeof val === "object") pid = val.presentation||val.assigned||val.pid||null;
+    if (pid === selectedPresentationId && !keys.includes(mn)) {
+      if (typeof val === "object") await update(ref(db, `monitors/${mn}`), { presentation: null });
+      else await remove(ref(db, `monitors/${mn}`));
+    }
+  }
+  // Assign selected names
+  for (const k of keys) {
+    const curSnap = await get(ref(db, `monitors/${k}`));
+    const curVal = curSnap.val();
+    if (typeof curVal === "object" && curVal !== null) {
+      await update(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+    } else {
+      await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+    }
+  }
+  monitorAssignInput.value = "";
+};
 
-                // actions
-                monitorsTbody.querySelectorAll(".assignToBtn").forEach((b) => {
-                    b.onclick = () => {
-                        const name = decodeURIComponent(b.dataset.name);
-                        monitorAssignInput.value =
-                            (monitorAssignInput.value ? monitorAssignInput.value + ", " : "") + name;
-                    };
-                });
-                monitorsTbody.querySelectorAll(".refreshBtn").forEach((b) => {
-                    b.onclick = async () => {
-                        const key = b.dataset.name;
-                        // send a command preserving any existing monitor object structure
-                        const curSnap = await get(ref(db, `monitors/${key}`));
-                        const curVal = curSnap.val();
-                        if (curVal && typeof curVal === "object") {
-                            await update(ref(db, `monitors/${key}`), {
-                                command: { cmd: "reloadPresentation", at: Date.now() }
-                            });
-                        } else {
-                            // if the value is a string, overwrite with object containing presentation=null and command
-                            await set(ref(db, `monitors/${key}`), {
-                                presentation: curVal || null,
-                                command: { cmd: "reloadPresentation", at: Date.now() }
-                            });
-                        }
-                        alert("Reload command sent to " + decodeURIComponent(key));
-                    };
-                });
-                monitorsTbody.querySelectorAll(".removeBtn").forEach((b) => {
-                    b.onclick = async () => {
-                        if (!confirm("Remove monitor entry (this unmaps it and marks offline)?")) return;
-                        await remove(ref(db, `monitors/${b.dataset.name}`));
-                    };
-                });
-            }
+clearMonitorAssignmentsBtn.onclick = async () => {
+  if (!selectedPresentationId) return;
+  if (!confirm("Clear all monitor assignments for this presentation?")) return;
+  const snap = await get(monitorsRef);
+  const cur = snap.val()||{};
+  for (const [mn, val] of Object.entries(cur)) {
+    let pid = null;
+    if (typeof val === "string") pid = val;
+    else if (val && typeof val === "object") pid = val.presentation||val.assigned||val.pid||null;
+    if (pid === selectedPresentationId) {
+      if (typeof val === "object") await update(ref(db, `monitors/${mn}`), { presentation: null });
+      else await remove(ref(db, `monitors/${mn}`));
+    }
+  }
+};
 
-            // Upload
-            uploadBtn.onclick = async () => {
-                const file = fileInput.files[0];
-                if (!file) return alert("Choose a file first");
-                uploadStatus.textContent = "";
-                progressWrap.style.display = "block";
-                progressFill.style.width = "0%";
-                progressPct.textContent = "0%";
-                uploadBtn.disabled = true;
-                try {
-                    const fd = new FormData();
-                    fd.append("file", file);
-                    fd.append("upload_preset", UPLOAD_PRESET);
-                    const data = await new Promise((resolve, reject) => {
-                        const xhr = new XMLHttpRequest();
-                        xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`);
-                        xhr.upload.onprogress = (e) => {
-                            if (e.lengthComputable) {
-                                const pct = Math.round((e.loaded / e.total) * 100);
-                                progressFill.style.width = pct + "%";
-                                progressPct.textContent = pct + "%";
-                            }
-                        };
-                        xhr.onload = () =>
-                            xhr.status < 300
-                                ? resolve(JSON.parse(xhr.responseText))
-                                : reject(new Error("HTTP " + xhr.status));
-                        xhr.onerror = () => reject(new Error("Network error"));
-                        xhr.send(fd);
-                    });
-                    progressFill.style.width = "100%";
-                    progressPct.textContent = "100%";
-                    const mobj = {
-                        url: data.secure_url,
-                        resource_type: data.resource_type,
-                        filename: fname.value || file.name,
-                        uploadedAt: Date.now(),
-                        duration: data.duration || null
-                    };
-                    const newRef = push(mediaRef);
-                    await set(newRef, mobj);
-                    uploadStatus.textContent = "✅ Uploaded and saved.";
-                    fname.value = "";
-                    fileInput.value = "";
-                    if (showNow.value !== "no" && selectedPresentationId) {
-                        const pRef = ref(db, `presentations/${selectedPresentationId}`);
-                        const cur = (await get(pRef)).val() || {};
-                        const item = {
-                            mediaId: newRef.key,
-                            start: 0,
-                            end: mobj.duration || null,
-                            label: mobj.filename
-                        };
-                        await update(pRef, {
-                            items: showNow.value === "replace" ? [item] : [...(cur.items || []), item]
-                        });
-                    }
-                } catch (err) {
-                    console.error(err);
-                    uploadStatus.textContent = "❌ Failed: " + err.message;
-                } finally {
-                    uploadBtn.disabled = false;
-                    setTimeout(() => {
-                        progressWrap.style.display = "none";
-                    }, 3000);
-                }
-            };
+function renderMonitorsTable() {
+  monitorsTbody.innerHTML = "";
+  const now = Date.now();
+  Object.entries(localMonitors||{}).sort((a,b) => a[0].localeCompare(b[0])).forEach(([encodedName, data]) => {
+    const name = decodeURIComponent(encodedName);
+    const tr = document.createElement("tr");
+    let lastSeen = 0, online = false, resolution = "—", pid = null;
+    if (typeof data === "string") { pid = data; }
+    else if (data && typeof data === "object") {
+      lastSeen = data.lastSeen||0;
+      online = now - lastSeen < 15000 && data.status === "online";
+      resolution = data.resolution||"—";
+      pid = data.presentation||data.assigned||data.pid||null;
+    }
+    const presName = pid && presentations[pid] ? escHtml(presentations[pid].name) : (pid ? pid.slice(0,8)+"…" : "—");
+    tr.innerHTML = `
+      <td style="color:var(--text)">${escHtml(name)}</td>
+      <td>${online ? '<span class="online-dot"></span>Online' : '<span class="offline-dot"></span>Offline'}</td>
+      <td>${lastSeen ? new Date(lastSeen).toLocaleTimeString() : "—"}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${escHtml(resolution)}</td>
+      <td>${presName}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button data-name="${encodedName}" class="btn sm assignToBtn">Assign here</button>
+          <button data-name="${encodedName}" class="btn sm reloadBtn">Reload</button>
+          <button data-name="${encodedName}" class="btn sm danger removeMonBtn">Remove</button>
+        </div>
+      </td>`;
+    monitorsTbody.appendChild(tr);
+  });
 
-            // Auto-save listeners for editor fields (so changes don't "revert" while editing)
-            modeEl.addEventListener("change", async () => {
-                // lock briefly to avoid race with realtime render
-                lock("mode");
-                await updatePresentationPartial({ mode: modeEl.value });
-                setTimeout(() => unlock("mode"), 250);
-            });
-            transitionEl.addEventListener("change", async () => {
-                lock("transition");
-                await updatePresentationPartial({ transition: transitionEl.value });
-                setTimeout(() => unlock("transition"), 250);
-            });
+  monitorsTbody.querySelectorAll(".assignToBtn").forEach(b => {
+    b.onclick = async () => {
+      if (!selectedPresentationId) return alert("Select a presentation tab first.");
+      const key = b.dataset.name;
+      const curSnap = await get(ref(db, `monitors/${key}`));
+      const curVal = curSnap.val();
+      if (typeof curVal === "object" && curVal !== null) {
+        await update(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
+      } else {
+        await set(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
+      }
+    };
+  });
 
-            // Interval: save on blur (prevents snapping while typing)
-            intervalSEl.addEventListener("focus", () => lock("interval"));
-            intervalSEl.addEventListener("blur", async () => {
-                unlock("interval");
-                const ms = (parseInt(intervalSEl.value, 10) || 5) * 1000;
-                await updatePresentationPartial({ intervalMs: ms });
-            });
+  monitorsTbody.querySelectorAll(".reloadBtn").forEach(b => {
+    b.onclick = async () => {
+      const key = b.dataset.name;
+      const curSnap = await get(ref(db, `monitors/${key}`));
+      const curVal = curSnap.val();
+      if (curVal && typeof curVal === "object") {
+        await update(ref(db, `monitors/${key}`), { command: { cmd: "reloadPresentation", at: Date.now() } });
+      } else {
+        await set(ref(db, `monitors/${key}`), { presentation: curVal||null, command: { cmd: "reloadPresentation", at: Date.now() } });
+      }
+    };
+  });
 
-            // overlay fields - debounce text
-            const saveOverlayText = debounce(async () => {
-                // Always save overlay text regardless of visibility state.
-                // Merge with whatever overlay exists on the presentation to avoid wiping other overlay properties.
-                if (!selectedPresentationId) return;
-                const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
-                const curOverlay = curSnap.val() || {};
-                await updatePresentationPartial({
-                    overlay: { ...curOverlay, text: overlayTextEl.value }
-                });
-            }, 450);
+  monitorsTbody.querySelectorAll(".removeMonBtn").forEach(b => {
+    b.onclick = async () => {
+      if (!confirm("Remove monitor entry?")) return;
+      await remove(ref(db, `monitors/${b.dataset.name}`));
+    };
+  });
+}
 
-            overlayTextEl.addEventListener("focus", () => lock("overlayText"));
-            overlayTextEl.addEventListener("input", () => {
-                // when the user is typing, we avoid remote overwrites
-                saveOverlayText();
-            });
-            overlayTextEl.addEventListener("blur", () => {
-                unlock("overlayText");
-                // final save to ensure value persisted
-                saveOverlayText();
-            });
-
-            overlayVisibleEl.addEventListener("change", async () => {
-                // toggle visible flag and persist overlay object (keep text even if invisible)
-                const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
-                const curOverlay = curSnap.val() || {};
-                await updatePresentationPartial({
-                    overlay: {
-                        ...curOverlay,
-                        visible: !!overlayVisibleEl.checked
-                    }
-                });
-            });
-
-            overlayBgColorInput.addEventListener("input", async () => {
-                selectedOverlayBg = overlayBgColorInput.value;
-                setSwatchActive("overlayBgSwatches", selectedOverlayBg);
-                const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
-                const curOverlay = curSnap.val() || {};
-                await updatePresentationPartial({
-                    overlay: { ...curOverlay, color: selectedOverlayBg }
-                });
-            });
-
-            overlayTxtColorInput.addEventListener("input", async () => {
-                selectedOverlayTxt = overlayTxtColorInput.value;
-                setSwatchActive("overlayTxtSwatches", selectedOverlayTxt);
-                const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
-                const curOverlay = curSnap.val() || {};
-                await updatePresentationPartial({
-                    overlay: { ...curOverlay, textColor: selectedOverlayTxt }
-                });
-            });
-
-            // Render initial swatch active states on load
-            document.addEventListener("DOMContentLoaded", () => {
-                setSwatchActive("overlayBgSwatches", overlayBgColorInput.value);
-                setSwatchActive("overlayTxtSwatches", overlayTxtColorInput.value);
-            });
-        </script>
-    </body>
+// Upload
+uploadBtn.onclick = async () => {
+  const file = fileInput.files[0];
+  if (!file) return alert("Choose a file first");
+  uploadStatus.textContent = "";
+  progressWrap.style.display = "block";
+  progressFill.style.width = "0%";
+  progressPct.textContent = "0%";
+  uploadBtn.disabled = true;
+  try {
+    const fd = new FormData();
+    fd.append("file", file); fd.append("upload_preset", UPLOAD_PRESET);
+    const data = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`);
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable) { const pct = Math.round(e.loaded/e.total*100); progressFill.style.width=pct+"%"; progressPct.textContent=pct+"%"; }
+      };
+      xhr.onload = () => xhr.status < 300 ? resolve(JSON.parse(xhr.responseText)) : reject(new Error("HTTP "+xhr.status));
+      xhr.onerror = () => reject(new Error("Network error"));
+      xhr.send(fd);
+    });
+    const mobj = { url: data.secure_url, resource_type: data.resource_type, filename: fname.value||file.name, uploadedAt: Date.now(), duration: data.duration||null };
+    const newRef = push(mediaRef);
+    await set(newRef, mobj);
+    uploadStatus.textContent = "✓ Uploaded"; uploadStatus.className = "status-text";
+    fname.value = ""; fileInput.value = "";
+    if (showNow.value !== "no" && selectedPresentationId) {
+      const pRef = ref(db, `presentations/${selectedPresentationId}`);
+      const cur = (await get(pRef)).val()||{};
+      const item = { mediaId: newRef.key, start: 0, end: mobj.duration||null, label: mobj.filename };
+      await update(pRef, { items: showNow.value==="replace"?[item]:[...(cur.items||[]),item] });
+    }
+  } catch(err) {
+    uploadStatus.textContent = "✗ Failed: "+err.message; uploadStatus.className = "status-text err";
+  } finally {
+    uploadBtn.disabled = false;
+    setTimeout(() => progressWrap.style.display = "none", 3000);
+  }
+};
+</script>
+</body>
 </html>
