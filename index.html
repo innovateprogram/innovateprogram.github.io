@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Display V2.7</title>
+    <title>Display V2.8</title>
     <style>
       *,
       *::before,
@@ -309,16 +309,17 @@
         } catch (e) {}
       }
 
-      // Returns { idx, elapsed } to jump to on load, or { idx:0, elapsed:0 } if not synced
+      // Returns { idx, elapsed, hasState } — hasState=false means no sync record exists yet.
+      // The caller uses hasState to decide whether to publish slide 0 on first load.
       async function readSync(pid, p) {
-        if (!syncEnabled || !pid || !p?.items) return { idx: 0, elapsed: 0 };
+        if (!syncEnabled || !pid || !p?.items) return { idx: 0, elapsed: 0, hasState: false };
         try {
           const snap = await get(syncRef(pid));
           const s = snap.val();
-          if (!s || s.idx == null) return { idx: 0, elapsed: 0 };
-          return { idx: s.idx, elapsed: Math.max(0, (Date.now() - s.startedAt) / 1000) };
+          if (!s || s.idx == null) return { idx: 0, elapsed: 0, hasState: false };
+          return { idx: s.idx, elapsed: Math.max(0, (Date.now() - s.startedAt) / 1000), hasState: true };
         } catch (e) {
-          return { idx: 0, elapsed: 0 };
+          return { idx: 0, elapsed: 0, hasState: false };
         }
       }
 
@@ -330,10 +331,8 @@
       let syncPid = null;
 
       async function ensureSyncListener(pid) {
-        // Nothing to do if already watching the right pid
-        if (pid === syncPid && syncUnsub) return;
-
-        // Tear down old listener
+        // Always tear down the old listener to get a fresh baseline.
+        // This is critical on reload — we need a new closure with an up-to-date baseline.
         if (syncUnsub) {
           syncUnsub();
           syncUnsub = null;
@@ -341,9 +340,9 @@
         syncPid = null;
         if (!pid) return;
 
-        // Read the current value BEFORE attaching the live listener.
-        // This gives us the "already handled" baseline so the first onValue
-        // fire (which replays the current DB value) doesn't cause a spurious jump.
+        // Read the current DB value FIRST, synchronously before attaching onValue.
+        // This timestamp becomes our baseline — the initial onValue fire will match it
+        // and be skipped, so only genuinely NEW writes from other displays come through.
         let baseline = null;
         try {
           const snap = await get(syncRef(pid));
@@ -356,14 +355,14 @@
           const s = snap.val();
           if (!s || s.idx == null) return;
 
-          // Skip the value that was already in the DB when we attached
+          // Skip the value that was in the DB when we attached (already handled by readSync)
           if (s.startedAt === baseline) return;
-          baseline = s.startedAt; // update so we don't re-process
+          baseline = s.startedAt;
 
-          // Ignore writes we made ourselves
+          // Ignore our own publishes
           if (s.publisherId === DISPLAY_ID) return;
 
-          // Only act if sync is on and we have slides loaded
+          // Only act if sync is on and slides are loaded
           if (!syncEnabled || !presentation) return;
 
           const elapsed = Math.max(0, (Date.now() - s.startedAt) / 1000);
@@ -808,15 +807,19 @@
         dismissPreload();
         applyOverlay(p, true);
 
-        // Set up sync listener — do this BEFORE reading sync state.
-        // ensureSyncListener reads the current DB value to set its baseline,
-        // so when we then call readSync() we're reading the same snapshot.
-        // After this point, any NEW writes from other displays will trigger the listener.
+        // Set up sync listener BEFORE reading sync state so we don't miss any
+        // writes that happen between the get() in ensureSyncListener and readSync().
         await ensureSyncListener(syncEnabled ? pid : null);
 
-        // Jump to the current sync position (or slide 0 if not synced)
-        const { idx: startIdx, elapsed } = await readSync(pid, p);
-        showSlide(p, startIdx, elapsed, false);
+        // Read the current sync position from Firebase
+        const { idx: startIdx, elapsed, hasState } = await readSync(pid, p);
+
+        // If there's no existing sync state in Firebase (first display to load, or
+        // Firebase was cleared), publish slide 0 so other displays / future reloads
+        // have something to sync to. Without this, idx=0 is never written and a
+        // reloading display would always start from whatever slide was last published.
+        const shouldPublish = syncEnabled && !hasState;
+        showSlide(p, startIdx, elapsed, shouldPublish);
       }
 
       // ── Firebase change listeners ──────────────────────────────────────────────────
