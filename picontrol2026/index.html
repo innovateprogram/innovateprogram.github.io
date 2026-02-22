@@ -1,433 +1,749 @@
 <!doctype html>
-<html lang=en>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<!-- Change Version Number Down below when editing document, only change first number if a huge change has occured but if a small
-  change has occured then change the second -->
-<title>Presentation Manager V2.1</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #0e0f11;
-  --surface: #16181c;
-  --surface2: #1e2025;
-  --border: #2a2d35;
-  --border2: #343740;
-  --text: #e8eaf0;
-  --text2: #8b8fa8;
-  --text3: #545769;
-  --accent: #5b6fff;
-  --accent2: #4a5de8;
-  --green: #3ecf74;
-  --red: #ff4757;
-  --orange: #ffa535;
-  --yellow: #f5d447;
-  --radius: 8px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  display: flex;
-  overflow: hidden;
-  font-size: 13px;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Presentation Manager V3.3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080a0f;
+      --bg2: #0d1017;
+      --surface: #111520;
+      --surface2: #161b27;
+      --surface3: #1c2233;
+      --border: rgba(255,255,255,0.06);
+      --border2: rgba(255,255,255,0.1);
+      --text: #f0f2f8;
+      --text2: #8891a8;
+      --text3: #4a5168;
+      --accent: #4f7bff;
+      --accent2: #3d6aee;
+      --accent-glow: rgba(79,123,255,0.15);
+      --green: #22d86e;
+      --green-glow: rgba(34,216,110,0.15);
+      --red: #ff4c6a;
+      --orange: #ff8c42;
+      --yellow: #f5c842;
+      --r: 14px;
+      --r-sm: 9px;
+      --sidebar-w: 340px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    html, body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      margin: 0;
+    }
 
-.sidebar {
-  width: 320px;
-  min-width: 280px;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.sidebar-header {
-  padding: 20px 20px 0;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-}
-.sidebar-header h2 {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 12px;
-}
-.sidebar-inner { overflow-y: auto; padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    /* Root layout: sidebar fixed left, main scrolls */
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
 
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg);
-}
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
 
-.tabs-bar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: stretch;
-  padding: 0 16px;
-  gap: 2px;
-  height: 48px;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-.tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 16px;
-  height: 48px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text2);
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
-  user-select: none;
-  position: relative;
-  flex-shrink: 0;
-}
-.tab:hover { color: var(--text); }
-.tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
-.tab-close {
-  width: 16px; height: 16px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 4px;
-  color: var(--text3);
-  font-size: 14px;
-  line-height: 1;
-  transition: background 0.1s, color 0.1s;
-}
-.tab-close:hover { background: rgba(255,71,87,0.15); color: var(--red); }
-.tab-add {
-  display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 48px;
-  cursor: pointer; color: var(--text3);
-  font-size: 18px;
-  transition: color 0.15s;
-  flex-shrink: 0;
-}
-.tab-add:hover { color: var(--accent); }
-.live-badge {
-  font-size: 9px; font-weight: 700;
-  letter-spacing: 0.08em;
-  background: var(--green);
-  color: #000;
-  border-radius: 3px;
-  padding: 2px 5px;
-  text-transform: uppercase;
-}
-.sync-badge {
-  font-size: 9px; font-weight: 700;
-  letter-spacing: 0.08em;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 3px;
-  padding: 2px 5px;
-  text-transform: uppercase;
-}
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 100;
+      flex-shrink: 0;
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    }
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.5;
+    }
+    .sidebar-header {
+      padding: 22px 20px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sidebar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--text);
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-logo .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 14px var(--accent);
+    }
+    /* Close button — mobile only */
+    .sidebar-close {
+      display: none;
+      width: 36px; height: 36px;
+      align-items: center; justify-content: center;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border2);
+      background: var(--surface3);
+      color: var(--text2);
+      font-size: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .sidebar-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sidebar-tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text3);
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-bottom: 2px solid transparent;
+    }
+    .sidebar-tab:hover { color: var(--text2); }
+    .sidebar-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-.editor-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.editor-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.editor-header h1 { font-size: 18px; font-weight: 600; color: var(--text); }
+    .sidebar-panel { display: none; flex: 1; overflow-y: auto; padding: 18px; flex-direction: column; gap: 14px; -webkit-overflow-scrolling: touch; }
+    .sidebar-panel.active { display: flex; }
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-}
-.card-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 14px;
-}
+    /* ===== UPLOAD ZONE ===== */
+    .drop-zone {
+      border: 2px dashed var(--border2);
+      border-radius: var(--r);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface2);
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragging {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-zone-icon { font-size: 36px; margin-bottom: 12px; }
+    .drop-zone-label { font-size: 14px; font-weight: 600; color: var(--text2); }
+    .drop-zone-sub { font-size: 12px; color: var(--text3); margin-top: 5px; }
 
-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text2);
-  margin-bottom: 5px;
-  letter-spacing: 0.03em;
-}
-input[type="text"], input[type="number"], select, textarea {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 10px;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 13px;
-  transition: border-color 0.15s;
-  -webkit-appearance: none;
-}
-input[type="text"]:focus, input[type="number"]:focus, select:focus { outline: none; border-color: var(--accent); }
-select option { background: var(--surface2); }
+    /* ===== MEDIA CARDS ===== */
+    .media-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .media-card:hover { border-color: var(--border2); }
+    .media-thumb-wrap {
+      width: 100%; height: 100px; background: var(--surface3);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .media-thumb-wrap img, .media-thumb-wrap video {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .media-thumb-type {
+      position: absolute; top: 8px; left: 8px;
+      background: rgba(0,0,0,0.78);
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text2);
+      text-transform: uppercase;
+    }
+    .media-thumb-yt-icon { font-size: 34px; color: #fff; opacity: 0.9; }
+    .media-card-body { padding: 12px 14px 14px; }
+    .media-card-name {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      background: none; border: none; width: 100%;
+      font-family: 'Manrope', sans-serif; cursor: text;
+    }
+    .media-card-name:focus { outline: none; color: var(--accent); }
+    .media-card-actions { display: flex; gap: 7px; margin-top: 10px; }
 
-.field { margin-bottom: 12px; }
-.row { display: flex; gap: 10px; }
-.row > .field { flex: 1; }
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 13px 20px; border-radius: var(--r-sm);
+      border: 1px solid var(--border2); background: var(--surface3);
+      color: var(--text); font-family: 'Manrope', sans-serif;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap; letter-spacing: 0.01em;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn:hover { background: var(--surface2); border-color: rgba(255,255,255,0.15); }
+    .btn:active { opacity: 0.8; transform: scale(0.97); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--accent2); border-color: var(--accent2); }
+    .btn.danger { background: rgba(255,76,106,0.1); border-color: rgba(255,76,106,0.25); color: var(--red); }
+    .btn.danger:hover { background: rgba(255,76,106,0.2); }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--text3); }
+    .btn.ghost:hover { background: var(--surface3); color: var(--text2); }
+    .btn.sm { padding: 11px 18px; font-size: 14px; }
+    .btn.xs { padding: 9px 14px; font-size: 13px; border-radius: 8px; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn.full { width: 100%; }
 
-.btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border2);
-  background: var(--surface2);
-  color: var(--text);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  white-space: nowrap;
-}
-.btn:hover { background: var(--border); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn.primary:hover { background: var(--accent2); }
-.btn.danger { background: rgba(255,71,87,0.12); border-color: rgba(255,71,87,0.3); color: var(--red); }
-.btn.danger:hover { background: rgba(255,71,87,0.2); }
-.btn.sm { padding: 5px 10px; font-size: 11px; }
-.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    /* ===== MAIN AREA ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
 
-.media-item {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  margin-bottom: 8px;
-}
-.media-thumb {
-  width: 64px; height: 42px;
-  border-radius: 4px;
-  object-fit: cover;
-  flex-shrink: 0;
-  background: var(--border);
-}
-.media-thumb-yt {
-  width: 64px; height: 42px;
-  border-radius: 4px;
-  background: #c00;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-.media-info { flex: 1; min-width: 0; }
-.media-name {
-  font-size: 12px; font-weight: 500;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  color: var(--text);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 2px 4px;
-  width: 100%;
-  font-family: inherit;
-  cursor: text;
-  transition: border-color 0.15s, background 0.15s;
-  display: block;
-}
-.media-name:hover { border-color: var(--border2); }
-.media-name:focus { outline: none; border-color: var(--accent); background: var(--surface); }
-.media-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    /* ===== TOP BAR ===== */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px; height: 62px; gap: 12px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    /* Hamburger — mobile only */
+    .topbar-menu {
+      display: none;
+      width: 40px; height: 40px;
+      align-items: center; justify-content: center;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border2);
+      background: var(--surface3);
+      color: var(--text2);
+      font-size: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 17px;
+      color: var(--text); flex: 1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      min-width: 0;
+    }
+    .topbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .badge-live {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green-glow); border: 1px solid rgba(34,216,110,0.3);
+      color: var(--green); border-radius: 20px; padding: 5px 13px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    }
+    .badge-live::before {
+      content: ''; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green); animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,216,110,0.4); }
+      50% { box-shadow: 0 0 0 5px rgba(34,216,110,0); }
+    }
 
-.progress-wrap { margin-top: 10px; display: none; }
-.progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.progress-fill { height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.2s; }
-.progress-label { font-size: 11px; color: var(--text2); margin-top: 4px; }
+    /* ===== PRESENTATION TABS ===== */
+    .pres-tabs {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: stretch;
+      padding: 0 10px; gap: 2px;
+      height: 46px; overflow-x: auto; flex-shrink: 0;
+      -webkit-overflow-scrolling: touch;
+      position: sticky;
+      top: 62px;
+      z-index: 49;
+    }
+    .pres-tab {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 18px; height: 46px; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--text3);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s; user-select: none; flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pres-tab:hover { color: var(--text2); }
+    .pres-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+    .pres-tab-close {
+      width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; color: var(--text3); font-size: 15px;
+      transition: all 0.1s; flex-shrink: 0;
+    }
+    .pres-tab-close:hover { background: rgba(255,76,106,0.15); color: var(--red); }
+    .pres-tab-add {
+      display: flex; align-items: center; justify-content: center;
+      width: 44px; height: 46px; cursor: pointer; color: var(--text3);
+      font-size: 20px; transition: color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pres-tab-add:hover { color: var(--accent); }
+    .chip {
+      display: inline-flex; align-items: center;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.07em;
+      border-radius: 4px; padding: 2px 6px; text-transform: uppercase;
+    }
+    .chip-live { background: var(--green-glow); color: var(--green); border: 1px solid rgba(34,216,110,0.3); }
+    .chip-sync { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(79,123,255,0.3); }
 
-.swatch-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
-.swatch {
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: transform 0.1s, border-color 0.1s;
-}
-.swatch:hover { transform: scale(1.15); }
-.swatch.active { border-color: #fff; transform: scale(1.1); }
+    /* ===== EDITOR LAYOUT — NATURAL SCROLL ===== */
+    .editor-layout { flex: 1; display: flex; }
+    .editor-scroll {
+      flex: 1;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
 
-.slide-card {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
-  margin-bottom: 8px;
-  position: relative;
-}
-.slide-card-header {
-  display: flex; align-items: center;
-  justify-content: space-between; gap: 8px; margin-bottom: 10px;
-}
-.slide-card-title { font-size: 12px; font-weight: 500; color: var(--text); }
-.slide-card-type { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; }
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 30px 36px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      min-height: 96px;
+      gap: 16px;
+    }
+    .card-title {
+      font-size: 14px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--text3);
+      display: flex; align-items: center; gap: 12px;
+      white-space: nowrap;
+    }
+    .card-title-icon { font-size: 22px; }
+    .card-body { padding: 36px; }
+    .card-body.compact { padding: 28px 36px; }
 
-.monitors-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.monitors-table th {
-  text-align: left; padding: 8px 10px;
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--text3);
-  border-bottom: 1px solid var(--border);
-}
-.monitors-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text2); }
-.monitors-table tr:last-child td { border-bottom: none; }
-.online-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 5px; box-shadow: 0 0 6px var(--green); }
-.offline-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--border2); margin-right: 5px; }
+    /* ===== FORM ELEMENTS ===== */
+    label {
+      display: block; font-size: 13px; font-weight: 700;
+      color: var(--text3); margin-bottom: 10px; letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-sm);
+      padding: 16px 20px;
+      color: var(--text);
+      font-family: 'Manrope', sans-serif;
+      font-size: 16px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    select option { background: var(--surface2); }
+    .field { margin-bottom: 24px; }
+    .field:last-child { margin-bottom: 0; }
+    .row { display: flex; gap: 20px; }
+    .row > .field { flex: 1; }
+    input[type="checkbox"] { accent-color: var(--accent); width: 20px; height: 20px; }
+    .check-row {
+      display: flex; align-items: center; gap: 14px;
+      font-size: 16px; color: var(--text2); cursor: pointer;
+    }
+    input[type="color"] {
+      width: 100%; height: 52px; padding: 4px; cursor: pointer;
+      border-radius: var(--r-sm); border: 1px solid var(--border2);
+      background: var(--surface2);
+    }
 
-.monitor-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 5px;
-  padding: 4px 9px;
-  font-size: 11px;
-  color: var(--text2);
-  margin: 2px;
-}
+    /* ===== SETTINGS GRID ===== */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 22px;
+    }
 
-.assigned-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; min-height: 24px; }
+    /* ===== SLIDE ITEMS ===== */
+    .slides-area { display: flex; flex-direction: column; gap: 12px; }
+    .slide-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      transition: border-color 0.15s, transform 0.1s;
+      cursor: grab;
+      display: flex;
+      align-items: stretch;
+    }
+    .slide-item:active { cursor: grabbing; }
+    .slide-item.drag-over { border-color: var(--accent); transform: scale(1.01); }
+    .slide-item-thumb {
+      width: 160px; min-height: 110px;
+      background: var(--surface3);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; overflow: hidden; position: relative;
+    }
+    .slide-item-thumb img, .slide-item-thumb video {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .slide-item-thumb-yt { font-size: 28px; color: rgba(255,255,255,0.5); }
+    .slide-item-thumb-badge {
+      position: absolute; bottom: 6px; left: 6px;
+      background: rgba(0,0,0,0.82); border-radius: 4px;
+      font-size: 10px; font-family: 'JetBrains Mono', monospace;
+      padding: 2px 6px; color: var(--text3);
+    }
+    .slide-num {
+      position: absolute; top: 6px; left: 6px;
+      background: rgba(0,0,0,0.85); color: var(--text3);
+      border-radius: 5px; font-size: 12px; font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 4px 8px;
+    }
+    .slide-item-body {
+      flex: 1; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+    }
+    .slide-item-name {
+      font-size: 16px; font-weight: 600; color: var(--text);
+      background: none; border: none; font-family: 'Manrope', sans-serif;
+      width: 100%; padding: 4px 0;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.15s;
+    }
+    .slide-item-name:focus { outline: none; color: var(--accent); border-bottom-color: var(--accent); }
+    .slide-item-fields {
+      display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+    }
+    .slide-item-fields .field { margin-bottom: 0; flex: 1; min-width: 80px; }
+    .slide-item-fields label { margin-bottom: 4px; }
+    .slide-item-actions {
+      display: flex; gap: 5px; align-items: center;
+      margin-left: auto; padding-bottom: 2px;
+    }
+    .drag-handle {
+      display: flex; align-items: center; padding: 0 12px;
+      color: var(--text3); cursor: grab; font-size: 18px;
+      flex-shrink: 0;
+    }
+    .drag-handle:hover { color: var(--text2); }
 
-.status-text { font-size: 11px; color: var(--green); margin-top: 4px; }
-.status-text.err { color: var(--red); }
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 80px 40px;
+      color: var(--text3);
+    }
+    .empty-state-icon { font-size: 60px; margin-bottom: 20px; opacity: 0.4; }
+    .empty-state-title { font-size: 20px; font-weight: 600; color: var(--text2); margin-bottom: 10px; }
+    .empty-state-sub { font-size: 16px; line-height: 1.6; }
 
-.section-divider {
-  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--text3);
-  margin-bottom: 10px; margin-top: 4px;
-  display: flex; align-items: center; gap: 8px;
-}
-.section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    /* ===== OVERLAY PREVIEW ===== */
+    .overlay-preview {
+      padding: 18px 22px; border-radius: var(--r-sm);
+      font-size: 20px; font-weight: 700;
+      word-break: break-word; margin-top: 14px;
+      display: none;
+    }
 
-.check-label {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 12px; color: var(--text2);
-  cursor: pointer; margin-top: 8px;
-}
-input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
+    /* ===== SWATCHES ===== */
+    .swatch-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .swatch {
+      width: 34px; height: 34px; border-radius: 50%;
+      cursor: pointer; border: 2px solid transparent;
+      transition: transform 0.1s, border-color 0.1s;
+    }
+    .swatch:hover { transform: scale(1.2); }
+    .swatch.active { border-color: #fff; transform: scale(1.1); }
 
-input[type="file"] {
-  background: var(--surface2);
-  border: 1px dashed var(--border2);
-  border-radius: 6px;
-  padding: 10px;
-  color: var(--text2);
-  width: 100%;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 12px;
-}
-input[type="file"]:hover { border-color: var(--accent); }
+    /* ===== MONITORS TABLE ===== */
+    .monitors-list { display: flex; flex-direction: column; gap: 10px; }
+    .monitor-row {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: 20px 24px;
+      display: flex; align-items: center; gap: 18px;
+      flex-wrap: wrap;
+    }
+    .monitor-status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .monitor-status-dot.online {
+      background: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite;
+    }
+    .monitor-status-dot.offline { background: var(--surface3); }
+    .monitor-info { flex: 1; min-width: 0; }
+    .monitor-name { font-size: 16px; font-weight: 600; color: var(--text); }
+    .monitor-meta { font-size: 13px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+    .monitor-pres { font-size: 14px; color: var(--text2); margin-top: 4px; }
+    .monitor-actions { display: flex; gap: 6px; }
 
-.overlay-preview {
-  margin-top: 10px;
-  border-radius: 6px;
-  padding: 10px 14px;
-  font-size: 14px;
-  font-weight: 700;
-  display: none;
-  word-break: break-word;
-}
+    /* ===== ASSIGNED BADGES ===== */
+    .assigned-wrap { display: flex; flex-wrap: wrap; gap: 10px; min-height: 38px; margin-top: 18px; }
+    .assigned-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(34,216,110,0.08);
+      border: 1px solid rgba(34,216,110,0.2);
+      border-radius: 20px; padding: 8px 18px;
+      font-size: 15px; color: var(--green);
+    }
 
-input[type="color"] {
-  width: 100%; height: 28px; padding: 2px; cursor: pointer;
-  border-radius: 6px; border: 1px solid var(--border);
-  background: var(--surface2);
-}
+    /* ===== PROGRESS ===== */
+    .progress-wrap { margin-top: 14px; display: none; }
+    .progress-bar { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0; background: var(--accent); transition: width 0.15s; border-radius: 2px; }
+    .progress-label { font-size: 12px; color: var(--text2); margin-top: 7px; text-align: center; }
 
-/* Sync info box */
-.sync-info {
-  margin-top: 10px;
-  padding: 10px 12px;
-  background: rgba(91,111,255,0.08);
-  border: 1px solid rgba(91,111,255,0.25);
-  border-radius: 6px;
-  font-size: 11px;
-  color: var(--text2);
-  line-height: 1.5;
-  display: none;
-}
-.sync-info.visible { display: block; }
-</style>
+    /* ===== STATUS ===== */
+    .status-text { font-size: 13px; color: var(--green); margin-top: 8px; text-align: center; }
+    .status-text.err { color: var(--red); }
+
+    /* ===== SECTION DIVIDER ===== */
+    .divider {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text3); margin: 4px 0;
+    }
+    .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ===== SYNC INFO ===== */
+    .info-box {
+      background: var(--accent-glow);
+      border: 1px solid rgba(79,123,255,0.25);
+      border-radius: var(--r-sm);
+      padding: 18px 20px; font-size: 15px;
+      color: var(--text2); line-height: 1.65;
+      display: none; margin-top: 18px;
+    }
+    .info-box.visible { display: block; }
+
+    /* slide check-row override */
+    .card-header .check-row span { font-size: 14px; }
+
+    /* ===== NO PRESENTATION ===== */
+    .no-pres {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px; color: var(--text3);
+      text-align: center; padding: 40px;
+    }
+    .no-pres-icon { font-size: 56px; opacity: 0.3; }
+    .no-pres-title { font-size: 18px; font-weight: 600; color: var(--text2); }
+    .no-pres-sub { font-size: 14px; line-height: 1.5; }
+
+    /* Upload name input */
+    .upload-name { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+    .upload-name input { flex: 1; }
+
+    /* ===== MOBILE OVERLAY (sidebar backdrop) ===== */
+    .sidebar-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 99;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+
+    /* Toast notifications */
+    .toast-wrap {
+      position: fixed; bottom: 24px; right: 24px;
+      display: flex; flex-direction: column; gap: 10px;
+      z-index: 9999; pointer-events: none;
+      max-width: calc(100vw - 48px);
+    }
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-sm);
+      padding: 13px 18px;
+      font-size: 13px; font-weight: 500;
+      color: var(--text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      animation: toastIn 0.2s ease, toastOut 0.2s ease 2.8s forwards;
+      display: flex; align-items: center; gap: 10px;
+      pointer-events: all;
+      min-width: 200px;
+    }
+    .toast.success { border-left: 3px solid var(--green); }
+    .toast.error { border-left: 3px solid var(--red); }
+    .toast.info { border-left: 3px solid var(--accent); }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+    /* ===== SLIDE ITEM INPUTS ===== */
+    .slide-item-fields input[type="number"] {
+      padding: 14px 16px;
+      font-size: 15px;
+    }
+
+    /* ===== RESPONSIVE — TABLET ===== */
+    @media (max-width: 1024px) {
+      :root { --sidebar-w: 300px; }
+      .settings-grid { grid-template-columns: 1fr 1fr; }
+      .topbar-actions .btn.ghost { display: none; }
+    }
+
+    /* ===== RESPONSIVE — MOBILE ===== */
+    @media (max-width: 720px) {
+      :root { --sidebar-w: min(320px, 88vw); }
+
+      /* Sidebar slides in over content */
+      .sidebar {
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        height: 100vh;
+        transform: translateX(-105%);
+        box-shadow: 4px 0 40px rgba(0,0,0,0.7);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-backdrop.visible { display: block; }
+      .sidebar-close { display: flex; }
+
+      /* Topbar shows hamburger, hides some actions */
+      .topbar { padding: 0 16px; height: 58px; }
+      .topbar-menu { display: flex; }
+      .topbar-title { font-size: 15px; }
+      .topbar-actions .btn.ghost { display: none; }
+      .topbar-actions .badge-live { display: none; }
+
+      /* Tighter editor padding */
+      .editor-scroll { padding: 16px; gap: 16px; }
+
+      /* Card padding reduced slightly on mobile */
+      .card-body { padding: 18px; }
+      .card-body.compact { padding: 16px 18px; }
+      .card-header { padding: 16px 18px; min-height: 56px; }
+
+      /* Settings grid single column on mobile */
+      .settings-grid { grid-template-columns: 1fr; gap: 14px; }
+
+      /* Slide items: stack thumb + body vertically on very small screens */
+      .slide-item-thumb { width: 100px; }
+      .slide-item-body { padding: 12px 14px; }
+
+      /* Row fields stack */
+      .row { flex-direction: column; gap: 0; }
+
+      /* Pres tabs scroll nicely */
+      .pres-tabs { padding: 0 6px; height: 44px; }
+      .pres-tab { padding: 0 14px; font-size: 13px; }
+
+      /* Toasts bottom center on mobile */
+      .toast-wrap { left: 16px; right: 16px; bottom: 16px; max-width: 100%; }
+      .toast { min-width: unset; width: 100%; }
+
+      /* Monitor actions wrap */
+      .monitor-row { gap: 10px; }
+      .monitor-actions { flex-wrap: wrap; }
+    }
+
+    @media (max-width: 400px) {
+      .slide-item { flex-direction: column; }
+      .slide-item-thumb { width: 100%; height: 120px; }
+      .slide-item-body { padding: 12px; }
+      .drag-handle { display: none; }
+      .slide-item-fields { flex-direction: column; }
+      .slide-item-actions { margin-left: 0; width: 100%; }
+      .slide-item-actions .btn { flex: 1; }
+    }
+  </style>
 </head>
 <body>
 
+<!-- Mobile sidebar backdrop -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<div class="app">
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h2>Media Library</h2>
-  </div>
-  <div class="sidebar-inner">
-
-    <div>
-      <div class="section-divider">Upload File</div>
-      <div class="card">
-        <div class="field"><input id="file" type="file" accept="image/*,video/*" /></div>
-        <div class="field">
-          <label>Label (optional)</label>
-          <input id="fname" type="text" placeholder="Display name" />
-        </div>
-        <div class="field">
-          <label>Add to current presentation</label>
-          <select id="showNow">
-            <option value="no">Don't add</option>
-            <option value="append">Append to slides</option>
-            <option value="replace">Replace slides</option>
-          </select>
-        </div>
-        <button id="uploadBtn" class="btn primary" style="width:100%">↑ Upload to Cloudinary</button>
-        <div class="progress-wrap" id="progressWrap">
-          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-          <div class="progress-label" id="progressPct">0%</div>
-        </div>
-        <div id="uploadStatus" class="status-text"></div>
-      </div>
+    <div class="sidebar-logo">
+      <div class="dot"></div>
+      PRESENTATION MGR
     </div>
+    <button class="sidebar-close" id="sidebarClose">×</button>
+  </div>
+  <div class="sidebar-tabs">
+    <div class="sidebar-tab active" data-panel="media">📁 Media</div>
+    <div class="sidebar-tab" data-panel="youtube">▶ YouTube</div>
+  </div>
 
-    <div>
-      <div class="section-divider">YouTube Video</div>
-      <div class="card">
+  <!-- MEDIA PANEL -->
+  <div class="sidebar-panel active" id="panel-media">
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="file" accept="image/*,video/*" multiple />
+      <div class="drop-zone-icon">🖼️</div>
+      <div class="drop-zone-label">Drop files here</div>
+      <div class="drop-zone-sub">or tap to browse · images & videos</div>
+    </div>
+    <div class="upload-name">
+      <input type="text" id="fname" placeholder="Label (optional)" />
+    </div>
+    <div class="field" style="margin-top:8px">
+      <label>After upload</label>
+      <select id="showNow">
+        <option value="no">Don't add to slides</option>
+        <option value="append">Append to current</option>
+        <option value="replace">Replace current slides</option>
+      </select>
+    </div>
+    <button id="uploadBtn" class="btn primary full">↑ Upload</button>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressPct">0%</div>
+    </div>
+    <div id="uploadStatus" class="status-text"></div>
+
+    <div class="divider" style="margin-top:6px">Library</div>
+    <div id="mediaList" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+
+  <!-- YOUTUBE PANEL -->
+  <div class="sidebar-panel" id="panel-youtube">
+    <div class="card">
+      <div class="card-body">
         <div class="field">
-          <label>URL or Video ID</label>
-          <input id="ytUrl" type="text" placeholder="youtube.com/watch?v=... or video ID" />
+          <label>YouTube URL or Video ID</label>
+          <input id="ytUrl" type="text" placeholder="youtube.com/watch?v=... or ID" />
         </div>
         <div class="field">
-          <label>Label</label>
-          <input id="ytName" type="text" placeholder="Display name" />
+          <label>Display Label</label>
+          <input id="ytName" type="text" placeholder="Optional name" />
         </div>
         <div class="row">
           <div class="field">
@@ -439,760 +755,935 @@ input[type="color"] {
             <input id="ytEnd" type="number" placeholder="auto" min="0" />
           </div>
         </div>
-        <button id="ytSaveBtn" class="btn primary" style="width:100%;margin-top:2px">Save YouTube video</button>
+        <button id="ytSaveBtn" class="btn primary full">Save to Library</button>
         <div id="ytStatus" class="status-text"></div>
       </div>
     </div>
-
-    <div>
-      <div class="section-divider">Stored Media</div>
-      <div id="mediaList"></div>
-    </div>
-
   </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
-  <div class="tabs-bar" id="tabsBar">
-    <div class="tab-add" id="addPresentationBtn" title="New presentation">+</div>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="topbar-menu" id="topbarMenu">☰</button>
+    <div class="topbar-title" id="editorTitle">Select a Presentation</div>
+    <div class="topbar-actions">
+      <span id="liveIndicator" style="display:none" class="badge-live">DEFAULT</span>
+      <button id="setActiveBtn" class="btn primary sm">⚡ Default</button>
+      <button id="refreshViewBtn" class="btn sm" title="Refresh all displays">↺</button>
+      <button id="renamePresentationBtn" class="btn sm ghost">✎ Rename</button>
+      <button id="deletePresentationBtn" class="btn sm danger">✕</button>
+    </div>
   </div>
 
-  <div class="editor-area" id="editorArea">
-    <div class="editor-header">
-      <h1 id="editorTitle">Select a Presentation</h1>
-      <div class="btn-row">
-        <button id="setActiveBtn" class="btn primary">Make Default</button>
-        <button id="refreshViewBtn" class="btn">↺ Refresh Displays</button>
-        <button id="renamePresentationBtn" class="btn">Rename</button>
-        <button id="deletePresentationBtn" class="btn danger">Delete</button>
-      </div>
-    </div>
+  <!-- PRESENTATION TABS -->
+  <div class="pres-tabs" id="tabsBar">
+    <div class="pres-tab-add" id="addPresentationBtn" title="New presentation">+</div>
+  </div>
 
-    <!-- Settings card -->
-    <div class="card">
-      <div class="card-title">Playback Settings</div>
-      <div class="row">
-        <div class="field">
-          <label>Mode</label>
-          <select id="mode">
-            <option value="slideshow">Slideshow</option>
-            <option value="single">Single slide</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Transition</label>
-          <select id="transition">
-            <option value="fade">Fade</option>
-            <option value="cut">Cut</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Interval (s)</label>
-          <input id="intervalS" type="number" value="5" min="1" />
-        </div>
-      </div>
-      <label class="check-label">
-        <input id="syncPlayback" type="checkbox" />
-        Sync playback across all displays
-      </label>
-      <div id="syncInfo" class="sync-info">
-        When enabled, all monitors showing this presentation stay on the same slide. If a display refreshes or reconnects, it jumps to wherever the other screens currently are.
-      </div>
-    </div>
+  <!-- EDITOR CONTENT -->
+  <div class="editor-layout">
+    <div class="editor-scroll" id="editorArea">
 
-    <!-- Overlay card -->
-    <div class="card">
-      <div class="card-title">Overlay Banner</div>
-      <div class="field">
-        <label>Message text</label>
-        <input id="overlayText" placeholder="e.g. Room closed today" />
+      <div class="no-pres" id="noPres" style="display:none">
+        <div class="no-pres-icon">🎞️</div>
+        <div class="no-pres-title">No Presentation Selected</div>
+        <div class="no-pres-sub">Tap <strong>+</strong> in the tabs above to create one</div>
       </div>
-      <label class="check-label">
-        <input id="overlayVisible" type="checkbox" />
-        Show overlay on display
-      </label>
-      <div id="overlayPreview" class="overlay-preview"></div>
-      <div class="row" style="margin-top:12px">
-        <div class="field">
-          <label>Background</label>
-          <div class="swatch-row" id="overlayBgSwatches">
-            <div class="swatch" style="background:#cc0000" data-color="#cc0000"></div>
-            <div class="swatch" style="background:#e65c00" data-color="#e65c00"></div>
-            <div class="swatch" style="background:#f0b429" data-color="#f0b429"></div>
-            <div class="swatch" style="background:#1a7f37" data-color="#1a7f37"></div>
-            <div class="swatch" style="background:#1a73e8" data-color="#1a73e8"></div>
-            <div class="swatch" style="background:#6a0dad" data-color="#6a0dad"></div>
-            <div class="swatch" style="background:#212121" data-color="#212121"></div>
-            <div class="swatch" style="background:#f5f5f5;border:1px solid #444" data-color="#f5f5f5"></div>
+
+      <!-- Settings Card -->
+      <div class="card" id="settingsCard">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">⚙️</span> Playback Settings</div>
+        </div>
+        <div class="card-body">
+          <div class="settings-grid">
+            <div class="field" style="margin-bottom:0">
+              <label>Mode</label>
+              <select id="mode">
+                <option value="slideshow">Slideshow</option>
+                <option value="single">Single Slide</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Transition</label>
+              <select id="transition">
+                <option value="fade">Fade</option>
+                <option value="cut">Cut</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Interval (seconds)</label>
+              <input id="intervalS" type="number" value="5" min="1" />
+            </div>
           </div>
-          <input id="overlayBgColor" type="color" value="#cc0000" />
-        </div>
-        <div class="field">
-          <label>Text colour</label>
-          <div class="swatch-row" id="overlayTxtSwatches">
-            <div class="swatch" style="background:#ffffff;border:1px solid #444" data-color="#ffffff"></div>
-            <div class="swatch" style="background:#000000" data-color="#000000"></div>
-            <div class="swatch" style="background:#f0b429" data-color="#f0b429"></div>
-            <div class="swatch" style="background:#ff6b6b" data-color="#ff6b6b"></div>
+          <label class="check-row" style="margin-top:18px; cursor:pointer">
+            <input id="syncPlayback" type="checkbox" />
+            <span>Sync playback across all displays</span>
+          </label>
+          <div id="syncInfo" class="info-box">
+            When enabled, all monitors showing this presentation stay on the same slide. If a display refreshes or reconnects, it jumps to the current position.
           </div>
-          <input id="overlayTxtColor" type="color" value="#ffffff" />
         </div>
       </div>
-    </div>
 
-    <!-- Monitor assignment card -->
-    <div class="card">
-      <div class="card-title">Monitor Assignment</div>
-      <div class="field">
-        <label>Assign monitor names (comma-separated)</label>
-        <input id="monitorAssign" placeholder="e.g. Lobby Screen, Room A" />
+      <!-- Overlay Card -->
+      <div class="card" id="overlayCard">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">📢</span> Overlay Banner</div>
+          <label class="check-row" style="cursor:pointer">
+            <input id="overlayVisible" type="checkbox" />
+            <span style="font-size:13px;color:var(--text2)">Show on display</span>
+          </label>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Message</label>
+            <input id="overlayText" placeholder="e.g. Room closed today" />
+          </div>
+          <div id="overlayPreview" class="overlay-preview"></div>
+          <div class="row" style="margin-top:16px">
+            <div class="field">
+              <label>Background</label>
+              <div class="swatch-row" id="overlayBgSwatches">
+                <div class="swatch" style="background:#cc0000" data-color="#cc0000"></div>
+                <div class="swatch" style="background:#e65c00" data-color="#e65c00"></div>
+                <div class="swatch" style="background:#f0b429" data-color="#f0b429"></div>
+                <div class="swatch" style="background:#1a7f37" data-color="#1a7f37"></div>
+                <div class="swatch" style="background:#1a73e8" data-color="#1a73e8"></div>
+                <div class="swatch" style="background:#6a0dad" data-color="#6a0dad"></div>
+                <div class="swatch" style="background:#212121" data-color="#212121"></div>
+                <div class="swatch" style="background:#f5f5f5;border:1px solid #444" data-color="#f5f5f5"></div>
+              </div>
+              <input id="overlayBgColor" type="color" value="#cc0000" />
+            </div>
+            <div class="field">
+              <label>Text Colour</label>
+              <div class="swatch-row" id="overlayTxtSwatches">
+                <div class="swatch" style="background:#ffffff;border:1px solid #444" data-color="#ffffff"></div>
+                <div class="swatch" style="background:#000000" data-color="#000000"></div>
+                <div class="swatch" style="background:#f0b429" data-color="#f0b429"></div>
+                <div class="swatch" style="background:#ff6b6b" data-color="#ff6b6b"></div>
+              </div>
+              <input id="overlayTxtColor" type="color" value="#ffffff" />
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="btn-row">
-        <button id="assignMonitorsBtn" class="btn primary">Assign</button>
-        <button id="clearMonitorAssignments" class="btn danger">Clear All</button>
+
+      <!-- Monitors -->
+      <div class="card" id="monitorAssignCard">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">🖥️</span> Monitor Assignment</div>
+          <div style="display:flex;gap:8px">
+            <button id="assignMonitorsBtn" class="btn primary sm">Assign</button>
+            <button id="clearMonitorAssignments" class="btn danger sm">Clear</button>
+          </div>
+        </div>
+        <div class="card-body compact">
+          <label>Monitor names (comma-separated)</label>
+          <input id="monitorAssign" placeholder="e.g. Lobby Screen, Room A" style="margin-bottom:0"/>
+          <div class="assigned-wrap" id="assignedMonitorsList"></div>
+        </div>
       </div>
-      <div class="assigned-wrap" id="assignedMonitorsList"></div>
-    </div>
 
-    <!-- Active monitors -->
-    <div class="card">
-      <div class="card-title">Active Monitors <span style="font-size:10px;color:var(--text3);text-transform:none;font-weight:400">(online if heartbeat within 15s)</span></div>
-      <table class="monitors-table">
-        <thead>
-          <tr>
-            <th>Monitor</th>
-            <th>Status</th>
-            <th>Last seen</th>
-            <th>Resolution</th>
-            <th>Assigned Presentation</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="monitorsTbody"></tbody>
-      </table>
-    </div>
+      <!-- Active Monitors -->
+      <div class="card" id="activeMonitorsCard">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">📡</span> Active Monitors</div>
+          <span style="font-size:12px;color:var(--text3)">Online if heartbeat &lt;15s</span>
+        </div>
+        <div class="card-body compact" id="monitorsContainer">
+          <div class="monitors-list" id="monitorsList"></div>
+        </div>
+      </div>
 
-    <!-- Slides -->
-    <div>
-      <div class="section-divider" style="margin-top:4px">Slides — add from media library</div>
-      <div id="presentationItems"></div>
-    </div>
+      <!-- Slides -->
+      <div class="card" id="slidesCard">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">🎞️</span> Slides</div>
+          <span style="font-size:12px;color:var(--text3)">Drag to reorder</span>
+        </div>
+        <div class="card-body">
+          <div id="presentationItems" class="slides-area"></div>
+        </div>
+      </div>
 
+    </div>
   </div>
 </div>
+</div><!-- /.app -->
+
+<!-- TOAST CONTAINER -->
+<div class="toast-wrap" id="toastWrap"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, set, onValue, remove, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, push, set, onValue, remove, get, update }
+    from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBgV9PoUFut3FPc0iChFNm2-h6-Uc5z6s0",
-  authDomain: "infinity-service-b2f10.firebaseapp.com",
-  databaseURL: "https://infinity-service-b2f10-default-rtdb.firebaseio.com",
-  projectId: "infinity-service-b2f10",
-  storageBucket: "infinity-service-b2f10.firebasestorage.app",
-  messagingSenderId: "805770674259",
-  appId: "1:805770674259:web:bcc520979e6772fda5c6a6"
-};
-const CLOUD_NAME = "dgrmpcha9";
-const UPLOAD_PRESET = "Innovate";
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgV9PoUFut3FPc0iChFNm2-h6-Uc5z6s0",
+    authDomain: "infinity-service-b2f10.firebaseapp.com",
+    databaseURL: "https://infinity-service-b2f10-default-rtdb.firebaseio.com",
+    projectId: "infinity-service-b2f10",
+    storageBucket: "infinity-service-b2f10.firebasestorage.app",
+    messagingSenderId: "805770674259",
+    appId: "1:805770674259:web:bcc520979e6772fda5c6a6"
+  };
+  const CLOUD_NAME = "dgrmpcha9";
+  const UPLOAD_PRESET = "Innovate";
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const mediaRef = ref(db, "media");
-const presentationsRef = ref(db, "presentations");
-const activeRef = ref(db, "activePresentation");
-const refreshRef = ref(db, "refreshSignal");
-const monitorsRef = ref(db, "monitors");
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const mediaRef = ref(db, "media");
+  const presentationsRef = ref(db, "presentations");
+  const activeRef = ref(db, "activePresentation");
+  const refreshRef = ref(db, "refreshSignal");
+  const monitorsRef = ref(db, "monitors");
 
-const fileInput = document.getElementById("file");
-const uploadBtn = document.getElementById("uploadBtn");
-const uploadStatus = document.getElementById("uploadStatus");
-const fname = document.getElementById("fname");
-const showNow = document.getElementById("showNow");
-const progressWrap = document.getElementById("progressWrap");
-const progressFill = document.getElementById("progressFill");
-const progressPct = document.getElementById("progressPct");
-const mediaListEl = document.getElementById("mediaList");
-const presentationItemsEl = document.getElementById("presentationItems");
-const tabsBar = document.getElementById("tabsBar");
-const addPresentationBtn = document.getElementById("addPresentationBtn");
-const editorTitle = document.getElementById("editorTitle");
-const modeEl = document.getElementById("mode");
-const transitionEl = document.getElementById("transition");
-const intervalSEl = document.getElementById("intervalS");
-const syncPlaybackEl = document.getElementById("syncPlayback");
-const syncInfoEl = document.getElementById("syncInfo");
-const overlayTextEl = document.getElementById("overlayText");
-const overlayVisibleEl = document.getElementById("overlayVisible");
-const overlayBgColorInput = document.getElementById("overlayBgColor");
-const overlayTxtColorInput = document.getElementById("overlayTxtColor");
-const overlayPreviewEl = document.getElementById("overlayPreview");
-const setActiveBtn = document.getElementById("setActiveBtn");
-const refreshViewBtn = document.getElementById("refreshViewBtn");
-const renamePresentationBtn = document.getElementById("renamePresentationBtn");
-const deletePresentationBtn = document.getElementById("deletePresentationBtn");
-const ytUrlEl = document.getElementById("ytUrl");
-const ytNameEl = document.getElementById("ytName");
-const ytStartEl = document.getElementById("ytStart");
-const ytEndEl = document.getElementById("ytEnd");
-const ytSaveBtn = document.getElementById("ytSaveBtn");
-const ytStatus = document.getElementById("ytStatus");
-const monitorAssignInput = document.getElementById("monitorAssign");
-const assignMonitorsBtn = document.getElementById("assignMonitorsBtn");
-const assignedMonitorsList = document.getElementById("assignedMonitorsList");
-const clearMonitorAssignmentsBtn = document.getElementById("clearMonitorAssignments");
-const monitorsTbody = document.getElementById("monitorsTbody");
+  const $ = id => document.getElementById(id);
+  const fileInput = $('file');
+  const uploadBtn = $('uploadBtn');
+  const uploadStatus = $('uploadStatus');
+  const fname = $('fname');
+  const showNow = $('showNow');
+  const progressWrap = $('progressWrap');
+  const progressFill = $('progressFill');
+  const progressPct = $('progressPct');
+  const mediaListEl = $('mediaList');
+  const presentationItemsEl = $('presentationItems');
+  const tabsBar = $('tabsBar');
+  const addPresentationBtn = $('addPresentationBtn');
+  const editorTitle = $('editorTitle');
+  const modeEl = $('mode');
+  const transitionEl = $('transition');
+  const intervalSEl = $('intervalS');
+  const syncPlaybackEl = $('syncPlayback');
+  const syncInfoEl = $('syncInfo');
+  const overlayTextEl = $('overlayText');
+  const overlayVisibleEl = $('overlayVisible');
+  const overlayBgColorInput = $('overlayBgColor');
+  const overlayTxtColorInput = $('overlayTxtColor');
+  const overlayPreviewEl = $('overlayPreview');
+  const setActiveBtn = $('setActiveBtn');
+  const refreshViewBtn = $('refreshViewBtn');
+  const renamePresentationBtn = $('renamePresentationBtn');
+  const deletePresentationBtn = $('deletePresentationBtn');
+  const ytUrlEl = $('ytUrl');
+  const ytNameEl = $('ytName');
+  const ytStartEl = $('ytStart');
+  const ytEndEl = $('ytEnd');
+  const ytSaveBtn = $('ytSaveBtn');
+  const ytStatus = $('ytStatus');
+  const monitorAssignInput = $('monitorAssign');
+  const assignMonitorsBtn = $('assignMonitorsBtn');
+  const assignedMonitorsList = $('assignedMonitorsList');
+  const clearMonitorAssignmentsBtn = $('clearMonitorAssignments');
+  const monitorsList = $('monitorsList');
+  const liveIndicator = $('liveIndicator');
+  const toastWrap = $('toastWrap');
+  const sidebar = $('sidebar');
+  const sidebarBackdrop = $('sidebarBackdrop');
+  const sidebarClose = $('sidebarClose');
+  const topbarMenu = $('topbarMenu');
 
-let localMedia = {};
-let presentations = {};
-let activePresentationId = null;
-let selectedPresentationId = null;
-let selectedOverlayBg = "#cc0000";
-let selectedOverlayTxt = "#ffffff";
-let localMonitors = {};
+  let localMedia = {};
+  let presentations = {};
+  let activePresentationId = null;
+  let selectedPresentationId = null;
+  let selectedOverlayBg = "#cc0000";
+  let selectedOverlayTxt = "#ffffff";
+  let localMonitors = {};
+  let dragSrcIdx = null;
 
-const editLocks = new Set();
-const lock = k => editLocks.add(k);
-const unlock = k => editLocks.delete(k);
-const isLocked = k => editLocks.has(k);
+  const editLocks = new Set();
+  const lock = k => editLocks.add(k);
+  const unlock = k => editLocks.delete(k);
+  const isLocked = k => editLocks.has(k);
 
-function escHtml(s) { return s ? String(s).replaceAll("<","&lt;").replaceAll(">","&gt;") : ""; }
-function debounce(fn, wait=400) {
-  let t;
-  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
-}
-function extractYtId(raw) {
-  raw = (raw||"").trim();
-  if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
-  try {
-    const u = new URL(raw);
-    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1).split("?")[0].slice(0,11);
-    return u.searchParams.get("v") || null;
-  } catch { return null; }
-}
+  // ===== MOBILE SIDEBAR =====
+  function openSidebar() {
+    sidebar.classList.add('open');
+    sidebarBackdrop.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    sidebarBackdrop.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+  topbarMenu.onclick = openSidebar;
+  sidebarClose.onclick = closeSidebar;
+  sidebarBackdrop.onclick = closeSidebar;
 
-// Swatches
-function setSwatchActive(containerId, color) {
-  const cont = document.getElementById(containerId);
-  if (!cont) return;
-  cont.querySelectorAll(".swatch").forEach(s => {
-    s.classList.toggle("active", (s.dataset.color||"").toLowerCase() === (color||"").toLowerCase());
-  });
-}
-function setupSwatches(contId, inputEl, onSelect) {
-  const cont = document.getElementById(contId);
-  if (!cont) return;
-  cont.querySelectorAll(".swatch").forEach(s => {
-    s.onclick = () => {
-      const color = s.dataset.color||"";
-      inputEl.value = color;
-      setSwatchActive(contId, color);
-      onSelect(color);
+  // ===== TOAST =====
+  function toast(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    const icons = { success: '✓', error: '✕', info: 'ℹ' };
+    el.textContent = `${icons[type] || ''} ${msg}`;
+    toastWrap.appendChild(el);
+    setTimeout(() => el.remove(), 3200);
+  }
+
+  // ===== SIDEBAR TABS =====
+  document.querySelectorAll('.sidebar-tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.sidebar-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      $(`panel-${tab.dataset.panel}`).classList.add('active');
     };
   });
-  inputEl.addEventListener("input", () => { setSwatchActive(contId, inputEl.value); onSelect(inputEl.value); });
-}
-setupSwatches("overlayBgSwatches", overlayBgColorInput, c => { selectedOverlayBg = c; updateOverlayPreview(); });
-setupSwatches("overlayTxtSwatches", overlayTxtColorInput, c => { selectedOverlayTxt = c; updateOverlayPreview(); });
 
-function updateOverlayPreview() {
-  const txt = overlayTextEl.value;
-  if (txt && overlayVisibleEl.checked) {
-    overlayPreviewEl.style.display = "block";
-    overlayPreviewEl.style.background = selectedOverlayBg;
-    overlayPreviewEl.style.color = selectedOverlayTxt;
-    overlayPreviewEl.textContent = txt;
-  } else {
-    overlayPreviewEl.style.display = "none";
-  }
-}
-
-// Firebase listeners
-onValue(mediaRef, snap => { localMedia = snap.val()||{}; renderMediaList(); if (selectedPresentationId) renderPresentationEditor(); });
-onValue(presentationsRef, snap => {
-  const raw = snap.val()||{};
-  presentations = {};
-  for (const [k,v] of Object.entries(raw)) { if (k !== "current") presentations[k] = v; }
-  if (Object.keys(presentations).length === 0) { createPresentation("Main"); return; }
-  if (!selectedPresentationId || !presentations[selectedPresentationId]) {
-    selectedPresentationId = Object.keys(presentations)[0];
-  }
-  renderTabs(); renderPresentationEditor();
-});
-onValue(activeRef, snap => { activePresentationId = snap.val()||null; renderTabs(); });
-onValue(monitorsRef, snap => { localMonitors = snap.val()||{}; renderTabs(); renderMonitorsTable(); renderPresentationEditor(); });
-
-async function createPresentation(name) {
-  const newRef = push(presentationsRef);
-  const id = newRef.key;
-  await set(newRef, {
-    name: name||"New Presentation",
-    items: [], mode: "slideshow", intervalMs: 5000, transition: "fade",
-    syncPlayback: false,
-    overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" }
+  // ===== DRAG AND DROP UPLOAD =====
+  const dropZone = $('dropZone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragging'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragging'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragging');
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      uploadBtn.click();
+    }
   });
-  selectedPresentationId = id;
-}
 
-addPresentationBtn.onclick = async () => {
-  const name = prompt("New presentation name:", "New Presentation");
-  if (name) await createPresentation(name);
-};
+  // ===== HELPERS =====
+  function escHtml(s) { return s ? String(s).replaceAll('<', '&lt;').replaceAll('>', '&gt;') : ''; }
+  function debounce(fn, wait = 400) {
+    let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+  }
+  function extractYtId(raw) {
+    raw = (raw || '').trim();
+    if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
+    try {
+      const u = new URL(raw);
+      if (u.hostname.includes('youtu.be')) return u.pathname.slice(1).split('?')[0].slice(0, 11);
+      return u.searchParams.get('v') || null;
+    } catch { return null; }
+  }
 
-renamePresentationBtn.onclick = async () => {
-  if (!selectedPresentationId) return;
-  const cur = presentations[selectedPresentationId]?.name||"";
-  const name = prompt("Rename:", cur);
-  if (!name) return;
-  await update(ref(db, `presentations/${selectedPresentationId}`), { name });
-};
-
-deletePresentationBtn.onclick = async () => {
-  if (!selectedPresentationId) return;
-  if (Object.keys(presentations).length <= 1) return alert("You need at least one presentation.");
-  const name = presentations[selectedPresentationId]?.name;
-  if (!confirm(`Delete "${name}"?`)) return;
-  await remove(ref(db, `presentations/${selectedPresentationId}`));
-  selectedPresentationId = null;
-};
-
-setActiveBtn.onclick = async () => {
-  if (!selectedPresentationId) return;
-  await set(activeRef, selectedPresentationId);
-  const p = (await get(ref(db, `presentations/${selectedPresentationId}`))).val();
-  if (p) await set(ref(db, "presentations/current"), { ...p, id: "current" });
-  alert(`"${p?.name}" is now live.`);
-};
-
-refreshViewBtn.onclick = async () => { await set(refreshRef, Date.now()); };
-
-ytSaveBtn.onclick = async () => {
-  const raw = ytUrlEl.value.trim();
-  if (!raw) return alert("Enter a YouTube URL or video ID");
-  const videoId = extractYtId(raw);
-  if (!videoId) return alert("Couldn't parse a YouTube video ID.");
-  const name = ytNameEl.value.trim() || `YouTube: ${videoId}`;
-  const start = parseFloat(ytStartEl.value)||0;
-  const endVal = ytEndEl.value.trim();
-  const end = endVal ? parseFloat(endVal) : null;
-  const newRef = push(mediaRef);
-  await set(newRef, { resource_type: "youtube", ytId: videoId, filename: name, uploadedAt: Date.now(), start, end, duration: end||null });
-  ytUrlEl.value = ""; ytNameEl.value = ""; ytStartEl.value = "0"; ytEndEl.value = "";
-  ytStatus.textContent = "✓ Saved"; ytStatus.className = "status-text";
-  setTimeout(() => ytStatus.textContent = "", 3000);
-};
-
-function renderTabs() {
-  tabsBar.querySelectorAll(".tab").forEach(t => t.remove());
-  const addBtn = document.getElementById("addPresentationBtn");
-  Object.entries(presentations).forEach(([id, p]) => {
-    const isSelected = id === selectedPresentationId;
-    const isLive = id === activePresentationId;
-    const isSynced = !!p.syncPlayback;
-    const tab = document.createElement("div");
-    tab.className = "tab" + (isSelected ? " active" : "");
-    tab.innerHTML = `<span>${escHtml(p.name||"Untitled")}${isLive ? '<span class="live-badge" style="margin-left:6px">Default</span>' : ""}${isSynced ? '<span class="sync-badge" style="margin-left:4px">SYNC</span>' : ""}</span><span class="tab-close">×</span>`;
-    tab.addEventListener("click", e => {
-      if (e.target.classList.contains("tab-close")) return;
-      selectedPresentationId = id; renderTabs(); renderPresentationEditor();
+  // ===== SWATCHES =====
+  function setSwatchActive(containerId, color) {
+    document.querySelectorAll(`#${containerId} .swatch`).forEach(s => {
+      s.classList.toggle('active', (s.dataset.color || '').toLowerCase() === (color || '').toLowerCase());
     });
-    tab.querySelector(".tab-close").addEventListener("click", async e => {
-      e.stopPropagation();
-      if (Object.keys(presentations).length <= 1) return alert("Need at least one presentation.");
-      if (!confirm(`Delete "${p.name}"?`)) return;
-      await remove(ref(db, `presentations/${id}`));
+  }
+  function setupSwatches(contId, inputEl, onSelect) {
+    document.querySelectorAll(`#${contId} .swatch`).forEach(s => {
+      s.onclick = () => { inputEl.value = s.dataset.color; setSwatchActive(contId, s.dataset.color); onSelect(s.dataset.color); };
     });
-    tabsBar.insertBefore(tab, addBtn);
-  });
-}
+    inputEl.addEventListener('input', () => { setSwatchActive(contId, inputEl.value); onSelect(inputEl.value); });
+  }
+  setupSwatches('overlayBgSwatches', overlayBgColorInput, c => { selectedOverlayBg = c; updateOverlayPreview(); });
+  setupSwatches('overlayTxtSwatches', overlayTxtColorInput, c => { selectedOverlayTxt = c; updateOverlayPreview(); });
 
-function renderMediaList() {
-  mediaListEl.innerHTML = "";
-  Object.keys(localMedia).sort((a,b) => localMedia[a].uploadedAt - localMedia[b].uploadedAt).forEach(id => {
-    const m = localMedia[id];
-    const div = document.createElement("div");
-    div.className = "media-item";
-    let thumb = "";
-    if (m.resource_type === "youtube") thumb = `<div class="media-thumb-yt">▶</div>`;
-    else if (m.resource_type === "image") thumb = `<img class="media-thumb" src="${m.url}" />`;
-    else thumb = `<video class="media-thumb" src="${m.url}" muted playsinline></video>`;
-    div.innerHTML = `
-      ${thumb}
-      <div class="media-info">
-        <input class="media-name rename-input" data-id="${id}" value="${escHtml(m.filename||id)}" />
-        <div class="media-meta">${m.resource_type}${m.resource_type==="youtube"?" · "+m.ytId:""}</div>
-        <div style="display:flex;gap:6px;margin-top:6px">
-          <button data-id="${id}" class="btn sm primary addBtn">+ Add to slide</button>
-          <button data-id="${id}" class="btn sm danger deleteBtn">Remove</button>
-        </div>
-      </div>`;
-    mediaListEl.appendChild(div);
+  function updateOverlayPreview() {
+    const txt = overlayTextEl.value;
+    if (txt && overlayVisibleEl.checked) {
+      overlayPreviewEl.style.display = 'block';
+      overlayPreviewEl.style.background = selectedOverlayBg;
+      overlayPreviewEl.style.color = selectedOverlayTxt;
+      overlayPreviewEl.textContent = txt;
+    } else { overlayPreviewEl.style.display = 'none'; }
+  }
+
+  // ===== FIREBASE LISTENERS =====
+  onValue(mediaRef, snap => {
+    localMedia = snap.val() || {};
+    renderMediaList();
+    if (selectedPresentationId) renderPresentationEditor();
   });
 
-  mediaListEl.querySelectorAll(".rename-input").forEach(inp => {
-    const save = async () => {
-      const id = inp.dataset.id;
-      const val = inp.value.trim();
-      if (!val || val === (localMedia[id]?.filename||"")) return;
-      await update(ref(db, `media/${id}`), { filename: val });
-    };
-    inp.addEventListener("blur", save);
-    inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
+  onValue(presentationsRef, snap => {
+    const raw = snap.val() || {};
+    presentations = {};
+    for (const [k, v] of Object.entries(raw)) { if (k !== 'current') presentations[k] = v; }
+    if (Object.keys(presentations).length === 0) { createPresentation('Main'); return; }
+    if (!selectedPresentationId || !presentations[selectedPresentationId]) {
+      selectedPresentationId = Object.keys(presentations)[0];
+    }
+    renderTabs();
+    renderPresentationEditor();
   });
-  mediaListEl.querySelectorAll(".addBtn").forEach(b => b.onclick = () => addToPresentation(b.dataset.id));
-  mediaListEl.querySelectorAll(".deleteBtn").forEach(b => {
-    b.onclick = async () => {
-      if (!confirm("Delete this media from all presentations?")) return;
-      await remove(ref(db, "media/"+b.dataset.id));
-      for (const [pid, p] of Object.entries(presentations)) {
-        if (!p.items) continue;
-        const filtered = p.items.filter(it => it.mediaId !== b.dataset.id);
-        if (filtered.length !== p.items.length) await update(ref(db, `presentations/${pid}`), { items: filtered });
+
+  onValue(activeRef, snap => {
+    activePresentationId = snap.val() || null;
+    renderTabs();
+    updateLiveIndicator();
+  });
+
+  onValue(monitorsRef, snap => {
+    localMonitors = snap.val() || {};
+    renderMonitorsList();
+    renderPresentationEditor();
+  });
+
+  function updateLiveIndicator() {
+    if (selectedPresentationId && activePresentationId === selectedPresentationId) {
+      liveIndicator.style.display = 'inline-flex';
+    } else { liveIndicator.style.display = 'none'; }
+  }
+
+  // ===== CREATE PRESENTATION =====
+  async function createPresentation(name) {
+    const newRef = push(presentationsRef);
+    const id = newRef.key;
+    await set(newRef, {
+      name: name || 'New Presentation', items: [],
+      mode: 'slideshow', intervalMs: 5000, transition: 'fade', syncPlayback: false,
+      overlay: { text: '', visible: false, color: '#cc0000', textColor: '#ffffff' }
+    });
+    selectedPresentationId = id;
+  }
+
+  addPresentationBtn.onclick = async () => {
+    const name = prompt('New presentation name:', 'New Presentation');
+    if (name) await createPresentation(name);
+  };
+
+  renamePresentationBtn.onclick = async () => {
+    if (!selectedPresentationId) return;
+    const cur = presentations[selectedPresentationId]?.name || '';
+    const name = prompt('Rename:', cur);
+    if (!name) return;
+    await update(ref(db, `presentations/${selectedPresentationId}`), { name });
+    toast(`Renamed to "${name}"`);
+  };
+
+  deletePresentationBtn.onclick = async () => {
+    if (!selectedPresentationId) return;
+    if (Object.keys(presentations).length <= 1) return toast('Need at least one presentation.', 'error');
+    const name = presentations[selectedPresentationId]?.name;
+    if (!confirm(`Delete "${name}"?`)) return;
+    await remove(ref(db, `presentations/${selectedPresentationId}`));
+    selectedPresentationId = null;
+    toast(`Deleted "${name}"`, 'info');
+  };
+
+  setActiveBtn.onclick = async () => {
+    if (!selectedPresentationId) return;
+    await set(activeRef, selectedPresentationId);
+    const p = (await get(ref(db, `presentations/${selectedPresentationId}`))).val();
+    if (p) await set(ref(db, 'presentations/current'), { ...p, id: 'current' });
+    toast(`"${p?.name}" is now the default`);
+    updateLiveIndicator();
+  };
+
+  refreshViewBtn.onclick = async () => {
+    await set(refreshRef, Date.now());
+    toast('Refresh signal sent to all displays', 'info');
+  };
+
+  // ===== YOUTUBE =====
+  ytSaveBtn.onclick = async () => {
+    const raw = ytUrlEl.value.trim();
+    if (!raw) return toast('Enter a YouTube URL or video ID', 'error');
+    const videoId = extractYtId(raw);
+    if (!videoId) return toast("Couldn't parse a YouTube video ID.", 'error');
+    const name = ytNameEl.value.trim() || `YouTube: ${videoId}`;
+    const start = parseFloat(ytStartEl.value) || 0;
+    const endVal = ytEndEl.value.trim();
+    const end = endVal ? parseFloat(endVal) : null;
+    const newRef2 = push(mediaRef);
+    await set(newRef2, { resource_type: 'youtube', ytId: videoId, filename: name, uploadedAt: Date.now(), start, end, duration: end || null });
+    ytUrlEl.value = ''; ytNameEl.value = ''; ytStartEl.value = '0'; ytEndEl.value = '';
+    toast('YouTube video saved to library');
+  };
+
+  // ===== TABS =====
+  function renderTabs() {
+    tabsBar.querySelectorAll('.pres-tab').forEach(t => t.remove());
+    const addBtn = $('addPresentationBtn');
+    Object.entries(presentations).forEach(([id, p]) => {
+      const isSelected = id === selectedPresentationId;
+      const isLive = id === activePresentationId;
+      const isSynced = !!p.syncPlayback;
+      const tab = document.createElement('div');
+      tab.className = 'pres-tab' + (isSelected ? ' active' : '');
+      tab.innerHTML = `<span>${escHtml(p.name || 'Untitled')}</span>${isLive ? '<span class="chip chip-live">Live</span>' : ''}${isSynced ? '<span class="chip chip-sync">Sync</span>' : ''}<span class="pres-tab-close">×</span>`;
+      tab.addEventListener('click', e => {
+        if (e.target.classList.contains('pres-tab-close')) return;
+        selectedPresentationId = id;
+        renderTabs(); renderPresentationEditor(); updateLiveIndicator();
+      });
+      tab.querySelector('.pres-tab-close').addEventListener('click', async e => {
+        e.stopPropagation();
+        if (Object.keys(presentations).length <= 1) return toast('Need at least one presentation.', 'error');
+        if (!confirm(`Delete "${p.name}"?`)) return;
+        await remove(ref(db, `presentations/${id}`));
+      });
+      tabsBar.insertBefore(tab, addBtn);
+    });
+    updateLiveIndicator();
+  }
+
+  // ===== MEDIA LIST =====
+  function renderMediaList() {
+    mediaListEl.innerHTML = '';
+    const sorted = Object.keys(localMedia).sort((a, b) => localMedia[a].uploadedAt - localMedia[b].uploadedAt);
+    if (sorted.length === 0) {
+      mediaListEl.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No media yet — upload above</div>';
+      return;
+    }
+    sorted.forEach(id => {
+      const m = localMedia[id];
+      const div = document.createElement('div');
+      div.className = 'media-card';
+      let thumb = '';
+      if (m.resource_type === 'youtube') thumb = `<div class="media-thumb-wrap" style="background:#0d0d0d"><div class="media-thumb-yt-icon">▶</div></div>`;
+      else if (m.resource_type === 'image') thumb = `<div class="media-thumb-wrap"><img src="${m.url}" loading="lazy" /></div>`;
+      else thumb = `<div class="media-thumb-wrap"><video src="${m.url}" muted playsinline></video></div>`;
+      const typeLabel = m.resource_type === 'youtube' ? 'YouTube' : (m.resource_type || 'file');
+      div.innerHTML = `
+        ${thumb}
+        <div class="media-card-body">
+          <input class="media-card-name rename-input" data-id="${id}" value="${escHtml(m.filename || id)}" title="Click to rename" />
+          <div class="media-card-actions">
+            <button data-id="${id}" class="btn primary xs addBtn">+ Add to Slides</button>
+            <button data-id="${id}" class="btn danger xs deleteBtn">✕</button>
+          </div>
+        </div>`;
+      const thumbEl = div.querySelector('.media-thumb-wrap');
+      if (thumbEl) {
+        const badge = document.createElement('div');
+        badge.className = 'media-thumb-type';
+        badge.textContent = typeLabel;
+        thumbEl.appendChild(badge);
       }
-    };
-  });
-}
-
-async function addToPresentation(mediaId) {
-  if (!selectedPresentationId) return alert("Select a presentation tab first");
-  const m = localMedia[mediaId];
-  if (!m) return;
-  const pSnap = await get(ref(db, `presentations/${selectedPresentationId}`));
-  const p = pSnap.val()||{};
-  const items = p.items||[];
-  items.push({ mediaId, start: m.start||0, end: m.end||m.duration||null, label: m.filename||"" });
-  await update(ref(db, `presentations/${selectedPresentationId}`), { items });
-}
-
-async function updatePresentationPartial(updates) {
-  if (!selectedPresentationId) return;
-  await update(ref(db, `presentations/${selectedPresentationId}`), updates);
-  if (selectedPresentationId === activePresentationId) {
-    const curRef = ref(db, "presentations/current");
-    const curSnap = await get(curRef);
-    const curVal = curSnap.val()||{};
-    await set(curRef, { ...curVal, ...updates });
-  }
-}
-
-// Helper: get all monitor names assigned to a given presentation ID
-function getAssignedMonitorNames(pid) {
-  const assigned = [];
-  for (const [mn, val] of Object.entries(localMonitors||{})) {
-    let p = null;
-    if (typeof val === "string") p = val;
-    else if (val && typeof val === "object") p = val.presentation||val.assigned||val.pid||null;
-    if (p === pid) assigned.push(decodeURIComponent(mn));
-  }
-  return assigned;
-}
-
-function renderPresentationEditor() {
-  presentationItemsEl.innerHTML = "";
-  if (!selectedPresentationId || !presentations[selectedPresentationId]) return;
-  const p = presentations[selectedPresentationId];
-  editorTitle.textContent = p.name||"Presentation";
-  if (!isLocked("mode")) modeEl.value = p.mode||"slideshow";
-  if (!isLocked("transition")) transitionEl.value = p.transition||"fade";
-  if (!isLocked("interval")) intervalSEl.value = Math.round((p.intervalMs||5000)/1000);
-  if (!isLocked("syncPlayback")) syncPlaybackEl.checked = !!p.syncPlayback;
-  syncInfoEl.classList.toggle("visible", !!p.syncPlayback);
-  if (!isLocked("overlayText")) overlayTextEl.value = p.overlay?.text||"";
-  overlayVisibleEl.checked = !!p.overlay?.visible;
-  if (p.overlay?.color) { selectedOverlayBg = p.overlay.color; overlayBgColorInput.value = p.overlay.color; setSwatchActive("overlayBgSwatches", selectedOverlayBg); }
-  if (p.overlay?.textColor) { selectedOverlayTxt = p.overlay.textColor; overlayTxtColorInput.value = p.overlay.textColor; setSwatchActive("overlayTxtSwatches", selectedOverlayTxt); }
-  updateOverlayPreview();
-
-  // Assigned monitors — show all assigned + pre-populate input field
-  const assigned = getAssignedMonitorNames(selectedPresentationId);
-  assignedMonitorsList.innerHTML = "";
-  if (assigned.length === 0) {
-    assignedMonitorsList.innerHTML = '<span style="font-size:11px;color:var(--text3)">No monitors assigned</span>';
-  }
-  assigned.forEach(name => {
-    const el = document.createElement("div");
-    el.className = "monitor-badge";
-    el.innerHTML = `<span style="color:var(--green);font-size:8px">●</span> ${escHtml(name)}`;
-    assignedMonitorsList.appendChild(el);
-  });
-
-  // Pre-populate the assign input with currently assigned monitors (if it's empty)
-  if (!isLocked("monitorAssign") && !monitorAssignInput.value.trim() && assigned.length > 0) {
-    monitorAssignInput.value = assigned.join(", ");
-  }
-
-  const pRef = ref(db, `presentations/${selectedPresentationId}`);
-  const getP = async () => (await get(pRef)).val();
-
-  if (!p.items || p.items.length === 0) {
-    presentationItemsEl.innerHTML = `<div class="card" style="text-align:center;color:var(--text3);padding:24px">No slides yet — add media from the library →</div>`;
-    return;
-  }
-
-  p.items.forEach((it, index) => {
-    const m = localMedia[it.mediaId]||{};
-    const isYt = m.resource_type === "youtube";
-    const div = document.createElement("div");
-    div.className = "slide-card";
-    div.innerHTML = `
-      <div class="slide-card-header">
-        <div>
-          <div class="slide-card-title">${isYt?"▶ ":""}${escHtml(m.filename||it.mediaId||"(missing)")}</div>
-          <div class="slide-card-type">${m.resource_type||"?"}</div>
-        </div>
-        <div style="display:flex;gap:4px">
-          <button data-idx="${index}" class="btn sm upBtn">▲</button>
-          <button data-idx="${index}" class="btn sm downBtn">▼</button>
-          <button data-idx="${index}" class="btn sm danger removeBtn">Remove</button>
-        </div>
-      </div>
-      <div class="row">
-        <div class="field">
-          <label>Label</label>
-          <input data-idx="${index}" class="itemLabel" value="${escHtml(it.label||"")}" />
-        </div>
-        <div class="field">
-          <label>Start (s)</label>
-          <input type="number" data-idx="${index}" class="itemStart" value="${it.start||0}" />
-        </div>
-        <div class="field">
-          <label>End (s)</label>
-          <input type="number" data-idx="${index}" class="itemEnd" value="${it.end==null?"":it.end}" placeholder="auto" />
-        </div>
-      </div>`;
-    presentationItemsEl.appendChild(div);
-  });
-
-  presentationItemsEl.querySelectorAll(".removeBtn").forEach(b => b.onclick = async () => {
-    const p2 = await getP(); p2.items.splice(+b.dataset.idx, 1); await set(pRef, p2);
-  });
-  presentationItemsEl.querySelectorAll(".upBtn").forEach(b => b.onclick = async () => {
-    const p2 = await getP(); const i = +b.dataset.idx; if (i <= 0) return;
-    [p2.items[i-1],p2.items[i]] = [p2.items[i],p2.items[i-1]]; await set(pRef, p2);
-  });
-  presentationItemsEl.querySelectorAll(".downBtn").forEach(b => b.onclick = async () => {
-    const p2 = await getP(); const i = +b.dataset.idx; if (i >= p2.items.length-1) return;
-    [p2.items[i+1],p2.items[i]] = [p2.items[i],p2.items[i+1]]; await set(pRef, p2);
-  });
-
-  presentationItemsEl.querySelectorAll(".itemStart").forEach(inp => {
-    const k = `start-${inp.dataset.idx}`; inp.addEventListener("focus", () => lock(k));
-    inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].start = parseFloat(inp.value)||0; await set(pRef,p2); });
-  });
-  presentationItemsEl.querySelectorAll(".itemEnd").forEach(inp => {
-    const k = `end-${inp.dataset.idx}`; inp.addEventListener("focus", () => lock(k));
-    inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].end = inp.value===""?null:parseFloat(inp.value); await set(pRef,p2); });
-  });
-  presentationItemsEl.querySelectorAll(".itemLabel").forEach(inp => {
-    const k = `label-${inp.dataset.idx}`; inp.addEventListener("focus", () => lock(k));
-    inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].label = inp.value; await set(pRef,p2); });
-  });
-}
-
-// Auto-save listeners
-modeEl.addEventListener("change", async () => { lock("mode"); await updatePresentationPartial({ mode: modeEl.value }); setTimeout(() => unlock("mode"), 250); });
-transitionEl.addEventListener("change", async () => { lock("transition"); await updatePresentationPartial({ transition: transitionEl.value }); setTimeout(() => unlock("transition"), 250); });
-intervalSEl.addEventListener("focus", () => lock("interval"));
-intervalSEl.addEventListener("blur", async () => { unlock("interval"); await updatePresentationPartial({ intervalMs: (parseInt(intervalSEl.value,10)||5)*1000 }); });
-
-syncPlaybackEl.addEventListener("change", async () => {
-  lock("syncPlayback");
-  syncInfoEl.classList.toggle("visible", syncPlaybackEl.checked);
-  await updatePresentationPartial({ syncPlayback: syncPlaybackEl.checked });
-  renderTabs(); // update SYNC badge in tab
-  setTimeout(() => unlock("syncPlayback"), 250);
-});
-
-const saveOverlayText = debounce(async () => {
-  if (!selectedPresentationId) return;
-  const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
-  const curOverlay = curSnap.val()||{};
-  await updatePresentationPartial({ overlay: { ...curOverlay, text: overlayTextEl.value } });
-}, 450);
-
-overlayTextEl.addEventListener("focus", () => lock("overlayText"));
-overlayTextEl.addEventListener("input", () => { updateOverlayPreview(); saveOverlayText(); });
-overlayTextEl.addEventListener("blur", () => { unlock("overlayText"); saveOverlayText(); });
-
-overlayVisibleEl.addEventListener("change", async () => {
-  updateOverlayPreview();
-  const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
-  const curOverlay = curSnap.val()||{};
-  await updatePresentationPartial({ overlay: { ...curOverlay, visible: !!overlayVisibleEl.checked } });
-});
-
-overlayBgColorInput.addEventListener("input", async () => {
-  selectedOverlayBg = overlayBgColorInput.value; setSwatchActive("overlayBgSwatches", selectedOverlayBg); updateOverlayPreview();
-  const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
-  const curOverlay = curSnap.val()||{};
-  await updatePresentationPartial({ overlay: { ...curOverlay, color: selectedOverlayBg } });
-});
-overlayTxtColorInput.addEventListener("input", async () => {
-  selectedOverlayTxt = overlayTxtColorInput.value; setSwatchActive("overlayTxtSwatches", selectedOverlayTxt); updateOverlayPreview();
-  const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
-  const curOverlay = curSnap.val()||{};
-  await updatePresentationPartial({ overlay: { ...curOverlay, textColor: selectedOverlayTxt } });
-});
-
-// Monitor assignment input - lock while typing
-monitorAssignInput.addEventListener("focus", () => lock("monitorAssign"));
-monitorAssignInput.addEventListener("blur", () => unlock("monitorAssign"));
-
-assignMonitorsBtn.onclick = async () => {
-  if (!selectedPresentationId) return alert("Select a presentation first.");
-  const raw = monitorAssignInput.value.trim();
-  const names = raw ? raw.split(",").map(s => s.trim()).filter(Boolean) : [];
-  const keys = names.map(n => encodeURIComponent(n));
-  const snap = await get(monitorsRef);
-  const cur = snap.val()||{};
-
-  // Remove this presentation from monitors no longer in list
-  for (const [mn, val] of Object.entries(cur)) {
-    let pid = null;
-    if (typeof val === "string") pid = val;
-    else if (val && typeof val === "object") pid = val.presentation||val.assigned||val.pid||null;
-    if (pid === selectedPresentationId && !keys.includes(mn)) {
-      if (typeof val === "object") await update(ref(db, `monitors/${mn}`), { presentation: null });
-      else await remove(ref(db, `monitors/${mn}`));
-    }
-  }
-  // Assign selected names
-  for (const k of keys) {
-    const curSnap = await get(ref(db, `monitors/${k}`));
-    const curVal = curSnap.val();
-    if (typeof curVal === "object" && curVal !== null) {
-      await update(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
-    } else {
-      await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
-    }
-  }
-};
-
-clearMonitorAssignmentsBtn.onclick = async () => {
-  if (!selectedPresentationId) return;
-  if (!confirm("Clear all monitor assignments for this presentation?")) return;
-  const snap = await get(monitorsRef);
-  const cur = snap.val()||{};
-  for (const [mn, val] of Object.entries(cur)) {
-    let pid = null;
-    if (typeof val === "string") pid = val;
-    else if (val && typeof val === "object") pid = val.presentation||val.assigned||val.pid||null;
-    if (pid === selectedPresentationId) {
-      if (typeof val === "object") await update(ref(db, `monitors/${mn}`), { presentation: null });
-      else await remove(ref(db, `monitors/${mn}`));
-    }
-  }
-  monitorAssignInput.value = "";
-};
-
-function renderMonitorsTable() {
-  monitorsTbody.innerHTML = "";
-  const now = Date.now();
-  Object.entries(localMonitors||{}).sort((a,b) => a[0].localeCompare(b[0])).forEach(([encodedName, data]) => {
-    const name = decodeURIComponent(encodedName);
-    const tr = document.createElement("tr");
-    let lastSeen = 0, online = false, resolution = "—", pid = null;
-    if (typeof data === "string") { pid = data; }
-    else if (data && typeof data === "object") {
-      lastSeen = data.lastSeen||0;
-      online = now - lastSeen < 15000 && data.status === "online";
-      resolution = data.resolution||"—";
-      pid = data.presentation||data.assigned||data.pid||null;
-    }
-    const presName = pid && presentations[pid] ? escHtml(presentations[pid].name) : (pid ? pid.slice(0,8)+"…" : "—");
-    tr.innerHTML = `
-      <td style="color:var(--text)">${escHtml(name)}</td>
-      <td>${online ? '<span class="online-dot"></span>Online' : '<span class="offline-dot"></span>Offline'}</td>
-      <td>${lastSeen ? new Date(lastSeen).toLocaleTimeString() : "—"}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:11px">${escHtml(resolution)}</td>
-      <td>${presName}</td>
-      <td>
-        <div style="display:flex;gap:4px">
-          <button data-name="${encodedName}" class="btn sm assignToBtn">Assign here</button>
-          <button data-name="${encodedName}" class="btn sm reloadBtn">Reload</button>
-          <button data-name="${encodedName}" class="btn sm danger removeMonBtn">Remove</button>
-        </div>
-      </td>`;
-    monitorsTbody.appendChild(tr);
-  });
-
-  monitorsTbody.querySelectorAll(".assignToBtn").forEach(b => {
-    b.onclick = async () => {
-      if (!selectedPresentationId) return alert("Select a presentation tab first.");
-      const key = b.dataset.name;
-      const curSnap = await get(ref(db, `monitors/${key}`));
-      const curVal = curSnap.val();
-      if (typeof curVal === "object" && curVal !== null) {
-        await update(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
-      } else {
-        await set(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
-      }
-    };
-  });
-
-  monitorsTbody.querySelectorAll(".reloadBtn").forEach(b => {
-    b.onclick = async () => {
-      const key = b.dataset.name;
-      const curSnap = await get(ref(db, `monitors/${key}`));
-      const curVal = curSnap.val();
-      if (curVal && typeof curVal === "object") {
-        await update(ref(db, `monitors/${key}`), { command: { cmd: "reloadPresentation", at: Date.now() } });
-      } else {
-        await set(ref(db, `monitors/${key}`), { presentation: curVal||null, command: { cmd: "reloadPresentation", at: Date.now() } });
-      }
-    };
-  });
-
-  monitorsTbody.querySelectorAll(".removeMonBtn").forEach(b => {
-    b.onclick = async () => {
-      if (!confirm("Remove monitor entry?")) return;
-      await remove(ref(db, `monitors/${b.dataset.name}`));
-    };
-  });
-}
-
-// Upload
-uploadBtn.onclick = async () => {
-  const file = fileInput.files[0];
-  if (!file) return alert("Choose a file first");
-  uploadStatus.textContent = "";
-  progressWrap.style.display = "block";
-  progressFill.style.width = "0%";
-  progressPct.textContent = "0%";
-  uploadBtn.disabled = true;
-  try {
-    const fd = new FormData();
-    fd.append("file", file); fd.append("upload_preset", UPLOAD_PRESET);
-    const data = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`);
-      xhr.upload.onprogress = e => {
-        if (e.lengthComputable) { const pct = Math.round(e.loaded/e.total*100); progressFill.style.width=pct+"%"; progressPct.textContent=pct+"%"; }
+      mediaListEl.appendChild(div);
+    });
+    mediaListEl.querySelectorAll('.rename-input').forEach(inp => {
+      const save = async () => {
+        const id = inp.dataset.id; const val = inp.value.trim();
+        if (!val || val === (localMedia[id]?.filename || '')) return;
+        await update(ref(db, `media/${id}`), { filename: val });
       };
-      xhr.onload = () => xhr.status < 300 ? resolve(JSON.parse(xhr.responseText)) : reject(new Error("HTTP "+xhr.status));
-      xhr.onerror = () => reject(new Error("Network error"));
-      xhr.send(fd);
+      inp.addEventListener('blur', save);
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
     });
-    const mobj = { url: data.secure_url, resource_type: data.resource_type, filename: fname.value||file.name, uploadedAt: Date.now(), duration: data.duration||null };
-    const newRef = push(mediaRef);
-    await set(newRef, mobj);
-    uploadStatus.textContent = "✓ Uploaded"; uploadStatus.className = "status-text";
-    fname.value = ""; fileInput.value = "";
-    if (showNow.value !== "no" && selectedPresentationId) {
-      const pRef = ref(db, `presentations/${selectedPresentationId}`);
-      const cur = (await get(pRef)).val()||{};
-      const item = { mediaId: newRef.key, start: 0, end: mobj.duration||null, label: mobj.filename };
-      await update(pRef, { items: showNow.value==="replace"?[item]:[...(cur.items||[]),item] });
-    }
-  } catch(err) {
-    uploadStatus.textContent = "✗ Failed: "+err.message; uploadStatus.className = "status-text err";
-  } finally {
-    uploadBtn.disabled = false;
-    setTimeout(() => progressWrap.style.display = "none", 3000);
+    mediaListEl.querySelectorAll('.addBtn').forEach(b => b.onclick = () => {
+      addToPresentation(b.dataset.id);
+      closeSidebar(); // close on mobile after adding
+    });
+    mediaListEl.querySelectorAll('.deleteBtn').forEach(b => {
+      b.onclick = async () => {
+        if (!confirm('Delete this media from all presentations?')) return;
+        await remove(ref(db, 'media/' + b.dataset.id));
+        for (const [pid, p] of Object.entries(presentations)) {
+          if (!p.items) continue;
+          const filtered = p.items.filter(it => it.mediaId !== b.dataset.id);
+          if (filtered.length !== p.items.length) await update(ref(db, `presentations/${pid}`), { items: filtered });
+        }
+        toast('Media removed');
+      };
+    });
   }
-};
+
+  async function addToPresentation(mediaId) {
+    if (!selectedPresentationId) return toast('Select a presentation tab first', 'error');
+    const m = localMedia[mediaId];
+    if (!m) return;
+    const pSnap = await get(ref(db, `presentations/${selectedPresentationId}`));
+    const p = pSnap.val() || {};
+    const items = p.items || [];
+    items.push({ mediaId, start: m.start || 0, end: m.end || m.duration || null, label: m.filename || '' });
+    await update(ref(db, `presentations/${selectedPresentationId}`), { items });
+    toast(`Added "${m.filename || mediaId}" to slides`);
+  }
+
+  async function updatePresentationPartial(updates) {
+    if (!selectedPresentationId) return;
+    await update(ref(db, `presentations/${selectedPresentationId}`), updates);
+    if (selectedPresentationId === activePresentationId) {
+      const curRef2 = ref(db, 'presentations/current');
+      const curSnap = await get(curRef2);
+      const curVal = curSnap.val() || {};
+      await set(curRef2, { ...curVal, ...updates });
+    }
+  }
+
+  function getAssignedMonitorNames(pid) {
+    const assigned = [];
+    for (const [mn, val] of Object.entries(localMonitors || {})) {
+      let p = null;
+      if (typeof val === 'string') p = val;
+      else if (val && typeof val === 'object') p = val.presentation || val.assigned || val.pid || null;
+      if (p === pid) assigned.push(decodeURIComponent(mn));
+    }
+    return assigned;
+  }
+
+  // ===== RENDER EDITOR =====
+  function renderPresentationEditor() {
+    if (!selectedPresentationId || !presentations[selectedPresentationId]) {
+      editorTitle.textContent = 'Select a Presentation';
+      return;
+    }
+    const p = presentations[selectedPresentationId];
+    editorTitle.textContent = p.name || 'Presentation';
+    if (!isLocked('mode')) modeEl.value = p.mode || 'slideshow';
+    if (!isLocked('transition')) transitionEl.value = p.transition || 'fade';
+    if (!isLocked('interval')) intervalSEl.value = Math.round((p.intervalMs || 5000) / 1000);
+    if (!isLocked('syncPlayback')) syncPlaybackEl.checked = !!p.syncPlayback;
+    syncInfoEl.classList.toggle('visible', !!p.syncPlayback);
+    if (!isLocked('overlayText')) overlayTextEl.value = p.overlay?.text || '';
+    overlayVisibleEl.checked = !!p.overlay?.visible;
+    if (p.overlay?.color) {
+      selectedOverlayBg = p.overlay.color;
+      overlayBgColorInput.value = p.overlay.color;
+      setSwatchActive('overlayBgSwatches', selectedOverlayBg);
+    }
+    if (p.overlay?.textColor) {
+      selectedOverlayTxt = p.overlay.textColor;
+      overlayTxtColorInput.value = p.overlay.textColor;
+      setSwatchActive('overlayTxtSwatches', selectedOverlayTxt);
+    }
+    updateOverlayPreview();
+
+    const assigned = getAssignedMonitorNames(selectedPresentationId);
+    assignedMonitorsList.innerHTML = '';
+    if (assigned.length === 0) {
+      assignedMonitorsList.innerHTML = '<span style="font-size:13px;color:var(--text3)">No monitors assigned</span>';
+    }
+    assigned.forEach(name => {
+      const el = document.createElement('div');
+      el.className = 'assigned-badge';
+      el.innerHTML = `🖥️ ${escHtml(name)}`;
+      assignedMonitorsList.appendChild(el);
+    });
+    if (!isLocked('monitorAssign') && !monitorAssignInput.value.trim() && assigned.length > 0) {
+      monitorAssignInput.value = assigned.join(', ');
+    }
+
+    renderSlides(p);
+  }
+
+  // ===== SLIDES WITH DRAG REORDER =====
+  function renderSlides(p) {
+    presentationItemsEl.innerHTML = '';
+    if (!p.items || p.items.length === 0) {
+      presentationItemsEl.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🖼️</div>
+          <div class="empty-state-title">No slides yet</div>
+          <div class="empty-state-sub">Add media from the library in the sidebar.</div>
+        </div>`;
+      return;
+    }
+
+    const pRef2 = ref(db, `presentations/${selectedPresentationId}`);
+    const getP = async () => (await get(pRef2)).val();
+
+    p.items.forEach((it, index) => {
+      const m = localMedia[it.mediaId] || {};
+      const isYt = m.resource_type === 'youtube';
+      const div = document.createElement('div');
+      div.className = 'slide-item';
+      div.draggable = true;
+      div.dataset.idx = index;
+
+      let thumbHtml = '';
+      if (isYt) thumbHtml = `<div class="slide-item-thumb"><div class="slide-item-thumb-yt">▶</div><div class="slide-item-thumb-badge">YT</div><div class="slide-num">${index + 1}</div></div>`;
+      else if (m.resource_type === 'image') thumbHtml = `<div class="slide-item-thumb"><img src="${m.url}" /><div class="slide-num">${index + 1}</div></div>`;
+      else thumbHtml = `<div class="slide-item-thumb"><video src="${m.url}" muted></video><div class="slide-num">${index + 1}</div></div>`;
+
+      div.innerHTML = `
+        <div class="drag-handle">⠿</div>
+        ${thumbHtml}
+        <div class="slide-item-body">
+          <input class="slide-item-name itemLabel" data-idx="${index}" value="${escHtml(it.label || m.filename || it.mediaId || '')}" placeholder="Label..." />
+          <div class="slide-item-fields">
+            <div class="field">
+              <label>Start (s)</label>
+              <input type="number" data-idx="${index}" class="itemStart" value="${it.start || 0}" />
+            </div>
+            <div class="field">
+              <label>End (s)</label>
+              <input type="number" data-idx="${index}" class="itemEnd" value="${it.end == null ? '' : it.end}" placeholder="auto" />
+            </div>
+            <div class="slide-item-actions">
+              <button data-idx="${index}" class="btn danger xs removeBtn">✕ Remove</button>
+            </div>
+          </div>
+        </div>`;
+      presentationItemsEl.appendChild(div);
+
+      div.addEventListener('dragstart', e => {
+        dragSrcIdx = index;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => div.style.opacity = '0.5', 0);
+      });
+      div.addEventListener('dragend', () => { div.style.opacity = ''; });
+      div.addEventListener('dragover', e => {
+        e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+        document.querySelectorAll('.slide-item').forEach(el => el.classList.remove('drag-over'));
+        div.classList.add('drag-over');
+      });
+      div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+      div.addEventListener('drop', async e => {
+        e.preventDefault();
+        div.classList.remove('drag-over');
+        const toIdx = index;
+        if (dragSrcIdx === null || dragSrcIdx === toIdx) return;
+        const p2 = await getP();
+        const [moved] = p2.items.splice(dragSrcIdx, 1);
+        p2.items.splice(toIdx, 0, moved);
+        await set(pRef2, p2);
+        dragSrcIdx = null;
+      });
+    });
+
+    presentationItemsEl.querySelectorAll('.removeBtn').forEach(b => b.onclick = async () => {
+      const p2 = await getP();
+      p2.items.splice(+b.dataset.idx, 1);
+      await set(pRef2, p2);
+      toast(`Removed slide`, 'info');
+    });
+
+    presentationItemsEl.querySelectorAll('.itemStart').forEach(inp => {
+      const k = `start-${inp.dataset.idx}`;
+      inp.addEventListener('focus', () => lock(k));
+      inp.addEventListener('blur', async () => {
+        unlock(k);
+        const p2 = await getP();
+        p2.items[+inp.dataset.idx].start = parseFloat(inp.value) || 0;
+        await set(pRef2, p2);
+      });
+    });
+    presentationItemsEl.querySelectorAll('.itemEnd').forEach(inp => {
+      const k = `end-${inp.dataset.idx}`;
+      inp.addEventListener('focus', () => lock(k));
+      inp.addEventListener('blur', async () => {
+        unlock(k);
+        const p2 = await getP();
+        p2.items[+inp.dataset.idx].end = inp.value === '' ? null : parseFloat(inp.value);
+        await set(pRef2, p2);
+      });
+    });
+    presentationItemsEl.querySelectorAll('.itemLabel').forEach(inp => {
+      const k = `label-${inp.dataset.idx}`;
+      inp.addEventListener('focus', () => lock(k));
+      inp.addEventListener('blur', async () => {
+        unlock(k);
+        const p2 = await getP();
+        p2.items[+inp.dataset.idx].label = inp.value;
+        await set(pRef2, p2);
+      });
+    });
+  }
+
+  // ===== MONITORS LIST =====
+  function renderMonitorsList() {
+    monitorsList.innerHTML = '';
+    const entries = Object.entries(localMonitors || {}).sort((a, b) => a[0].localeCompare(b[0]));
+    if (entries.length === 0) {
+      monitorsList.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No monitors connected yet</div>';
+      return;
+    }
+    const now = Date.now();
+    entries.forEach(([encodedName, data]) => {
+      const name = decodeURIComponent(encodedName);
+      let lastSeen = 0, online = false, resolution = '—', pid = null;
+      if (typeof data === 'string') { pid = data; }
+      else if (data && typeof data === 'object') {
+        lastSeen = data.lastSeen || 0;
+        online = now - lastSeen < 15000 && data.status === 'online';
+        resolution = data.resolution || '—';
+        pid = data.presentation || data.assigned || data.pid || null;
+      }
+      const presName = pid && presentations[pid] ? presentations[pid].name : pid ? pid.slice(0, 8) + '…' : 'Unassigned';
+      const lastSeenStr = lastSeen ? new Date(lastSeen).toLocaleTimeString() : 'Never';
+      const row = document.createElement('div');
+      row.className = 'monitor-row';
+      row.innerHTML = `
+        <div class="monitor-status-dot ${online ? 'online' : 'offline'}"></div>
+        <div class="monitor-info">
+          <div class="monitor-name">${escHtml(name)}</div>
+          <div class="monitor-meta">${resolution} · ${lastSeenStr}</div>
+          <div class="monitor-pres">→ ${escHtml(presName)}</div>
+        </div>
+        <div class="monitor-actions">
+          <button data-name="${encodedName}" class="btn xs assignToBtn" title="Assign current presentation">Assign</button>
+          <button data-name="${encodedName}" class="btn xs reloadBtn" title="Reload this monitor">↺</button>
+          <button data-name="${encodedName}" class="btn danger xs removeMonBtn" title="Remove monitor">✕</button>
+        </div>`;
+      monitorsList.appendChild(row);
+    });
+
+    monitorsList.querySelectorAll('.assignToBtn').forEach(b => {
+      b.onclick = async () => {
+        if (!selectedPresentationId) return toast('Select a presentation tab first.', 'error');
+        const key = b.dataset.name;
+        const curSnap = await get(ref(db, `monitors/${key}`));
+        const curVal = curSnap.val();
+        if (typeof curVal === 'object' && curVal !== null) await update(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
+        else await set(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
+        toast(`Monitor assigned`);
+      };
+    });
+    monitorsList.querySelectorAll('.reloadBtn').forEach(b => {
+      b.onclick = async () => {
+        const key = b.dataset.name;
+        const curSnap = await get(ref(db, `monitors/${key}`));
+        const curVal = curSnap.val();
+        if (curVal && typeof curVal === 'object') await update(ref(db, `monitors/${key}`), { command: { cmd: 'reloadPresentation', at: Date.now() } });
+        else await set(ref(db, `monitors/${key}`), { presentation: curVal || null, command: { cmd: 'reloadPresentation', at: Date.now() } });
+        toast('Reload sent', 'info');
+      };
+    });
+    monitorsList.querySelectorAll('.removeMonBtn').forEach(b => {
+      b.onclick = async () => {
+        if (!confirm('Remove monitor entry?')) return;
+        await remove(ref(db, `monitors/${b.dataset.name}`));
+        toast('Monitor removed', 'info');
+      };
+    });
+  }
+
+  // ===== AUTO-SAVE LISTENERS =====
+  modeEl.addEventListener('change', async () => { lock('mode'); await updatePresentationPartial({ mode: modeEl.value }); setTimeout(() => unlock('mode'), 250); });
+  transitionEl.addEventListener('change', async () => { lock('transition'); await updatePresentationPartial({ transition: transitionEl.value }); setTimeout(() => unlock('transition'), 250); });
+  intervalSEl.addEventListener('focus', () => lock('interval'));
+  intervalSEl.addEventListener('blur', async () => { unlock('interval'); await updatePresentationPartial({ intervalMs: (parseInt(intervalSEl.value, 10) || 5) * 1000 }); });
+  syncPlaybackEl.addEventListener('change', async () => {
+    lock('syncPlayback');
+    syncInfoEl.classList.toggle('visible', syncPlaybackEl.checked);
+    await updatePresentationPartial({ syncPlayback: syncPlaybackEl.checked });
+    renderTabs();
+    setTimeout(() => unlock('syncPlayback'), 250);
+  });
+
+  const saveOverlayText = debounce(async () => {
+    if (!selectedPresentationId) return;
+    const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+    const curOverlay = curSnap.val() || {};
+    await updatePresentationPartial({ overlay: { ...curOverlay, text: overlayTextEl.value } });
+  }, 450);
+
+  overlayTextEl.addEventListener('focus', () => lock('overlayText'));
+  overlayTextEl.addEventListener('input', () => { updateOverlayPreview(); saveOverlayText(); });
+  overlayTextEl.addEventListener('blur', () => { unlock('overlayText'); saveOverlayText(); });
+
+  overlayVisibleEl.addEventListener('change', async () => {
+    updateOverlayPreview();
+    const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+    const curOverlay = curSnap.val() || {};
+    await updatePresentationPartial({ overlay: { ...curOverlay, visible: !!overlayVisibleEl.checked } });
+  });
+
+  overlayBgColorInput.addEventListener('input', async () => {
+    selectedOverlayBg = overlayBgColorInput.value;
+    setSwatchActive('overlayBgSwatches', selectedOverlayBg);
+    updateOverlayPreview();
+    const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+    const curOverlay = curSnap.val() || {};
+    await updatePresentationPartial({ overlay: { ...curOverlay, color: selectedOverlayBg } });
+  });
+  overlayTxtColorInput.addEventListener('input', async () => {
+    selectedOverlayTxt = overlayTxtColorInput.value;
+    setSwatchActive('overlayTxtSwatches', selectedOverlayTxt);
+    updateOverlayPreview();
+    const curSnap = await get(ref(db, `presentations/${selectedPresentationId}/overlay`));
+    const curOverlay = curSnap.val() || {};
+    await updatePresentationPartial({ overlay: { ...curOverlay, textColor: selectedOverlayTxt } });
+  });
+
+  monitorAssignInput.addEventListener('focus', () => lock('monitorAssign'));
+  monitorAssignInput.addEventListener('blur', () => unlock('monitorAssign'));
+
+  assignMonitorsBtn.onclick = async () => {
+    if (!selectedPresentationId) return toast('Select a presentation first.', 'error');
+    const raw = monitorAssignInput.value.trim();
+    const names = raw ? raw.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const keys = names.map(n => encodeURIComponent(n));
+    const snap = await get(monitorsRef);
+    const cur = snap.val() || {};
+    for (const [mn, val] of Object.entries(cur)) {
+      let pid = null;
+      if (typeof val === 'string') pid = val;
+      else if (val && typeof val === 'object') pid = val.presentation || val.assigned || val.pid || null;
+      if (pid === selectedPresentationId && !keys.includes(mn)) {
+        if (typeof val === 'object') await update(ref(db, `monitors/${mn}`), { presentation: null });
+        else await remove(ref(db, `monitors/${mn}`));
+      }
+    }
+    for (const k of keys) {
+      const curSnap = await get(ref(db, `monitors/${k}`));
+      const curVal = curSnap.val();
+      if (typeof curVal === 'object' && curVal !== null) await update(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+      else await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+    }
+    toast(`${names.length} monitor(s) assigned`);
+  };
+
+  clearMonitorAssignmentsBtn.onclick = async () => {
+    if (!selectedPresentationId) return;
+    if (!confirm('Clear all monitor assignments for this presentation?')) return;
+    const snap = await get(monitorsRef);
+    const cur = snap.val() || {};
+    for (const [mn, val] of Object.entries(cur)) {
+      let pid = null;
+      if (typeof val === 'string') pid = val;
+      else if (val && typeof val === 'object') pid = val.presentation || val.assigned || val.pid || null;
+      if (pid === selectedPresentationId) {
+        if (typeof val === 'object') await update(ref(db, `monitors/${mn}`), { presentation: null });
+        else await remove(ref(db, `monitors/${mn}`));
+      }
+    }
+    monitorAssignInput.value = '';
+    toast('Monitor assignments cleared', 'info');
+  };
+
+  // ===== FILE UPLOAD =====
+  uploadBtn.onclick = async () => {
+    const files = fileInput.files;
+    if (!files || files.length === 0) return toast('Choose a file first', 'error');
+    uploadStatus.textContent = '';
+    progressWrap.style.display = 'block';
+    progressFill.style.width = '0%';
+    progressPct.textContent = '0%';
+    uploadBtn.disabled = true;
+    try {
+      const file = files[0];
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', UPLOAD_PRESET);
+      const data = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`);
+        xhr.upload.onprogress = e => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            progressFill.style.width = pct + '%';
+            progressPct.textContent = pct + '%';
+          }
+        };
+        xhr.onload = () => xhr.status < 300 ? resolve(JSON.parse(xhr.responseText)) : reject(new Error('HTTP ' + xhr.status));
+        xhr.onerror = () => reject(new Error('Network error'));
+        xhr.send(fd);
+      });
+      const mobj = { url: data.secure_url, resource_type: data.resource_type, filename: fname.value || file.name, uploadedAt: Date.now(), duration: data.duration || null };
+      const newRef3 = push(mediaRef);
+      await set(newRef3, mobj);
+      toast(`"${mobj.filename}" uploaded`);
+      fname.value = ''; fileInput.value = '';
+      if (showNow.value !== 'no' && selectedPresentationId) {
+        const pRef3 = ref(db, `presentations/${selectedPresentationId}`);
+        const cur = (await get(pRef3)).val() || {};
+        const item = { mediaId: newRef3.key, start: 0, end: mobj.duration || null, label: mobj.filename };
+        await update(pRef3, { items: showNow.value === 'replace' ? [item] : [...(cur.items || []), item] });
+      }
+    } catch (err) {
+      toast('Upload failed: ' + err.message, 'error');
+    } finally {
+      uploadBtn.disabled = false;
+      setTimeout(() => progressWrap.style.display = 'none', 3000);
+    }
+  };
 </script>
 </body>
 </html>
