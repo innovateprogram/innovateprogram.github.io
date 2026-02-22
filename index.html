@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <!-- Change Version Number Down below when editing document, only change first number if a huge change has occured but if a small
   change has occured then change the second -->
-    <title>Display V2.4</title>
+    <title>Display V2.5</title>
     <style>
       *,
       *::before,
@@ -557,7 +557,8 @@
 
           // Play muted first (guaranteed to work), then unmute
           vid.muted = true;
-          vid.play()
+          vid
+            .play()
             .then(() => {
               doPlay();
             })
@@ -891,7 +892,7 @@
           await attachSyncListener(pid);
 
           let presentationFirstFire = true;
-          assignedPresentationUnsub = onValue(ref(db, `presentations/${pid}`), (snap) => {
+          assignedPresentationUnsub = onValue(ref(db, `presentations/${pid}`), async (snap) => {
             if (presentationFirstFire) {
               presentationFirstFire = false;
               return;
