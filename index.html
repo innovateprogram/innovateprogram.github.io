@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Display V2.6</title>
+    <title>Display V2.7</title>
     <style>
       *,
       *::before,
@@ -502,9 +502,6 @@
         void slide.offsetWidth;
         slide.classList.add("visible");
 
-        // Publish AFTER showing so other displays can follow
-        if (publish) publishSync(idx);
-
         const item = p.items[idx];
         const media = mediaCache[item.mediaId];
         if (!media) {
@@ -513,13 +510,16 @@
         }
 
         if (media.resource_type === "youtube") {
-          playYT(p, idx, item, media, seekOffset || 0);
+          // publish flag passed through so YT player can fire sync when playback begins
+          playYT(p, idx, item, media, seekOffset || 0, publish);
         } else if (media.resource_type !== "image") {
           const vid = slide.querySelector("video");
-          if (vid) playVideo(p, slide, vid, item, seekOffset || 0);
+          if (vid) playVideo(p, slide, vid, item, seekOffset || 0, publish);
           else scheduleNext(p);
         } else {
-          // Image — account for elapsed time when syncing
+          // Images: no async start — publish immediately
+          if (publish) publishSync(idx);
+          // Account for elapsed time when syncing
           if (seekOffset && p.intervalMs) {
             const remaining = Math.max(500, p.intervalMs - seekOffset * 1000);
             slideTimer = setTimeout(() => advance(p), remaining);
@@ -529,15 +529,20 @@
         }
       }
 
-      function playVideo(p, slideEl, vid, item, seekOffset) {
-        const start = (item.start || 0) + (seekOffset || 0);
+      function playVideo(p, slideEl, vid, item, seekOffset, publish) {
+        // seekOffset = seconds already elapsed on this slide (received from sync state).
+        // We seek to (item.start + seekOffset) so video plays from the right position.
+        // When publishing, we back-date startedAt by seekOffset so other displays
+        // calculate the same seek position when they read the sync state.
+        const itemStart = item.start || 0;
+        const seekTo = itemStart + (seekOffset || 0);
         const end = item.end || null;
         vid.onended = null;
 
         const attemptPlay = () => {
           try {
-            if (isFinite(vid.duration) && start > 0 && start < vid.duration) vid.currentTime = start;
-            else if (start === 0) vid.currentTime = 0;
+            if (isFinite(vid.duration) && seekTo > 0 && seekTo < vid.duration) vid.currentTime = seekTo;
+            else if (seekTo === 0) vid.currentTime = 0;
           } catch (e) {}
 
           vid.muted = true;
@@ -545,7 +550,19 @@
             .play()
             .then(() => {
               vid.muted = false;
-              if (end && end > start) {
+
+              // Publish sync after play() resolves so startedAt is accurate.
+              // Back-date by seekOffset so other displays seek to the same position.
+              if (publish && syncEnabled && currentPid) {
+                const backdatedStart = Date.now() - (seekOffset || 0) * 1000;
+                set(syncRef(currentPid), {
+                  idx: slideIndex,
+                  startedAt: backdatedStart,
+                  publisherId: DISPLAY_ID
+                }).catch(() => {});
+              }
+
+              if (end && end > seekTo) {
                 const poll = () => {
                   if (!slideEl.classList.contains("visible")) return;
                   vid.currentTime >= end ? (vid.pause(), advance(p)) : requestAnimationFrame(poll);
@@ -601,10 +618,23 @@
         document.head.appendChild(tag);
       }
 
-      function playYT(p, idx, item, media, seekOffset) {
+      function playYT(p, idx, item, media, seekOffset, publish) {
         const base = item.start ?? media.start ?? 0;
-        const start = base + (seekOffset || 0);
+        const itemStart = base;
+        const start = itemStart + (seekOffset || 0);
         const end = item.end ?? media.end ?? null;
+
+        // Helper to publish sync when YT playback actually begins.
+        // Back-date startedAt by seekOffset so other displays calculate the right seek.
+        const publishYtSync = () => {
+          if (!publish || !syncEnabled || !currentPid) return;
+          const backdatedStart = Date.now() - (seekOffset || 0) * 1000;
+          set(syncRef(currentPid), {
+            idx: slideIndex,
+            startedAt: backdatedStart,
+            publisherId: DISPLAY_ID
+          }).catch(() => {});
+        };
 
         loadYtApi(() => {
           if (ytPlayers[idx]) {
@@ -615,11 +645,13 @@
               pl.setVolume(100);
               pl.playVideo();
             } catch (e) {}
+            publishYtSync();
             if (end && end > start) pollYt(p, idx, pl, end);
             return;
           }
           const divId = `yt-${idx}`;
           if (!document.getElementById(divId)) return;
+          let ytSyncPublished = false;
           new window.YT.Player(divId, {
             videoId: media.ytId,
             playerVars: {
@@ -653,13 +685,19 @@
               },
               onStateChange: (e) => {
                 if (e.data === 0) advance(p);
-                if (e.data === 1)
+                if (e.data === 1) {
+                  // State 1 = playing — fire sync publish once when playback actually starts
+                  if (!ytSyncPublished) {
+                    ytSyncPublished = true;
+                    publishYtSync();
+                  }
                   setTimeout(() => {
                     try {
                       e.target.unMute();
                       e.target.setVolume(100);
                     } catch (err) {}
                   }, 300);
+                }
               },
               onError: (e) => {
                 console.warn("YT error:", e.data);
