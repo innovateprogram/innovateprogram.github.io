@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <!-- Change Version Number Down below when editing document, only change first number if a huge change has occured but if a small
   change has occured then change the second -->
-    <title>Display V2.3</title>
+    <title>Display V2.4</title>
     <style>
       *,
       *::before,
@@ -557,8 +557,7 @@
 
           // Play muted first (guaranteed to work), then unmute
           vid.muted = true;
-          vid
-            .play()
+          vid.play()
             .then(() => {
               doPlay();
             })
@@ -783,10 +782,9 @@
         dismissPreload();
         applyOverlay(p, true);
 
-        // Attach sync listener BEFORE reading sync state so we don't miss updates,
-        // but with a flag to ignore the very first onValue fire (which is the
-        // current DB value we're about to read manually anyway).
-        attachSyncListener(pid);
+        // Attach sync listener FIRST (awaited so baseline is set before we show slides),
+        // then read sync state and jump to the right slide.
+        await attachSyncListener(pid);
 
         // Now read current sync state and jump to the right slide
         const { idx: syncIdx, elapsed } = await readSyncState(pid, p);
@@ -798,8 +796,8 @@
       let syncUnsub = null;
       let syncListenerPid = null;
 
-      function attachSyncListener(pid) {
-        // Always detach and reattach so skipFirst resets correctly
+      async function attachSyncListener(pid) {
+        // Always detach first so we get a clean slate
         if (syncUnsub) {
           syncUnsub();
           syncUnsub = null;
@@ -807,28 +805,27 @@
         if (!pid) return;
         syncListenerPid = pid;
 
-        // Track the last sync state value we've already acted on (set during readSyncState)
-        // so we don't double-jump when the listener fires its initial value.
-        // We record the current DB value's startedAt to compare against.
+        // Read the current sync state FIRST (before attaching onValue) so we know
+        // the baseline startedAt. This prevents acting on the initial onValue fire
+        // (which is just the current DB value we've already handled via readSyncState).
         let lastHandledStartedAt = null;
+        try {
+          const snap = await get(getSyncRef(pid));
+          const s = snap.val();
+          if (s && s.startedAt) lastHandledStartedAt = s.startedAt;
+        } catch (e) {}
 
-        // Read once to capture the "already handled" baseline
-        get(getSyncRef(pid))
-          .then((snap) => {
-            const s = snap.val();
-            if (s && s.startedAt) lastHandledStartedAt = s.startedAt;
-          })
-          .catch(() => {});
-
+        // NOW attach the live listener — any event with the same startedAt as our
+        // baseline is already handled; only genuinely new advances come through.
         syncUnsub = onValue(getSyncRef(pid), (snap) => {
           const s = snap.val();
           if (!s || s.idx == null) return;
 
-          // Skip if this is the same event we already handled on boot via readSyncState
+          // Skip the value we just read as our baseline
           if (s.startedAt === lastHandledStartedAt) return;
           lastHandledStartedAt = s.startedAt;
 
-          // Ignore updates we published ourselves to prevent feedback loops
+          // Ignore our own publishes to prevent feedback loops
           if (s.publisherId === DISPLAY_ID) return;
 
           // Only apply if sync is enabled for the current presentation
@@ -891,7 +888,7 @@
           if (!pid) return;
 
           // Attach sync listener when assigned presentation changes
-          attachSyncListener(pid);
+          await attachSyncListener(pid);
 
           let presentationFirstFire = true;
           assignedPresentationUnsub = onValue(ref(db, `presentations/${pid}`), (snap) => {
@@ -903,7 +900,7 @@
             if (p) {
               const wasSynced = syncEnabled;
               syncEnabled = !!p.syncPlayback;
-              if (syncEnabled && !wasSynced) attachSyncListener(pid);
+              if (syncEnabled && !wasSynced) await attachSyncListener(pid);
             }
             debouncedPresentationChange(false);
           });
