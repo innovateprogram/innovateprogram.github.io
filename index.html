@@ -3,9 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <!-- Change Version Number Down below when editing document, only change first number if a huge change has occured but if a small
-  change has occured then change the second -->
-    <title>Display V2.5</title>
+    <title>Display V2.6</title>
     <style>
       *,
       *::before,
@@ -21,7 +19,6 @@
         overflow: hidden;
         cursor: none;
       }
-
       #preload {
         position: fixed;
         inset: 0;
@@ -73,7 +70,6 @@
         color: #444;
         letter-spacing: 0.05em;
       }
-
       .canvas {
         position: fixed;
         inset: 0;
@@ -108,7 +104,6 @@
         height: 100%;
         object-fit: contain;
       }
-
       .yt-wrap {
         position: absolute;
         inset: 0;
@@ -119,7 +114,6 @@
         border: none;
         display: block;
       }
-
       @keyframes bannerSlide {
         from {
           transform: translateX(-110%);
@@ -155,7 +149,6 @@
       <div id="preload-track"><div id="preload-fill"></div></div>
       <div id="preload-status">Connecting</div>
     </div>
-
     <div class="canvas" id="canvas" style="opacity: 0; transition: opacity 0.5s ease"></div>
     <div class="overlay" id="overlay"></div>
 
@@ -191,6 +184,7 @@
       const preloadStatus = document.getElementById("preload-status");
       const preloadTitle = document.getElementById("preload-title");
 
+      // ── State ──────────────────────────────────────────────────────────────────────
       let mediaCache = {};
       let slideEls = [];
       let presentation = null;
@@ -201,15 +195,16 @@
       let ytApiLoading = false;
       let pendingYtInits = [];
       let monitorName = null;
-      let monitorRef = null;
       let lastCommandAt = 0;
+      let currentPid = null; // presentation ID currently showing
       let syncEnabled = false;
-      let currentPresentationId = null;
 
-      // A unique ID for this display instance so we can ignore our own sync writes
+      // Unique ID so we can ignore our own Firebase sync writes
       const DISPLAY_ID = Math.random().toString(36).slice(2);
 
-      // ── Preload UI ─────────────────────────────────────────────────────────────────
+      // ── Helpers ────────────────────────────────────────────────────────────────────
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
       function setProgress(pct, label) {
         preloadFill.style.width = Math.min(100, Math.max(0, pct)) + "%";
         if (label != null) preloadStatus.textContent = label;
@@ -219,19 +214,15 @@
         canvas.style.opacity = "1";
         setTimeout(() => (preload.style.display = "none"), 600);
       }
-      function sleep(ms) {
-        return new Promise((r) => setTimeout(r, ms));
-      }
 
       // ── Monitor identity ───────────────────────────────────────────────────────────
       function resetToFirstRun() {
         localStorage.clear();
-        if ("caches" in window) {
+        if ("caches" in window)
           caches
             .keys()
-            .then((keys) => keys.forEach((k) => caches.delete(k)))
+            .then((ks) => ks.forEach((k) => caches.delete(k)))
             .catch(() => {});
-        }
         window.location.reload();
       }
 
@@ -243,18 +234,15 @@
             return q.trim();
           }
         } catch (e) {}
-
         const ls = localStorage.getItem("monitorName");
         if (ls && ls.trim()) {
-          const key = encodeURIComponent(ls.trim());
-          const snap = await get(ref(db, `monitors/${key}`)).catch(() => null);
+          const snap = await get(ref(db, `monitors/${encodeURIComponent(ls.trim())}`)).catch(() => null);
           if (snap && snap.val() === null) {
             resetToFirstRun();
             return null;
           }
           return ls.trim();
         }
-
         const p = prompt("Enter monitor name:", "");
         if (p && p.trim()) {
           localStorage.setItem("monitorName", p.trim());
@@ -263,50 +251,31 @@
         return null;
       }
 
-      // ── Presence / heartbeat ───────────────────────────────────────────────────────
+      // ── Presence ───────────────────────────────────────────────────────────────────
       async function registerPresence(name) {
         if (!name) return;
-        const key = encodeURIComponent(name);
-        monitorRef = ref(db, `monitors/${key}`);
-        const presencePayload = {
-          status: "online",
-          lastSeen: Date.now(),
-          resolution: `${screen.width}x${screen.height}`
-        };
-        await update(monitorRef, presencePayload).catch(() => {});
-        onDisconnect(monitorRef)
+        const mRef = ref(db, `monitors/${encodeURIComponent(name)}`);
+        const payload = { status: "online", lastSeen: Date.now(), resolution: `${screen.width}x${screen.height}` };
+        await update(mRef, payload).catch(() => {});
+        onDisconnect(mRef)
           .update({ status: "offline", lastSeen: Date.now() })
           .catch(() => {});
         setInterval(async () => {
           try {
-            await update(monitorRef, { lastSeen: Date.now(), resolution: `${screen.width}x${screen.height}` });
+            await update(mRef, { lastSeen: Date.now(), resolution: `${screen.width}x${screen.height}` });
           } catch (e) {}
         }, 5000);
       }
 
-      // ── Commands ───────────────────────────────────────────────────────────────────
-      function attachCommandListener(name) {
-        if (!name) return;
-        onValue(ref(db, `monitors/${encodeURIComponent(name)}/command`), (snap) => {
-          const cmd = snap.val();
-          if (!cmd || !cmd.at || cmd.at <= lastCommandAt) return;
-          lastCommandAt = cmd.at;
-          if (cmd.cmd === "reloadPresentation") handlePresentationChange(true);
-        });
-      }
-
-      // ── Presentation resolution ────────────────────────────────────────────────────
+      // ── Resolve which presentation to show ─────────────────────────────────────────
       async function resolvePresentation(name) {
         if (!name) return { p: null, pid: null };
-        const key = encodeURIComponent(name);
-        const monSnap = await get(ref(db, `monitors/${key}`));
+        const monSnap = await get(ref(db, `monitors/${encodeURIComponent(name)}`));
         const monData = monSnap.val();
-
         let pid = null;
         if (typeof monData === "string") pid = monData;
-        else if (monData && typeof monData === "object") {
+        else if (monData && typeof monData === "object")
           pid = monData.presentation || monData.assigned || monData.pid || null;
-        }
 
         if (pid) {
           const snap = await get(ref(db, `presentations/${pid}`));
@@ -327,34 +296,82 @@
       }
 
       // ── Sync state ─────────────────────────────────────────────────────────────────
-      // syncState: { idx, startedAt, publisherId }
-      // publisherId lets us ignore writes we made ourselves.
+      // Shape: { idx, startedAt, publisherId }
 
-      function getSyncRef(pid) {
+      function syncRef(pid) {
         return ref(db, `syncState/${pid}`);
       }
 
-      async function publishSyncState(pid, idx) {
-        if (!syncEnabled || !pid) return;
+      async function publishSync(idx) {
+        if (!syncEnabled || !currentPid) return;
         try {
-          await set(getSyncRef(pid), { idx, startedAt: Date.now(), publisherId: DISPLAY_ID });
+          await set(syncRef(currentPid), { idx, startedAt: Date.now(), publisherId: DISPLAY_ID });
         } catch (e) {}
       }
 
-      async function readSyncState(pid, p) {
-        if (!syncEnabled || !pid || !p || !p.items) return { idx: 0, elapsed: 0 };
+      // Returns { idx, elapsed } to jump to on load, or { idx:0, elapsed:0 } if not synced
+      async function readSync(pid, p) {
+        if (!syncEnabled || !pid || !p?.items) return { idx: 0, elapsed: 0 };
         try {
-          const snap = await get(getSyncRef(pid));
+          const snap = await get(syncRef(pid));
           const s = snap.val();
           if (!s || s.idx == null) return { idx: 0, elapsed: 0 };
-          const elapsed = (Date.now() - s.startedAt) / 1000;
-          return { idx: s.idx, elapsed };
+          return { idx: s.idx, elapsed: Math.max(0, (Date.now() - s.startedAt) / 1000) };
         } catch (e) {
           return { idx: 0, elapsed: 0 };
         }
       }
 
-      // ── Cleanup ────────────────────────────────────────────────────────────────────
+      // ── Sync listener — ONE place, owned here ──────────────────────────────────────
+      // Strategy: read current value first to get baseline, THEN attach onValue.
+      // Only one listener exists at a time; reattach only when pid changes.
+
+      let syncUnsub = null;
+      let syncPid = null;
+
+      async function ensureSyncListener(pid) {
+        // Nothing to do if already watching the right pid
+        if (pid === syncPid && syncUnsub) return;
+
+        // Tear down old listener
+        if (syncUnsub) {
+          syncUnsub();
+          syncUnsub = null;
+        }
+        syncPid = null;
+        if (!pid) return;
+
+        // Read the current value BEFORE attaching the live listener.
+        // This gives us the "already handled" baseline so the first onValue
+        // fire (which replays the current DB value) doesn't cause a spurious jump.
+        let baseline = null;
+        try {
+          const snap = await get(syncRef(pid));
+          const s = snap.val();
+          if (s?.startedAt) baseline = s.startedAt;
+        } catch (e) {}
+
+        syncPid = pid;
+        syncUnsub = onValue(syncRef(pid), (snap) => {
+          const s = snap.val();
+          if (!s || s.idx == null) return;
+
+          // Skip the value that was already in the DB when we attached
+          if (s.startedAt === baseline) return;
+          baseline = s.startedAt; // update so we don't re-process
+
+          // Ignore writes we made ourselves
+          if (s.publisherId === DISPLAY_ID) return;
+
+          // Only act if sync is on and we have slides loaded
+          if (!syncEnabled || !presentation) return;
+
+          const elapsed = Math.max(0, (Date.now() - s.startedAt) / 1000);
+          showSlide(presentation, s.idx, elapsed, false);
+        });
+      }
+
+      // ── Slide cleanup & build ──────────────────────────────────────────────────────
       function cleanupSlides() {
         clearTimeout(slideTimer);
         slideTimer = null;
@@ -373,10 +390,9 @@
         canvas.innerHTML = "";
       }
 
-      // ── Build slides ───────────────────────────────────────────────────────────────
       function buildSlides(p) {
         cleanupSlides();
-        if (!p || !p.items || !p.items.length) return;
+        if (!p?.items?.length) return;
         p.items.forEach((it, idx) => {
           const m = mediaCache[it.mediaId];
           const slide = document.createElement("div");
@@ -399,8 +415,6 @@
             const vid = document.createElement("video");
             vid.src = m.url;
             vid.preload = "auto";
-            // Keep muted initially so autoplay is allowed by the browser.
-            // We unmute just before playing (browsers allow muted autoplay).
             vid.muted = true;
             vid.setAttribute("playsinline", "");
             slide.appendChild(vid);
@@ -437,8 +451,8 @@
           };
           const seekAndWait = () => {
             if (done) return;
-            const st = startTime || 0;
             try {
+              const st = startTime || 0;
               if (st > 0 && isFinite(vid.duration) && st < vid.duration) vid.currentTime = st;
             } catch (e) {}
             checkReady();
@@ -464,26 +478,22 @@
       function showSlide(p, idx, seekOffset, publish) {
         clearTimeout(slideTimer);
         slideTimer = null;
-        if (!p || !p.items || !p.items.length) return;
+        if (!p?.items?.length) return;
         idx = ((idx % p.items.length) + p.items.length) % p.items.length;
         slideIndex = idx;
 
         const isCut = p.transition === "cut";
         canvas.querySelectorAll(".slide").forEach((s) => {
-          const i = parseInt(s.dataset.idx, 10);
-          if (i === idx) return;
+          if (parseInt(s.dataset.idx, 10) === idx) return;
           s.classList.remove("visible");
           const v = s.querySelector("video");
           if (v) {
             v.pause();
             v.onended = null;
           }
-          const pl = ytPlayers[i];
-          if (pl) {
-            try {
-              pl.pauseVideo();
-            } catch (e) {}
-          }
+          try {
+            ytPlayers[parseInt(s.dataset.idx, 10)]?.pauseVideo();
+          } catch (e) {}
         });
 
         const slide = canvas.querySelector(`.slide[data-idx="${idx}"]`);
@@ -492,7 +502,8 @@
         void slide.offsetWidth;
         slide.classList.add("visible");
 
-        if (publish && currentPresentationId) publishSyncState(currentPresentationId, idx);
+        // Publish AFTER showing so other displays can follow
+        if (publish) publishSync(idx);
 
         const item = p.items[idx];
         const media = mediaCache[item.mediaId];
@@ -508,7 +519,7 @@
           if (vid) playVideo(p, slide, vid, item, seekOffset || 0);
           else scheduleNext(p);
         } else {
-          // Image
+          // Image — account for elapsed time when syncing
           if (seekOffset && p.intervalMs) {
             const remaining = Math.max(500, p.intervalMs - seekOffset * 1000);
             slideTimer = setTimeout(() => advance(p), remaining);
@@ -521,58 +532,37 @@
       function playVideo(p, slideEl, vid, item, seekOffset) {
         const start = (item.start || 0) + (seekOffset || 0);
         const end = item.end || null;
-
         vid.onended = null;
 
-        const doPlay = () => {
-          // Unmute after play() succeeds (muted autoplay is universally allowed)
-          vid.muted = false;
-
-          if (end && end > start) {
-            const poll = () => {
-              if (!slideEl.classList.contains("visible")) return;
-              if (vid.currentTime >= end) {
-                vid.pause();
-                advance(p);
-              } else {
-                requestAnimationFrame(poll);
-              }
-            };
-            requestAnimationFrame(poll);
-          } else {
-            vid.onended = () => advance(p);
-          }
-        };
-
         const attemptPlay = () => {
-          // Seek to the correct start position
           try {
-            const target = start;
-            if (isFinite(vid.duration) && target > 0 && target < vid.duration) {
-              vid.currentTime = target;
-            } else if (target === 0) {
-              vid.currentTime = 0;
-            }
+            if (isFinite(vid.duration) && start > 0 && start < vid.duration) vid.currentTime = start;
+            else if (start === 0) vid.currentTime = 0;
           } catch (e) {}
 
-          // Play muted first (guaranteed to work), then unmute
           vid.muted = true;
           vid
             .play()
             .then(() => {
-              doPlay();
+              vid.muted = false;
+              if (end && end > start) {
+                const poll = () => {
+                  if (!slideEl.classList.contains("visible")) return;
+                  vid.currentTime >= end ? (vid.pause(), advance(p)) : requestAnimationFrame(poll);
+                };
+                requestAnimationFrame(poll);
+              } else {
+                vid.onended = () => advance(p);
+              }
             })
             .catch((err) => {
               console.warn("Video play failed:", err);
-              // Still schedule next so slideshow doesn't hang
               scheduleNext(p);
             });
         };
 
-        // If metadata isn't loaded yet, wait for it before seeking
-        if (vid.readyState >= 1) {
-          attemptPlay();
-        } else {
+        if (vid.readyState >= 1) attemptPlay();
+        else {
           vid.addEventListener("loadedmetadata", attemptPlay, { once: true });
           vid.load();
         }
@@ -592,7 +582,7 @@
         showSlide(p, slideIndex + 1, 0, true);
       }
 
-      // ── YouTube with autoplay bypass ───────────────────────────────────────────────
+      // ── YouTube ────────────────────────────────────────────────────────────────────
       function loadYtApi(cb) {
         if (ytApiReady) {
           cb();
@@ -612,9 +602,9 @@
       }
 
       function playYT(p, idx, item, media, seekOffset) {
-        const baseStart = item.start != null ? item.start : media.start != null ? media.start : 0;
-        const start = baseStart + (seekOffset || 0);
-        const end = item.end != null ? item.end : media.end != null ? media.end : null;
+        const base = item.start ?? media.start ?? 0;
+        const start = base + (seekOffset || 0);
+        const end = item.end ?? media.end ?? null;
 
         loadYtApi(() => {
           if (ytPlayers[idx]) {
@@ -628,10 +618,8 @@
             if (end && end > start) pollYt(p, idx, pl, end);
             return;
           }
-
           const divId = `yt-${idx}`;
           if (!document.getElementById(divId)) return;
-
           new window.YT.Player(divId, {
             videoId: media.ytId,
             playerVars: {
@@ -648,7 +636,7 @@
               fs: 0
             },
             events: {
-              onReady: function (e) {
+              onReady: (e) => {
                 ytPlayers[idx] = e.target;
                 e.target.mute();
                 try {
@@ -663,19 +651,18 @@
                 }, 500);
                 if (end && end > start) pollYt(p, idx, e.target, end);
               },
-              onStateChange: function (e) {
+              onStateChange: (e) => {
                 if (e.data === 0) advance(p);
-                if (e.data === 1) {
+                if (e.data === 1)
                   setTimeout(() => {
                     try {
                       e.target.unMute();
                       e.target.setVolume(100);
                     } catch (err) {}
                   }, 300);
-                }
               },
-              onError: function (e) {
-                console.warn("YT player error:", e.data);
+              onError: (e) => {
+                console.warn("YT error:", e.data);
                 advance(p);
               }
             }
@@ -686,7 +673,7 @@
       function pollYt(p, idx, player, end) {
         const check = () => {
           const slide = canvas.querySelector(`.slide[data-idx="${idx}"]`);
-          if (!slide || !slide.classList.contains("visible")) return;
+          if (!slide?.classList.contains("visible")) return;
           try {
             if (player.getCurrentTime() >= end) {
               player.pauseVideo();
@@ -720,30 +707,35 @@
         }
       }
 
-      // ── Presentation change / reload ───────────────────────────────────────────────
+      // ── Main load / reload ─────────────────────────────────────────────────────────
       let currentPresentationKey = null;
 
-      async function handlePresentationChange(forceReload) {
+      async function loadPresentation(forceReload = false) {
         const { p, pid } = await resolvePresentation(monitorName);
 
-        if (!p || !p.items || !p.items.length) {
+        if (!p?.items?.length) {
           setProgress(100, "No slides found");
           await sleep(600);
           dismissPreload();
           return;
         }
 
+        // Update globals BEFORE anything that reads them
         syncEnabled = !!p.syncPlayback;
-        currentPresentationId = pid;
+        currentPid = pid;
 
-        const fp = JSON.stringify(p.items.map((i) => i.mediaId)) + p.name + p.intervalMs + p.transition;
-        if (!forceReload && fp === currentPresentationKey) {
+        // If only settings changed (overlay, interval, etc.) — no rebuild needed
+        const key = JSON.stringify(p.items.map((i) => i.mediaId)) + p.name + p.intervalMs + p.transition;
+        if (!forceReload && key === currentPresentationKey) {
           presentation = p;
           applyOverlay(p, true);
+          // Re-attach sync listener in case syncEnabled just changed
+          await ensureSyncListener(syncEnabled ? pid : null);
           return;
         }
-        currentPresentationKey = fp;
+        currentPresentationKey = key;
 
+        // Full rebuild
         setProgress(5, "Fetching media…");
         const mediaSnap = await get(ref(db, "media"));
         mediaCache = mediaSnap.val() || {};
@@ -751,179 +743,155 @@
         presentation = p;
         buildSlides(p);
 
+        // Preload assets
         let loaded = 0;
         const total = p.items.length;
-        const promises = p.items.map((it, idx) => {
-          const m = mediaCache[it.mediaId];
-          if (!m || m.resource_type === "youtube") {
-            return Promise.resolve().then(() => {
+        await Promise.all(
+          p.items.map(async (it, idx) => {
+            const m = mediaCache[it.mediaId];
+            if (!m || m.resource_type === "youtube") {
               loaded++;
               setProgress(10 + (loaded / total) * 85, `${loaded}/${total}`);
-            });
-          }
-          const slide = slideEls[idx];
-          if (m.resource_type === "image") {
-            const img = slide.querySelector("img");
-            return waitForImage(img).then(() => {
-              loaded++;
-              setProgress(10 + (loaded / total) * 85, `${loaded}/${total}`);
-            });
-          } else {
-            const vid = slide.querySelector("video");
-            return waitForVideo(vid, it.start || 0).then(() => {
-              loaded++;
-              setProgress(10 + (loaded / total) * 85, `${loaded}/${total}`);
-            });
-          }
-        });
+              return;
+            }
+            const slide = slideEls[idx];
+            if (m.resource_type === "image") {
+              await waitForImage(slide.querySelector("img"));
+            } else {
+              await waitForVideo(slide.querySelector("video"), it.start || 0);
+            }
+            loaded++;
+            setProgress(10 + (loaded / total) * 85, `${loaded}/${total}`);
+          })
+        );
 
-        await Promise.all(promises);
         setProgress(100, "Ready");
         await sleep(200);
         dismissPreload();
         applyOverlay(p, true);
 
-        // Attach sync listener FIRST (awaited so baseline is set before we show slides),
-        // then read sync state and jump to the right slide.
-        await attachSyncListener(pid);
+        // Set up sync listener — do this BEFORE reading sync state.
+        // ensureSyncListener reads the current DB value to set its baseline,
+        // so when we then call readSync() we're reading the same snapshot.
+        // After this point, any NEW writes from other displays will trigger the listener.
+        await ensureSyncListener(syncEnabled ? pid : null);
 
-        // Now read current sync state and jump to the right slide
-        const { idx: syncIdx, elapsed } = await readSyncState(pid, p);
-        slideIndex = 0;
-        showSlide(p, syncIdx, elapsed, false);
+        // Jump to the current sync position (or slide 0 if not synced)
+        const { idx: startIdx, elapsed } = await readSync(pid, p);
+        showSlide(p, startIdx, elapsed, false);
       }
 
-      // ── Sync listener ──────────────────────────────────────────────────────────────
-      let syncUnsub = null;
-      let syncListenerPid = null;
+      // ── Firebase change listeners ──────────────────────────────────────────────────
+      // All roads lead to loadPresentation(). We debounce to avoid hammering it.
 
-      async function attachSyncListener(pid) {
-        // Always detach first so we get a clean slate
-        if (syncUnsub) {
-          syncUnsub();
-          syncUnsub = null;
-        }
-        if (!pid) return;
-        syncListenerPid = pid;
-
-        // Read the current sync state FIRST (before attaching onValue) so we know
-        // the baseline startedAt. This prevents acting on the initial onValue fire
-        // (which is just the current DB value we've already handled via readSyncState).
-        let lastHandledStartedAt = null;
-        try {
-          const snap = await get(getSyncRef(pid));
-          const s = snap.val();
-          if (s && s.startedAt) lastHandledStartedAt = s.startedAt;
-        } catch (e) {}
-
-        // NOW attach the live listener — any event with the same startedAt as our
-        // baseline is already handled; only genuinely new advances come through.
-        syncUnsub = onValue(getSyncRef(pid), (snap) => {
-          const s = snap.val();
-          if (!s || s.idx == null) return;
-
-          // Skip the value we just read as our baseline
-          if (s.startedAt === lastHandledStartedAt) return;
-          lastHandledStartedAt = s.startedAt;
-
-          // Ignore our own publishes to prevent feedback loops
-          if (s.publisherId === DISPLAY_ID) return;
-
-          // Only apply if sync is enabled for the current presentation
-          if (!syncEnabled || !presentation) return;
-
-          const elapsed = (Date.now() - s.startedAt) / 1000;
-          showSlide(presentation, s.idx, elapsed, false);
-        });
-      }
-
-      // ── Live update listeners ──────────────────────────────────────────────────────
-      let changeDebounceTimer = null;
-      function debouncedPresentationChange(force) {
-        clearTimeout(changeDebounceTimer);
-        changeDebounceTimer = setTimeout(() => handlePresentationChange(force), 300);
+      let reloadDebounce = null;
+      function scheduleReload(force = false) {
+        clearTimeout(reloadDebounce);
+        reloadDebounce = setTimeout(() => loadPresentation(force), 350);
       }
 
       function attachListeners() {
-        let monitorFirstFire = true;
-        onValue(ref(db, `monitors/${encodeURIComponent(monitorName)}`), () => {
-          if (monitorFirstFire) {
-            monitorFirstFire = false;
-            return;
-          }
-          debouncedPresentationChange(false);
+        const monKey = encodeURIComponent(monitorName);
+
+        // Watch for commands (reload button in manager)
+        onValue(ref(db, `monitors/${monKey}/command`), (snap) => {
+          const cmd = snap.val();
+          if (!cmd?.at || cmd.at <= lastCommandAt) return;
+          lastCommandAt = cmd.at;
+          if (cmd.cmd === "reloadPresentation") loadPresentation(true);
         });
 
+        // Watch monitor record (assignment changes, deletion)
+        let monFirstFire = true;
+        onValue(ref(db, `monitors/${monKey}`), (snap) => {
+          if (monFirstFire) {
+            monFirstFire = false;
+            return;
+          }
+          if (snap.val() === null) {
+            resetToFirstRun();
+            return;
+          }
+          scheduleReload(false);
+        });
+
+        // Watch the assigned presentation directly for live edits
+        // Track which presentation we're watching so we can switch
+        let watchedPid = null;
+        let presentationUnsub = null;
+
+        async function updatePresentationWatch() {
+          const monSnap = await get(ref(db, `monitors/${monKey}`));
+          const monData = monSnap.val();
+          let pid = null;
+          if (typeof monData === "string") pid = monData;
+          else if (monData && typeof monData === "object")
+            pid = monData.presentation || monData.assigned || monData.pid || null;
+
+          if (pid === watchedPid) return;
+          watchedPid = pid;
+
+          if (presentationUnsub) {
+            presentationUnsub();
+            presentationUnsub = null;
+          }
+          if (!pid) return;
+
+          let presFirstFire = true;
+          presentationUnsub = onValue(ref(db, `presentations/${pid}`), (snap) => {
+            if (presFirstFire) {
+              presFirstFire = false;
+              return;
+            }
+            if (!snap.val()) return;
+            // Update syncEnabled immediately so the sync listener check is current
+            syncEnabled = !!snap.val().syncPlayback;
+            scheduleReload(false);
+          });
+        }
+
+        // Re-run updatePresentationWatch whenever monitor record changes
+        let monWatchFirstFire = true;
+        onValue(ref(db, `monitors/${monKey}`), () => {
+          if (monWatchFirstFire) {
+            monWatchFirstFire = false;
+            return;
+          }
+          updatePresentationWatch();
+        });
+
+        // Watch activePresentation (fallback for unassigned monitors)
         let activeFirstFire = true;
         onValue(ref(db, "activePresentation"), async () => {
           if (activeFirstFire) {
             activeFirstFire = false;
             return;
           }
-          const monSnap = await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`));
+          // Only matters if this monitor has no specific assignment
+          const monSnap = await get(ref(db, `monitors/${monKey}`));
           const monData = monSnap.val();
           let pid = null;
-          if (typeof monData === "string") pid = monData;
-          else if (monData && typeof monData === "object")
+          if (typeof monData === "object" && monData)
             pid = monData.presentation || monData.assigned || monData.pid || null;
-          if (!pid) debouncedPresentationChange(false);
+          if (!pid) scheduleReload(false);
         });
 
-        let assignedPid = null;
-        let assignedPresentationUnsub = null;
-        async function watchAssignedPresentation() {
-          const monSnap = await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`));
-          const monData = monSnap.val();
-          let pid = null;
-          if (typeof monData === "string") pid = monData;
-          else if (monData && typeof monData === "object")
-            pid = monData.presentation || monData.assigned || monData.pid || null;
-
-          if (pid === assignedPid) return;
-          assignedPid = pid;
-
-          if (assignedPresentationUnsub) {
-            assignedPresentationUnsub();
-            assignedPresentationUnsub = null;
-          }
-          if (!pid) return;
-
-          // Attach sync listener when assigned presentation changes
-          await attachSyncListener(pid);
-
-          let presentationFirstFire = true;
-          assignedPresentationUnsub = onValue(ref(db, `presentations/${pid}`), async (snap) => {
-            if (presentationFirstFire) {
-              presentationFirstFire = false;
-              return;
-            }
-            const p = snap.val();
-            if (p) {
-              const wasSynced = syncEnabled;
-              syncEnabled = !!p.syncPlayback;
-              if (syncEnabled && !wasSynced) await attachSyncListener(pid);
-            }
-            debouncedPresentationChange(false);
-          });
-        }
-
-        onValue(ref(db, `monitors/${encodeURIComponent(monitorName)}`), watchAssignedPresentation);
-
+        // Watch presentations/current (legacy fallback)
         let curFirstFire = true;
         onValue(ref(db, "presentations/current"), async () => {
           if (curFirstFire) {
             curFirstFire = false;
             return;
           }
-          const monSnap = await get(ref(db, `monitors/${encodeURIComponent(monitorName)}`));
+          const monSnap = await get(ref(db, `monitors/${monKey}`));
           const monData = monSnap.val();
           let pid = null;
-          if (typeof monData === "string") pid = monData;
-          else if (monData && typeof monData === "object")
+          if (typeof monData === "object" && monData)
             pid = monData.presentation || monData.assigned || monData.pid || null;
-          if (!pid) debouncedPresentationChange(false);
+          if (!pid) scheduleReload(false);
         });
 
+        // Global refresh signal (Refresh Displays button)
         let lastRefreshSignal = null;
         onValue(ref(db, "refreshSignal"), (snap) => {
           const val = snap.val();
@@ -936,15 +904,6 @@
             window.location.reload();
           }
         });
-
-        let deletionFirstFire = true;
-        onValue(ref(db, `monitors/${encodeURIComponent(monitorName)}`), (snap) => {
-          if (deletionFirstFire) {
-            deletionFirstFire = false;
-            return;
-          }
-          if (snap.val() === null) resetToFirstRun();
-        });
       }
 
       // ── Boot ───────────────────────────────────────────────────────────────────────
@@ -954,11 +913,8 @@
         if (!monitorName) return;
         preloadTitle.textContent = monitorName;
         await registerPresence(monitorName);
-        attachCommandListener(monitorName);
         attachListeners();
-        await handlePresentationChange(false);
-        // Note: attachSyncListener is now called inside handlePresentationChange,
-        // so no need to call it again here.
+        await loadPresentation(false);
       }
 
       boot();
