@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <!-- Change Version Number Down below when editing document, only change first number if a huge change has occured but if a small
   change has occured then change the second -->
-    <title>Display V2.1</title>
+    <title>Display V2.2</title>
     <style>
       *,
       *::before,
@@ -204,7 +204,10 @@
       let monitorRef = null;
       let lastCommandAt = 0;
       let syncEnabled = false;
-      let currentPresentationId = null; // track which pres we're showing
+      let currentPresentationId = null;
+
+      // A unique ID for this display instance so we can ignore our own sync writes
+      const DISPLAY_ID = Math.random().toString(36).slice(2);
 
       // ── Preload UI ─────────────────────────────────────────────────────────────────
       function setProgress(pct, label) {
@@ -221,11 +224,8 @@
       }
 
       // ── Monitor identity ───────────────────────────────────────────────────────────
-
-      // Wipe all local state so the display acts as if it's never been set up
       function resetToFirstRun() {
         localStorage.clear();
-        // Also clear any session/app caches if available
         if ("caches" in window) {
           caches
             .keys()
@@ -236,7 +236,6 @@
       }
 
       async function getMonitorName() {
-        // ?monitor= param always takes precedence (kiosk/URL-pinned displays)
         try {
           const q = new URL(window.location.href).searchParams.get("monitor");
           if (q && q.trim()) {
@@ -247,13 +246,11 @@
 
         const ls = localStorage.getItem("monitorName");
         if (ls && ls.trim()) {
-          // Check Firebase — if this monitor was deleted from the dashboard, start fresh
           const key = encodeURIComponent(ls.trim());
           const snap = await get(ref(db, `monitors/${key}`)).catch(() => null);
           if (snap && snap.val() === null) {
-            // Record exists in Firebase path but is null = was explicitly deleted
             resetToFirstRun();
-            return null; // won't reach here due to reload
+            return null;
           }
           return ls.trim();
         }
@@ -330,8 +327,8 @@
       }
 
       // ── Sync state ─────────────────────────────────────────────────────────────────
-      // syncState in Firebase: { idx: number, startedAt: timestamp }
-      // This lets any display joining mid-show jump to the correct slide & seek position.
+      // syncState: { idx, startedAt, publisherId }
+      // publisherId lets us ignore writes we made ourselves.
 
       function getSyncRef(pid) {
         return ref(db, `syncState/${pid}`);
@@ -340,19 +337,17 @@
       async function publishSyncState(pid, idx) {
         if (!syncEnabled || !pid) return;
         try {
-          await set(getSyncRef(pid), { idx, startedAt: Date.now() });
+          await set(getSyncRef(pid), { idx, startedAt: Date.now(), publisherId: DISPLAY_ID });
         } catch (e) {}
       }
 
-      // Given syncState + presentation, figure out which slide index we should be on
-      // and how far into that slide we are (for video/YT seeking).
       async function readSyncState(pid, p) {
         if (!syncEnabled || !pid || !p || !p.items) return { idx: 0, elapsed: 0 };
         try {
           const snap = await get(getSyncRef(pid));
           const s = snap.val();
           if (!s || s.idx == null) return { idx: 0, elapsed: 0 };
-          const elapsed = (Date.now() - s.startedAt) / 1000; // seconds since slide started
+          const elapsed = (Date.now() - s.startedAt) / 1000;
           return { idx: s.idx, elapsed };
         } catch (e) {
           return { idx: 0, elapsed: 0 };
@@ -404,6 +399,8 @@
             const vid = document.createElement("video");
             vid.src = m.url;
             vid.preload = "auto";
+            // Keep muted initially so autoplay is allowed by the browser.
+            // We unmute just before playing (browsers allow muted autoplay).
             vid.muted = true;
             vid.setAttribute("playsinline", "");
             slide.appendChild(vid);
@@ -451,6 +448,7 @@
           vid.load();
         });
       }
+
       function waitForImage(img) {
         return new Promise((resolve) => {
           if (img.complete && img.naturalWidth > 0) {
@@ -494,7 +492,6 @@
         void slide.offsetWidth;
         slide.classList.add("visible");
 
-        // Only publish when THIS display is advancing naturally — not when catching up to sync
         if (publish && currentPresentationId) publishSyncState(currentPresentationId, idx);
 
         const item = p.items[idx];
@@ -511,7 +508,7 @@
           if (vid) playVideo(p, slide, vid, item, seekOffset || 0);
           else scheduleNext(p);
         } else {
-          // Image: if synced, adjust timer to remaining time
+          // Image
           if (seekOffset && p.intervalMs) {
             const remaining = Math.max(500, p.intervalMs - seekOffset * 1000);
             slideTimer = setTimeout(() => advance(p), remaining);
@@ -524,23 +521,60 @@
       function playVideo(p, slideEl, vid, item, seekOffset) {
         const start = (item.start || 0) + (seekOffset || 0);
         const end = item.end || null;
+
         vid.onended = null;
-        vid.muted = false;
-        try {
-          if (isFinite(vid.duration) && start < vid.duration) vid.currentTime = start;
-        } catch (e) {}
-        vid.play().catch(() => {});
-        if (end && end > start) {
-          const poll = () => {
-            if (!slideEl.classList.contains("visible")) return;
-            if (vid.currentTime >= end) {
-              vid.pause();
-              advance(p);
-            } else requestAnimationFrame(poll);
-          };
-          requestAnimationFrame(poll);
+
+        const doPlay = () => {
+          // Unmute after play() succeeds (muted autoplay is universally allowed)
+          vid.muted = false;
+
+          if (end && end > start) {
+            const poll = () => {
+              if (!slideEl.classList.contains("visible")) return;
+              if (vid.currentTime >= end) {
+                vid.pause();
+                advance(p);
+              } else {
+                requestAnimationFrame(poll);
+              }
+            };
+            requestAnimationFrame(poll);
+          } else {
+            vid.onended = () => advance(p);
+          }
+        };
+
+        const attemptPlay = () => {
+          // Seek to the correct start position
+          try {
+            const target = start;
+            if (isFinite(vid.duration) && target > 0 && target < vid.duration) {
+              vid.currentTime = target;
+            } else if (target === 0) {
+              vid.currentTime = 0;
+            }
+          } catch (e) {}
+
+          // Play muted first (guaranteed to work), then unmute
+          vid.muted = true;
+          vid
+            .play()
+            .then(() => {
+              doPlay();
+            })
+            .catch((err) => {
+              console.warn("Video play failed:", err);
+              // Still schedule next so slideshow doesn't hang
+              scheduleNext(p);
+            });
+        };
+
+        // If metadata isn't loaded yet, wait for it before seeking
+        if (vid.readyState >= 1) {
+          attemptPlay();
         } else {
-          vid.onended = () => advance(p);
+          vid.addEventListener("loadedmetadata", attemptPlay, { once: true });
+          vid.load();
         }
       }
 
@@ -749,10 +783,50 @@
         dismissPreload();
         applyOverlay(p, true);
 
-        // Read sync state to jump to the right slide
+        // Attach sync listener BEFORE reading sync state so we don't miss updates,
+        // but with a flag to ignore the very first onValue fire (which is the
+        // current DB value we're about to read manually anyway).
+        attachSyncListener(pid);
+
+        // Now read current sync state and jump to the right slide
         const { idx: syncIdx, elapsed } = await readSyncState(pid, p);
         slideIndex = 0;
         showSlide(p, syncIdx, elapsed, false);
+      }
+
+      // ── Sync listener ──────────────────────────────────────────────────────────────
+      let syncUnsub = null;
+      let syncListenerPid = null;
+
+      function attachSyncListener(pid) {
+        // Detach old listener if presentation changed
+        if (syncUnsub && pid === syncListenerPid) return; // already watching this pid
+        if (syncUnsub) {
+          syncUnsub();
+          syncUnsub = null;
+        }
+        if (!pid) return;
+        syncListenerPid = pid;
+
+        // Skip the first fire — it's the current value we already handled via readSyncState
+        let skipFirst = true;
+        syncUnsub = onValue(getSyncRef(pid), (snap) => {
+          if (skipFirst) {
+            skipFirst = false;
+            return;
+          }
+          if (!syncEnabled || !presentation) return;
+          const s = snap.val();
+          if (!s || s.idx == null) return;
+
+          // Ignore updates we published ourselves to prevent feedback loops
+          if (s.publisherId === DISPLAY_ID) return;
+
+          const elapsed = (Date.now() - s.startedAt) / 1000;
+          if (s.idx !== slideIndex || elapsed > 3) {
+            showSlide(presentation, s.idx, elapsed, false);
+          }
+        });
       }
 
       // ── Live update listeners ──────────────────────────────────────────────────────
@@ -760,31 +834,6 @@
       function debouncedPresentationChange(force) {
         clearTimeout(changeDebounceTimer);
         changeDebounceTimer = setTimeout(() => handlePresentationChange(force), 300);
-      }
-
-      // Live sync listener - when another display advances, follow it
-      let syncUnsub = null;
-      function attachSyncListener(pid) {
-        if (syncUnsub) {
-          syncUnsub();
-          syncUnsub = null;
-        }
-        if (!pid) return;
-        let firstFire = true;
-        syncUnsub = onValue(getSyncRef(pid), (snap) => {
-          if (firstFire) {
-            firstFire = false;
-            return;
-          }
-          if (!syncEnabled || !presentation) return;
-          const s = snap.val();
-          if (!s || s.idx == null) return;
-          const elapsed = (Date.now() - s.startedAt) / 1000;
-          // Only jump if the slide is actually different or we're more than 3s behind
-          if (s.idx !== slideIndex || elapsed > 3) {
-            showSlide(presentation, s.idx, elapsed, false);
-          }
-        });
       }
 
       function attachListeners() {
@@ -831,7 +880,7 @@
           }
           if (!pid) return;
 
-          // Attach sync listener for new presentation
+          // Attach sync listener when assigned presentation changes
           attachSyncListener(pid);
 
           let presentationFirstFire = true;
@@ -840,7 +889,6 @@
               presentationFirstFire = false;
               return;
             }
-            // Check if syncPlayback setting changed
             const p = snap.val();
             if (p) {
               const wasSynced = syncEnabled;
@@ -881,9 +929,6 @@
           }
         });
 
-        // ── Deletion watcher ───────────────────────────────────────────────────────
-        // If this monitor's record is removed from the dashboard while the display
-        // is running, wipe all local data and reload so it asks for a name again.
         let deletionFirstFire = true;
         onValue(ref(db, `monitors/${encodeURIComponent(monitorName)}`), (snap) => {
           if (deletionFirstFire) {
@@ -898,14 +943,14 @@
       async function boot() {
         setProgress(0, "Connecting…");
         monitorName = await getMonitorName();
-        if (!monitorName) return; // prompt was cancelled or reset in progress
+        if (!monitorName) return;
         preloadTitle.textContent = monitorName;
         await registerPresence(monitorName);
         attachCommandListener(monitorName);
         attachListeners();
         await handlePresentationChange(false);
-        // Attach sync listener after boot
-        if (currentPresentationId) attachSyncListener(currentPresentationId);
+        // Note: attachSyncListener is now called inside handlePresentationChange,
+        // so no need to call it again here.
       }
 
       boot();
