@@ -1,9 +1,9 @@
 <!doctype html>
-<html>
+<html lang=en>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Presentation Manager</title>
+<title>Presentation Manager V2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -460,7 +460,7 @@ input[type="color"] {
     <div class="editor-header">
       <h1 id="editorTitle">Select a Presentation</h1>
       <div class="btn-row">
-        <button id="setActiveBtn" class="btn primary">⚡ Set Live</button>
+        <button id="setActiveBtn" class="btn primary">Make Default</button>
         <button id="refreshViewBtn" class="btn">↺ Refresh Displays</button>
         <button id="renamePresentationBtn" class="btn">Rename</button>
         <button id="deletePresentationBtn" class="btn danger">Delete</button>
@@ -791,7 +791,7 @@ function renderTabs() {
     const isSynced = !!p.syncPlayback;
     const tab = document.createElement("div");
     tab.className = "tab" + (isSelected ? " active" : "");
-    tab.innerHTML = `<span>${escHtml(p.name||"Untitled")}${isLive ? '<span class="live-badge" style="margin-left:6px">LIVE</span>' : ""}${isSynced ? '<span class="sync-badge" style="margin-left:4px">SYNC</span>' : ""}</span><span class="tab-close">×</span>`;
+    tab.innerHTML = `<span>${escHtml(p.name||"Untitled")}${isLive ? '<span class="live-badge" style="margin-left:6px">Default</span>' : ""}${isSynced ? '<span class="sync-badge" style="margin-left:4px">SYNC</span>' : ""}</span><span class="tab-close">×</span>`;
     tab.addEventListener("click", e => {
       if (e.target.classList.contains("tab-close")) return;
       selectedPresentationId = id; renderTabs(); renderPresentationEditor();
