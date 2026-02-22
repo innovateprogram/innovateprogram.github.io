@@ -35,12 +35,10 @@ body {
   font-size: 13px;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-/* LEFT PANEL */
 .sidebar {
   width: 320px;
   min-width: 280px;
@@ -65,7 +63,6 @@ body {
 }
 .sidebar-inner { overflow-y: auto; padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
 
-/* MAIN */
 .main {
   flex: 1;
   display: flex;
@@ -74,7 +71,6 @@ body {
   background: var(--bg);
 }
 
-/* TABS */
 .tabs-bar {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -132,8 +128,16 @@ body {
   padding: 2px 5px;
   text-transform: uppercase;
 }
+.sync-badge {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.08em;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 3px;
+  padding: 2px 5px;
+  text-transform: uppercase;
+}
 
-/* EDITOR AREA */
 .editor-area {
   flex: 1;
   overflow-y: auto;
@@ -151,7 +155,6 @@ body {
 }
 .editor-header h1 { font-size: 18px; font-weight: 600; color: var(--text); }
 
-/* Cards */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -167,7 +170,6 @@ body {
   margin-bottom: 14px;
 }
 
-/* Form elements */
 label {
   display: block;
   font-size: 11px;
@@ -195,7 +197,6 @@ select option { background: var(--surface2); }
 .row { display: flex; gap: 10px; }
 .row > .field { flex: 1; }
 
-/* Buttons */
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 12px;
@@ -218,7 +219,6 @@ select option { background: var(--surface2); }
 .btn.sm { padding: 5px 10px; font-size: 11px; }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 
-/* Media items */
 .media-item {
   display: flex;
   gap: 10px;
@@ -263,13 +263,11 @@ select option { background: var(--surface2); }
 .media-name:focus { outline: none; border-color: var(--accent); background: var(--surface); }
 .media-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
 
-/* Upload progress */
 .progress-wrap { margin-top: 10px; display: none; }
 .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
 .progress-fill { height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.2s; }
 .progress-label { font-size: 11px; color: var(--text2); margin-top: 4px; }
 
-/* Swatches */
 .swatch-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
 .swatch {
   width: 22px; height: 22px;
@@ -281,7 +279,6 @@ select option { background: var(--surface2); }
 .swatch:hover { transform: scale(1.15); }
 .swatch.active { border-color: #fff; transform: scale(1.1); }
 
-/* Slide items */
 .slide-card {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -297,7 +294,6 @@ select option { background: var(--surface2); }
 .slide-card-title { font-size: 12px; font-weight: 500; color: var(--text); }
 .slide-card-type { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; }
 
-/* Monitors table */
 .monitors-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .monitors-table th {
   text-align: left; padding: 8px 10px;
@@ -311,7 +307,6 @@ select option { background: var(--surface2); }
 .online-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 5px; box-shadow: 0 0 6px var(--green); }
 .offline-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--border2); margin-right: 5px; }
 
-/* Monitor badges */
 .monitor-badge {
   display: inline-flex; align-items: center; gap: 5px;
   background: var(--surface2);
@@ -323,14 +318,11 @@ select option { background: var(--surface2); }
   margin: 2px;
 }
 
-/* Assigned monitors area */
 .assigned-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; min-height: 24px; }
 
-/* Status text */
 .status-text { font-size: 11px; color: var(--green); margin-top: 4px; }
 .status-text.err { color: var(--red); }
 
-/* Section divider */
 .section-divider {
   font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--text3);
@@ -339,7 +331,6 @@ select option { background: var(--surface2); }
 }
 .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* Checkbox */
 .check-label {
   display: flex; align-items: center; gap: 8px;
   font-size: 12px; color: var(--text2);
@@ -347,7 +338,6 @@ select option { background: var(--surface2); }
 }
 input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
 
-/* File input */
 input[type="file"] {
   background: var(--surface2);
   border: 1px dashed var(--border2);
@@ -361,7 +351,6 @@ input[type="file"] {
 }
 input[type="file"]:hover { border-color: var(--accent); }
 
-/* Overlay preview */
 .overlay-preview {
   margin-top: 10px;
   border-radius: 6px;
@@ -372,12 +361,25 @@ input[type="file"]:hover { border-color: var(--accent); }
   word-break: break-word;
 }
 
-/* Color input */
 input[type="color"] {
   width: 100%; height: 28px; padding: 2px; cursor: pointer;
   border-radius: 6px; border: 1px solid var(--border);
   background: var(--surface2);
 }
+
+/* Sync info box */
+.sync-info {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(91,111,255,0.08);
+  border: 1px solid rgba(91,111,255,0.25);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.5;
+  display: none;
+}
+.sync-info.visible { display: block; }
 </style>
 </head>
 <body>
@@ -389,7 +391,6 @@ input[type="color"] {
   </div>
   <div class="sidebar-inner">
 
-    <!-- Upload -->
     <div>
       <div class="section-divider">Upload File</div>
       <div class="card">
@@ -415,7 +416,6 @@ input[type="color"] {
       </div>
     </div>
 
-    <!-- YouTube -->
     <div>
       <div class="section-divider">YouTube Video</div>
       <div class="card">
@@ -442,7 +442,6 @@ input[type="color"] {
       </div>
     </div>
 
-    <!-- Media list -->
     <div>
       <div class="section-divider">Stored Media</div>
       <div id="mediaList"></div>
@@ -490,6 +489,13 @@ input[type="color"] {
           <label>Interval (s)</label>
           <input id="intervalS" type="number" value="5" min="1" />
         </div>
+      </div>
+      <label class="check-label">
+        <input id="syncPlayback" type="checkbox" />
+        Sync playback across all displays
+      </label>
+      <div id="syncInfo" class="sync-info">
+        When enabled, all monitors showing this presentation stay on the same slide. If a display refreshes or reconnects, it jumps to wherever the other screens currently are.
       </div>
     </div>
 
@@ -598,7 +604,6 @@ const activeRef = ref(db, "activePresentation");
 const refreshRef = ref(db, "refreshSignal");
 const monitorsRef = ref(db, "monitors");
 
-// DOM refs
 const fileInput = document.getElementById("file");
 const uploadBtn = document.getElementById("uploadBtn");
 const uploadStatus = document.getElementById("uploadStatus");
@@ -615,6 +620,8 @@ const editorTitle = document.getElementById("editorTitle");
 const modeEl = document.getElementById("mode");
 const transitionEl = document.getElementById("transition");
 const intervalSEl = document.getElementById("intervalS");
+const syncPlaybackEl = document.getElementById("syncPlayback");
+const syncInfoEl = document.getElementById("syncInfo");
 const overlayTextEl = document.getElementById("overlayText");
 const overlayVisibleEl = document.getElementById("overlayVisible");
 const overlayBgColorInput = document.getElementById("overlayBgColor");
@@ -650,12 +657,10 @@ const unlock = k => editLocks.delete(k);
 const isLocked = k => editLocks.has(k);
 
 function escHtml(s) { return s ? String(s).replaceAll("<","&lt;").replaceAll(">","&gt;") : ""; }
-
 function debounce(fn, wait=400) {
   let t;
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
 }
-
 function extractYtId(raw) {
   raw = (raw||"").trim();
   if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
@@ -702,7 +707,7 @@ function updateOverlayPreview() {
   }
 }
 
-// Firebase
+// Firebase listeners
 onValue(mediaRef, snap => { localMedia = snap.val()||{}; renderMediaList(); if (selectedPresentationId) renderPresentationEditor(); });
 onValue(presentationsRef, snap => {
   const raw = snap.val()||{};
@@ -720,7 +725,12 @@ onValue(monitorsRef, snap => { localMonitors = snap.val()||{}; renderTabs(); ren
 async function createPresentation(name) {
   const newRef = push(presentationsRef);
   const id = newRef.key;
-  await set(newRef, { name: name||"New Presentation", items: [], mode: "slideshow", intervalMs: 5000, transition: "fade", overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" } });
+  await set(newRef, {
+    name: name||"New Presentation",
+    items: [], mode: "slideshow", intervalMs: 5000, transition: "fade",
+    syncPlayback: false,
+    overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" }
+  });
   selectedPresentationId = id;
 }
 
@@ -775,21 +785,13 @@ ytSaveBtn.onclick = async () => {
 function renderTabs() {
   tabsBar.querySelectorAll(".tab").forEach(t => t.remove());
   const addBtn = document.getElementById("addPresentationBtn");
-  const rev = {};
-  for (const [mn, val] of Object.entries(localMonitors||{})) {
-    let pid = null;
-    if (typeof val === "string") pid = val;
-    else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
-    if (!pid) continue;
-    rev[pid] = rev[pid]||[];
-    rev[pid].push(decodeURIComponent(mn));
-  }
   Object.entries(presentations).forEach(([id, p]) => {
     const isSelected = id === selectedPresentationId;
     const isLive = id === activePresentationId;
+    const isSynced = !!p.syncPlayback;
     const tab = document.createElement("div");
     tab.className = "tab" + (isSelected ? " active" : "");
-    tab.innerHTML = `<span>${escHtml(p.name||"Untitled")}${isLive ? '<span class="live-badge" style="margin-left:6px">LIVE</span>' : ""}</span><span class="tab-close">×</span>`;
+    tab.innerHTML = `<span>${escHtml(p.name||"Untitled")}${isLive ? '<span class="live-badge" style="margin-left:6px">LIVE</span>' : ""}${isSynced ? '<span class="sync-badge" style="margin-left:4px">SYNC</span>' : ""}</span><span class="tab-close">×</span>`;
     tab.addEventListener("click", e => {
       if (e.target.classList.contains("tab-close")) return;
       selectedPresentationId = id; renderTabs(); renderPresentationEditor();
@@ -873,6 +875,18 @@ async function updatePresentationPartial(updates) {
   }
 }
 
+// Helper: get all monitor names assigned to a given presentation ID
+function getAssignedMonitorNames(pid) {
+  const assigned = [];
+  for (const [mn, val] of Object.entries(localMonitors||{})) {
+    let p = null;
+    if (typeof val === "string") p = val;
+    else if (val && typeof val === "object") p = val.presentation||val.assigned||val.pid||null;
+    if (p === pid) assigned.push(decodeURIComponent(mn));
+  }
+  return assigned;
+}
+
 function renderPresentationEditor() {
   presentationItemsEl.innerHTML = "";
   if (!selectedPresentationId || !presentations[selectedPresentationId]) return;
@@ -881,21 +895,17 @@ function renderPresentationEditor() {
   if (!isLocked("mode")) modeEl.value = p.mode||"slideshow";
   if (!isLocked("transition")) transitionEl.value = p.transition||"fade";
   if (!isLocked("interval")) intervalSEl.value = Math.round((p.intervalMs||5000)/1000);
+  if (!isLocked("syncPlayback")) syncPlaybackEl.checked = !!p.syncPlayback;
+  syncInfoEl.classList.toggle("visible", !!p.syncPlayback);
   if (!isLocked("overlayText")) overlayTextEl.value = p.overlay?.text||"";
   overlayVisibleEl.checked = !!p.overlay?.visible;
   if (p.overlay?.color) { selectedOverlayBg = p.overlay.color; overlayBgColorInput.value = p.overlay.color; setSwatchActive("overlayBgSwatches", selectedOverlayBg); }
   if (p.overlay?.textColor) { selectedOverlayTxt = p.overlay.textColor; overlayTxtColorInput.value = p.overlay.textColor; setSwatchActive("overlayTxtSwatches", selectedOverlayTxt); }
   updateOverlayPreview();
 
-  // Assigned monitors
+  // Assigned monitors — show all assigned + pre-populate input field
+  const assigned = getAssignedMonitorNames(selectedPresentationId);
   assignedMonitorsList.innerHTML = "";
-  const assigned = [];
-  for (const [mn, val] of Object.entries(localMonitors||{})) {
-    let pid = null;
-    if (typeof val === "string") pid = val;
-    else if (val && typeof val === "object") pid = val.presentation||val.assigned||val.pid||null;
-    if (pid === selectedPresentationId) assigned.push(decodeURIComponent(mn));
-  }
   if (assigned.length === 0) {
     assignedMonitorsList.innerHTML = '<span style="font-size:11px;color:var(--text3)">No monitors assigned</span>';
   }
@@ -905,6 +915,11 @@ function renderPresentationEditor() {
     el.innerHTML = `<span style="color:var(--green);font-size:8px">●</span> ${escHtml(name)}`;
     assignedMonitorsList.appendChild(el);
   });
+
+  // Pre-populate the assign input with currently assigned monitors (if it's empty)
+  if (!isLocked("monitorAssign") && !monitorAssignInput.value.trim() && assigned.length > 0) {
+    monitorAssignInput.value = assigned.join(", ");
+  }
 
   const pRef = ref(db, `presentations/${selectedPresentationId}`);
   const getP = async () => (await get(pRef)).val();
@@ -960,19 +975,6 @@ function renderPresentationEditor() {
     [p2.items[i+1],p2.items[i]] = [p2.items[i],p2.items[i+1]]; await set(pRef, p2);
   });
 
-  const wireEdit = (sel, key, getter) => {
-    presentationItemsEl.querySelectorAll(sel).forEach(inp => {
-      const k = `${key}-${inp.dataset.idx}`;
-      inp.addEventListener("focus", () => lock(k));
-      inp.addEventListener("blur", async () => {
-        unlock(k);
-        const p2 = await getP();
-        p2.items[+inp.dataset.idx][key.replace("item","")] = getter(inp.value);
-        await set(pRef, p2);
-      });
-    });
-  };
-  // Wire start/end/label
   presentationItemsEl.querySelectorAll(".itemStart").forEach(inp => {
     const k = `start-${inp.dataset.idx}`; inp.addEventListener("focus", () => lock(k));
     inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].start = parseFloat(inp.value)||0; await set(pRef,p2); });
@@ -992,6 +994,14 @@ modeEl.addEventListener("change", async () => { lock("mode"); await updatePresen
 transitionEl.addEventListener("change", async () => { lock("transition"); await updatePresentationPartial({ transition: transitionEl.value }); setTimeout(() => unlock("transition"), 250); });
 intervalSEl.addEventListener("focus", () => lock("interval"));
 intervalSEl.addEventListener("blur", async () => { unlock("interval"); await updatePresentationPartial({ intervalMs: (parseInt(intervalSEl.value,10)||5)*1000 }); });
+
+syncPlaybackEl.addEventListener("change", async () => {
+  lock("syncPlayback");
+  syncInfoEl.classList.toggle("visible", syncPlaybackEl.checked);
+  await updatePresentationPartial({ syncPlayback: syncPlaybackEl.checked });
+  renderTabs(); // update SYNC badge in tab
+  setTimeout(() => unlock("syncPlayback"), 250);
+});
 
 const saveOverlayText = debounce(async () => {
   if (!selectedPresentationId) return;
@@ -1024,7 +1034,10 @@ overlayTxtColorInput.addEventListener("input", async () => {
   await updatePresentationPartial({ overlay: { ...curOverlay, textColor: selectedOverlayTxt } });
 });
 
-// Monitor assignment - improved
+// Monitor assignment input - lock while typing
+monitorAssignInput.addEventListener("focus", () => lock("monitorAssign"));
+monitorAssignInput.addEventListener("blur", () => unlock("monitorAssign"));
+
 assignMonitorsBtn.onclick = async () => {
   if (!selectedPresentationId) return alert("Select a presentation first.");
   const raw = monitorAssignInput.value.trim();
@@ -1053,7 +1066,6 @@ assignMonitorsBtn.onclick = async () => {
       await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
     }
   }
-  monitorAssignInput.value = "";
 };
 
 clearMonitorAssignmentsBtn.onclick = async () => {
@@ -1070,6 +1082,7 @@ clearMonitorAssignmentsBtn.onclick = async () => {
       else await remove(ref(db, `monitors/${mn}`));
     }
   }
+  monitorAssignInput.value = "";
 };
 
 function renderMonitorsTable() {
