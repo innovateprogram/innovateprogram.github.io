@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournament Control Panel</title>
+<style>
+  body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: white; }
+  h1 { color: #e94560; }
+  input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: none; font-size: 14px; box-sizing: border-box; }
+  button { width: 100%; padding: 12px; margin: 6px 0; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
+  .open   { background: #0f3460; color: white; }
+  .change { background: #533483; color: white; }
+  .release{ background: #2d6a4f; color: white; }
+  .shut   { background: #e94560; color: white; }
+  #status { margin-top: 16px; padding: 10px; background: #0f3460; border-radius: 6px; font-size: 13px; min-height: 20px; }
+</style>
+</head>
+<body>
+<h1>🎮 Tournament Control</h1>
+
+<input type="text" id="linkInput" placeholder="https://kahoot.it/..." value="https://" />
+
+<button class="open"    onclick="send('OPEN_LINK')">🌐 Open Link (new window)</button>
+<button class="change"  onclick="send('CHANGE_TAB')">🔄 Change Tab</button>
+<button class="release" onclick="send('RELEASE', '')">✅ Release Control</button>
+<button class="shut"    onclick="confirmShutdown()">⛔ Shutdown PCs</button>
+
+<div id="status">Ready.</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBLyt3BL_4Ai4ZGQUWvR41R_1GO0-gW4A4",
+    authDomain: "innovate-website-5705b.firebaseapp.com",
+    projectId: "innovate-website-5705b",
+    databaseURL: "https://innovate-website-5705b-default-rtdb.firebaseio.com",
+    storageBucket: "innovate-website-5705b.firebasestorage.app",
+    messagingSenderId: "838085567637",
+    appId: "1:838085567637:web:9d324be23b387fa732a79c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.send = function(cmd, linkOverride) {
+    const link = linkOverride !== undefined ? linkOverride : document.getElementById("linkInput").value.trim();
+    const status = document.getElementById("status");
+
+    set(ref(db, "tournament/command"), { cmd, link })
+      .then(() => { status.textContent = `✅ Sent: ${cmd} → ${link || "(no link)"}`; })
+      .catch(e => { status.textContent = `❌ Error: ${e.message}`; });
+  }
+
+  window.confirmShutdown = function() {
+    if (confirm("⛔ Are you sure you want to SHUTDOWN all PCs?"))
+      window.send("SHUTDOWN", "");
+  }
+</script>
+</body>
+</html>
