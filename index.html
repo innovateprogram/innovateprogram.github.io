@@ -3,7 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Display V2.8</title>
+    <!-- Change the version number for changes to the sheet, change the first number for large
+changes, change the small number for bug fixes and small changers -->
+    <title>Display V2.12</title>
     <style>
       *,
       *::before,
@@ -74,6 +76,13 @@
         position: fixed;
         inset: 0;
         background: #000;
+        /* Canvas transitions for notification mode */
+        transition:
+          top 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+          height 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+          width 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+          left 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+          border-radius 0.6s cubic-bezier(0.22, 1, 0.36, 1);
       }
       .slide {
         position: absolute;
@@ -114,31 +123,60 @@
         border: none;
         display: block;
       }
-      @keyframes bannerSlide {
-        from {
-          transform: translateX(-110%);
-        }
-        to {
-          transform: translateX(0);
-        }
+
+      /* ── Notification overlay (full-screen mode) ── */
+      #notification-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.5s ease;
       }
-      .overlay {
-        position: absolute;
-        top: 0;
+      #notification-screen.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Colored background behind the shrunken canvas — fills whole screen */
+      #notification-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 199;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+      #notification-bg.visible {
+        opacity: 1;
+      }
+
+      /* Message text — bottom zone, height and font-size set entirely by JS */
+      #notification-text {
+        position: fixed;
+        bottom: 0;
         left: 0;
-        padding: 16px 36px 16px 24px;
-        border-radius: 0 0 10px 0;
+        right: 0;
+        z-index: 201;
         font-family: system-ui, Arial, sans-serif;
-        font-size: clamp(18px, 3vw, 34px);
-        font-weight: 800;
-        letter-spacing: 0.02em;
-        line-height: 1.3;
-        z-index: 100;
-        max-width: 75vw;
-        word-break: break-word;
-        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
-        display: none;
-        animation: bannerSlide 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        font-weight: 900;
+        line-height: 1.05;
+        text-align: center;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translateY(40px);
+        opacity: 0;
+        transition:
+          transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
+          opacity 0.4s ease 0.1s;
+      }
+      #notification-text.visible {
+        transform: translateY(0);
+        opacity: 1;
       }
     </style>
   </head>
@@ -149,8 +187,27 @@
       <div id="preload-track"><div id="preload-fill"></div></div>
       <div id="preload-status">Connecting</div>
     </div>
-    <div class="canvas" id="canvas" style="opacity: 0; transition: opacity 0.5s ease"></div>
-    <div class="overlay" id="overlay"></div>
+
+    <!-- Notification background layer (colored fill behind canvas) -->
+    <div id="notification-bg"></div>
+
+    <!-- Main canvas — gets repositioned when notification is active -->
+    <div
+      class="canvas"
+      id="canvas"
+      style="
+        opacity: 0;
+        transition:
+          opacity 0.5s ease,
+          top 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+          height 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+          width 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+          left 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+          border-radius 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      "></div>
+
+    <!-- Notification text at the bottom -->
+    <div id="notification-text"></div>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -178,7 +235,8 @@
       const db = getDatabase(app);
 
       const canvas = document.getElementById("canvas");
-      const overlayEl = document.getElementById("overlay");
+      const notifBg = document.getElementById("notification-bg");
+      const notifText = document.getElementById("notification-text");
       const preload = document.getElementById("preload");
       const preloadFill = document.getElementById("preload-fill");
       const preloadStatus = document.getElementById("preload-status");
@@ -296,8 +354,6 @@
       }
 
       // ── Sync state ─────────────────────────────────────────────────────────────────
-      // Shape: { idx, startedAt, publisherId }
-
       function syncRef(pid) {
         return ref(db, `syncState/${pid}`);
       }
@@ -309,8 +365,6 @@
         } catch (e) {}
       }
 
-      // Returns { idx, elapsed, hasState } — hasState=false means no sync record exists yet.
-      // The caller uses hasState to decide whether to publish slide 0 on first load.
       async function readSync(pid, p) {
         if (!syncEnabled || !pid || !p?.items) return { idx: 0, elapsed: 0, hasState: false };
         try {
@@ -323,16 +377,11 @@
         }
       }
 
-      // ── Sync listener — ONE place, owned here ──────────────────────────────────────
-      // Strategy: read current value first to get baseline, THEN attach onValue.
-      // Only one listener exists at a time; reattach only when pid changes.
-
+      // ── Sync listener ──────────────────────────────────────────────────────────────
       let syncUnsub = null;
       let syncPid = null;
 
       async function ensureSyncListener(pid) {
-        // Always tear down the old listener to get a fresh baseline.
-        // This is critical on reload — we need a new closure with an up-to-date baseline.
         if (syncUnsub) {
           syncUnsub();
           syncUnsub = null;
@@ -340,9 +389,6 @@
         syncPid = null;
         if (!pid) return;
 
-        // Read the current DB value FIRST, synchronously before attaching onValue.
-        // This timestamp becomes our baseline — the initial onValue fire will match it
-        // and be skipped, so only genuinely NEW writes from other displays come through.
         let baseline = null;
         try {
           const snap = await get(syncRef(pid));
@@ -354,21 +400,136 @@
         syncUnsub = onValue(syncRef(pid), (snap) => {
           const s = snap.val();
           if (!s || s.idx == null) return;
-
-          // Skip the value that was in the DB when we attached (already handled by readSync)
           if (s.startedAt === baseline) return;
           baseline = s.startedAt;
-
-          // Ignore our own publishes
           if (s.publisherId === DISPLAY_ID) return;
-
-          // Only act if sync is on and slides are loaded
           if (!syncEnabled || !presentation) return;
-
           const elapsed = Math.max(0, (Date.now() - s.startedAt) / 1000);
           showSlide(presentation, s.idx, elapsed, false);
         });
       }
+
+      // ── Notification overlay ───────────────────────────────────────────────────────
+      const NOTIF_TEXT_MAX_H_PCT = 45;
+      const NOTIF_TEXT_MIN_H_PCT = 12;
+
+      let notifActive = false;
+
+      function applyOverlay(p, animate) {
+        const ov = p.overlay || {};
+        if (ov.visible && ov.text) {
+          showNotification(ov.text, ov.color || "#cc0000", ov.textColor || "#fff", animate);
+        } else {
+          hideNotification();
+        }
+      }
+
+      function showNotification(text, bgColor, textColor, animate) {
+        notifActive = true;
+
+        notifBg.style.background = bgColor;
+        notifBg.classList.add("visible");
+
+        // Set text first so we can measure it
+        notifText.style.color = textColor;
+        notifText.style.background = bgColor;
+        notifText.textContent = text;
+
+        // Fit text and get how tall the text block needs to be
+        const textHeightPx = fitNotifText();
+
+        // Available height for the video
+        const availH = window.innerHeight - textHeightPx;
+        const availW = window.innerWidth;
+
+        // Fit a 16:9 box inside the available space — no cropping, no black bars
+        const ratio = 16 / 9;
+        let vidW = availW;
+        let vidH = Math.round(vidW / ratio);
+        if (vidH > availH) {
+          vidH = availH;
+          vidW = Math.round(vidH * ratio);
+        }
+        const vidLeft = Math.round((availW - vidW) / 2);
+
+        canvas.style.top = "0";
+        canvas.style.left = vidLeft + "px";
+        canvas.style.right = "auto";
+        canvas.style.bottom = "auto";
+        canvas.style.width = vidW + "px";
+        canvas.style.height = vidH + "px";
+        canvas.style.borderRadius = "0";
+        canvas.style.overflow = "hidden";
+        canvas.style.zIndex = "200";
+
+        notifText.style.height = textHeightPx + "px";
+        notifText.classList.add("visible");
+      }
+
+      function hideNotification() {
+        if (!notifActive) return;
+        notifActive = false;
+
+        notifBg.classList.remove("visible");
+        notifText.classList.remove("visible");
+
+        canvas.style.top = "0";
+        canvas.style.left = "0";
+        canvas.style.right = "0";
+        canvas.style.bottom = "0";
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.style.borderRadius = "0";
+        canvas.style.overflow = "";
+        canvas.style.zIndex = "";
+      }
+
+      // Binary-search the largest font that fits width and the max-height budget.
+      // Returns the pixel height the text zone will occupy.
+      function fitNotifText() {
+        const el = notifText;
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+        const maxH = Math.round((screenH * NOTIF_TEXT_MAX_H_PCT) / 100);
+        const minH = Math.round((screenH * NOTIF_TEXT_MIN_H_PCT) / 100);
+        const maxW = screenW * 0.96;
+
+        el.style.whiteSpace = "normal";
+        el.style.height = "auto";
+        el.style.padding = "2vh 2vw";
+
+        let lo = 24,
+          hi = Math.round(screenW * 0.25);
+        for (let i = 0; i < 14; i++) {
+          const mid = Math.round((lo + hi) / 2);
+          el.style.fontSize = mid + "px";
+          if (el.scrollWidth <= maxW && el.scrollHeight <= maxH) lo = mid;
+          else hi = mid - 1;
+        }
+        el.style.fontSize = lo + "px";
+
+        const renderedH = Math.max(minH, Math.min(maxH, el.scrollHeight + Math.round(screenH * 0.04)));
+        return renderedH;
+      }
+
+      window.addEventListener("resize", () => {
+        if (!notifActive) return;
+        const textHeightPx = fitNotifText();
+        const availH = window.innerHeight - textHeightPx;
+        const availW = window.innerWidth;
+        const ratio = 16 / 9;
+        let vidW = availW;
+        let vidH = Math.round(vidW / ratio);
+        if (vidH > availH) {
+          vidH = availH;
+          vidW = Math.round(vidH * ratio);
+        }
+        const vidLeft = Math.round((availW - vidW) / 2);
+        canvas.style.left = vidLeft + "px";
+        canvas.style.width = vidW + "px";
+        canvas.style.height = vidH + "px";
+        notifText.style.height = textHeightPx + "px";
+      });
 
       // ── Slide cleanup & build ──────────────────────────────────────────────────────
       function cleanupSlides() {
@@ -509,16 +670,13 @@
         }
 
         if (media.resource_type === "youtube") {
-          // publish flag passed through so YT player can fire sync when playback begins
           playYT(p, idx, item, media, seekOffset || 0, publish);
         } else if (media.resource_type !== "image") {
           const vid = slide.querySelector("video");
           if (vid) playVideo(p, slide, vid, item, seekOffset || 0, publish);
           else scheduleNext(p);
         } else {
-          // Images: no async start — publish immediately
           if (publish) publishSync(idx);
-          // Account for elapsed time when syncing
           if (seekOffset && p.intervalMs) {
             const remaining = Math.max(500, p.intervalMs - seekOffset * 1000);
             slideTimer = setTimeout(() => advance(p), remaining);
@@ -529,10 +687,6 @@
       }
 
       function playVideo(p, slideEl, vid, item, seekOffset, publish) {
-        // seekOffset = seconds already elapsed on this slide (received from sync state).
-        // We seek to (item.start + seekOffset) so video plays from the right position.
-        // When publishing, we back-date startedAt by seekOffset so other displays
-        // calculate the same seek position when they read the sync state.
         const itemStart = item.start || 0;
         const seekTo = itemStart + (seekOffset || 0);
         const end = item.end || null;
@@ -549,9 +703,6 @@
             .play()
             .then(() => {
               vid.muted = false;
-
-              // Publish sync after play() resolves so startedAt is accurate.
-              // Back-date by seekOffset so other displays seek to the same position.
               if (publish && syncEnabled && currentPid) {
                 const backdatedStart = Date.now() - (seekOffset || 0) * 1000;
                 set(syncRef(currentPid), {
@@ -560,7 +711,6 @@
                   publisherId: DISPLAY_ID
                 }).catch(() => {});
               }
-
               if (end && end > seekTo) {
                 const poll = () => {
                   if (!slideEl.classList.contains("visible")) return;
@@ -623,8 +773,6 @@
         const start = itemStart + (seekOffset || 0);
         const end = item.end ?? media.end ?? null;
 
-        // Helper to publish sync when YT playback actually begins.
-        // Back-date startedAt by seekOffset so other displays calculate the right seek.
         const publishYtSync = () => {
           if (!publish || !syncEnabled || !currentPid) return;
           const backdatedStart = Date.now() - (seekOffset || 0) * 1000;
@@ -685,7 +833,6 @@
               onStateChange: (e) => {
                 if (e.data === 0) advance(p);
                 if (e.data === 1) {
-                  // State 1 = playing — fire sync publish once when playback actually starts
                   if (!ytSyncPublished) {
                     ytSyncPublished = true;
                     publishYtSync();
@@ -723,27 +870,6 @@
         requestAnimationFrame(check);
       }
 
-      // ── Overlay ────────────────────────────────────────────────────────────────────
-      let overlayVisible = false;
-      function applyOverlay(p, animate) {
-        const ov = p.overlay || {};
-        if (ov.visible && ov.text) {
-          overlayEl.style.background = ov.color || "#cc0000";
-          overlayEl.style.color = ov.textColor || "#fff";
-          overlayEl.textContent = ov.text;
-          overlayEl.style.display = "block";
-          if (animate && !overlayVisible) {
-            overlayEl.style.animation = "none";
-            void overlayEl.offsetWidth;
-            overlayEl.style.animation = "";
-          }
-          overlayVisible = true;
-        } else {
-          overlayEl.style.display = "none";
-          overlayVisible = false;
-        }
-      }
-
       // ── Main load / reload ─────────────────────────────────────────────────────────
       let currentPresentationKey = null;
 
@@ -757,22 +883,18 @@
           return;
         }
 
-        // Update globals BEFORE anything that reads them
         syncEnabled = !!p.syncPlayback;
         currentPid = pid;
 
-        // If only settings changed (overlay, interval, etc.) — no rebuild needed
         const key = JSON.stringify(p.items.map((i) => i.mediaId)) + p.name + p.intervalMs + p.transition;
         if (!forceReload && key === currentPresentationKey) {
           presentation = p;
           applyOverlay(p, true);
-          // Re-attach sync listener in case syncEnabled just changed
           await ensureSyncListener(syncEnabled ? pid : null);
           return;
         }
         currentPresentationKey = key;
 
-        // Full rebuild
         setProgress(5, "Fetching media…");
         const mediaSnap = await get(ref(db, "media"));
         mediaCache = mediaSnap.val() || {};
@@ -780,7 +902,6 @@
         presentation = p;
         buildSlides(p);
 
-        // Preload assets
         let loaded = 0;
         const total = p.items.length;
         await Promise.all(
@@ -807,24 +928,14 @@
         dismissPreload();
         applyOverlay(p, true);
 
-        // Set up sync listener BEFORE reading sync state so we don't miss any
-        // writes that happen between the get() in ensureSyncListener and readSync().
         await ensureSyncListener(syncEnabled ? pid : null);
 
-        // Read the current sync position from Firebase
         const { idx: startIdx, elapsed, hasState } = await readSync(pid, p);
-
-        // If there's no existing sync state in Firebase (first display to load, or
-        // Firebase was cleared), publish slide 0 so other displays / future reloads
-        // have something to sync to. Without this, idx=0 is never written and a
-        // reloading display would always start from whatever slide was last published.
         const shouldPublish = syncEnabled && !hasState;
         showSlide(p, startIdx, elapsed, shouldPublish);
       }
 
       // ── Firebase change listeners ──────────────────────────────────────────────────
-      // All roads lead to loadPresentation(). We debounce to avoid hammering it.
-
       let reloadDebounce = null;
       function scheduleReload(force = false) {
         clearTimeout(reloadDebounce);
@@ -834,7 +945,6 @@
       function attachListeners() {
         const monKey = encodeURIComponent(monitorName);
 
-        // Watch for commands (reload button in manager)
         onValue(ref(db, `monitors/${monKey}/command`), (snap) => {
           const cmd = snap.val();
           if (!cmd?.at || cmd.at <= lastCommandAt) return;
@@ -842,7 +952,6 @@
           if (cmd.cmd === "reloadPresentation") loadPresentation(true);
         });
 
-        // Watch monitor record (assignment changes, deletion)
         let monFirstFire = true;
         onValue(ref(db, `monitors/${monKey}`), (snap) => {
           if (monFirstFire) {
@@ -856,8 +965,6 @@
           scheduleReload(false);
         });
 
-        // Watch the assigned presentation directly for live edits
-        // Track which presentation we're watching so we can switch
         let watchedPid = null;
         let presentationUnsub = null;
 
@@ -885,13 +992,11 @@
               return;
             }
             if (!snap.val()) return;
-            // Update syncEnabled immediately so the sync listener check is current
             syncEnabled = !!snap.val().syncPlayback;
             scheduleReload(false);
           });
         }
 
-        // Re-run updatePresentationWatch whenever monitor record changes
         let monWatchFirstFire = true;
         onValue(ref(db, `monitors/${monKey}`), () => {
           if (monWatchFirstFire) {
@@ -901,14 +1006,12 @@
           updatePresentationWatch();
         });
 
-        // Watch activePresentation (fallback for unassigned monitors)
         let activeFirstFire = true;
         onValue(ref(db, "activePresentation"), async () => {
           if (activeFirstFire) {
             activeFirstFire = false;
             return;
           }
-          // Only matters if this monitor has no specific assignment
           const monSnap = await get(ref(db, `monitors/${monKey}`));
           const monData = monSnap.val();
           let pid = null;
@@ -917,7 +1020,6 @@
           if (!pid) scheduleReload(false);
         });
 
-        // Watch presentations/current (legacy fallback)
         let curFirstFire = true;
         onValue(ref(db, "presentations/current"), async () => {
           if (curFirstFire) {
@@ -932,7 +1034,6 @@
           if (!pid) scheduleReload(false);
         });
 
-        // Global refresh signal (Refresh Displays button)
         let lastRefreshSignal = null;
         onValue(ref(db, "refreshSignal"), (snap) => {
           const val = snap.val();
