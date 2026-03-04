@@ -3,38 +3,49 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Presentation Manager V5.0</title>
+    <title>Presentation Manager V4.0</title>
 
     <!-- ===== META / EMBED TAGS ===== -->
-    <meta name="description" content="Presentation Manager — control and schedule digital signage displays in real time." />
+    <meta
+      name="description"
+      content="Presentation Manager — control and schedule digital signage displays in real time." />
     <meta name="author" content="MRSC" />
     <meta name="theme-color" content="#2e8b2e" />
 
     <!-- Open Graph (Facebook, LinkedIn, iMessage, WhatsApp, Slack…) -->
-    <meta property="og:type"        content="website" />
-    <meta property="og:title"       content="Presentation Manager V4.0" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Presentation Manager V4.0" />
     <meta property="og:description" content="Control and schedule digital signage displays in real time." />
-    <meta property="og:image"       content="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
-    <meta property="og:image:width"  content="480" />
+    <meta
+      property="og:image"
+      content="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
+    <meta property="og:image:width" content="480" />
     <meta property="og:image:height" content="480" />
-    <meta property="og:image:alt"   content="MRSC Logo" />
+    <meta property="og:image:alt" content="MRSC Logo" />
 
     <!-- Twitter Card -->
-    <meta name="twitter:card"        content="summary" />
-    <meta name="twitter:title"       content="Presentation Manager V4.0" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Presentation Manager V4.0" />
     <meta name="twitter:description" content="Control and schedule digital signage displays in real time." />
-    <meta name="twitter:image"       content="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
-    <meta name="twitter:image:alt"   content="MRSC Logo" />
+    <meta
+      name="twitter:image"
+      content="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
+    <meta name="twitter:image:alt" content="MRSC Logo" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
-    <link rel="apple-touch-icon"      href="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
+    <link
+      rel="apple-touch-icon"
+      href="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
 
     <style>
       /* San Francisco system font stack */
       * {
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-                     "Helvetica Neue", "Segoe UI", Arial, sans-serif !important;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI",
+          Arial, sans-serif !important;
       }
     </style>
     <style>
@@ -120,15 +131,28 @@
         max-width: 400px;
         position: relative;
         box-shadow:
-          0 32px 80px rgba(0,0,0,0.10),
+          0 32px 80px rgba(0, 0, 0, 0.1),
           0 0 0 1px rgba(46, 139, 46, 0.08);
         animation: authIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
       }
       @keyframes authIn {
-        0%   { opacity: 0; transform: translateY(32px) scale(0.94); filter: blur(4px); }
-        60%  { opacity: 1; filter: blur(0); }
-        80%  { transform: translateY(-4px) scale(1.01); }
-        100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        0% {
+          opacity: 0;
+          transform: translateY(32px) scale(0.94);
+          filter: blur(4px);
+        }
+        60% {
+          opacity: 1;
+          filter: blur(0);
+        }
+        80% {
+          transform: translateY(-4px) scale(1.01);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          filter: blur(0);
+        }
       }
       .auth-logo {
         display: flex;
@@ -166,7 +190,9 @@
         margin-bottom: 32px;
         line-height: 1.5;
       }
-      .auth-field { margin-bottom: 18px; }
+      .auth-field {
+        margin-bottom: 18px;
+      }
       .auth-field label {
         display: block;
         font-size: 11px;
@@ -185,7 +211,9 @@
         color: var(--text);
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
         font-size: 16px;
-        transition: border-color 0.15s, box-shadow 0.15s;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
         outline: none;
         -webkit-appearance: none;
       }
@@ -197,14 +225,25 @@
       .auth-field input.shake {
         animation: shake 0.4s ease;
         border-color: var(--red);
-        box-shadow: 0 0 0 3px rgba(192,57,43,0.15);
+        box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
       }
       @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        20% { transform: translateX(-8px); }
-        40% { transform: translateX(8px); }
-        60% { transform: translateX(-5px); }
-        80% { transform: translateX(5px); }
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20% {
+          transform: translateX(-8px);
+        }
+        40% {
+          transform: translateX(8px);
+        }
+        60% {
+          transform: translateX(-5px);
+        }
+        80% {
+          transform: translateX(5px);
+        }
       }
       .auth-btn {
         width: 100%;
@@ -219,11 +258,24 @@
         font-weight: 700;
         cursor: pointer;
         letter-spacing: 0.03em;
-        transition: background 0.2s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s cubic-bezier(0.25,0.46,0.45,0.94);
+        transition:
+          background 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+          transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+          box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       }
-      .auth-btn:hover { background: var(--accent2); box-shadow: 0 4px 16px rgba(46,139,46,0.28); transform: scale(1.02); }
-      .auth-btn:active { transform: scale(0.96); box-shadow: none; }
-      .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .auth-btn:hover {
+        background: var(--accent2);
+        box-shadow: 0 4px 16px rgba(46, 139, 46, 0.28);
+        transform: scale(1.02);
+      }
+      .auth-btn:active {
+        transform: scale(0.96);
+        box-shadow: none;
+      }
+      .auth-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
       .auth-error {
         font-size: 13px;
         color: var(--red);
@@ -236,8 +288,12 @@
         justify-content: center;
         gap: 6px;
       }
-      .auth-error::before { content: ""; }
-      .auth-error.visible::before { content: "⚠"; }
+      .auth-error::before {
+        content: "";
+      }
+      .auth-error.visible::before {
+        content: "⚠";
+      }
       .auth-pin-row {
         display: flex;
         gap: 10px;
@@ -258,22 +314,33 @@
         outline: none;
         -webkit-appearance: none;
         caret-color: transparent;
-        transition: border-color 0.15s, box-shadow 0.15s;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
       }
       .auth-pin-input:focus {
         border-color: var(--accent);
         box-shadow: 0 0 0 3px var(--accent-glow);
         transform: scale(1.08);
       }
-      .auth-pin-input.filled { color: var(--accent); animation: pinFilled 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+      .auth-pin-input.filled {
+        color: var(--accent);
+        animation: pinFilled 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
       @keyframes pinFilled {
-        0%   { transform: scale(1); }
-        40%  { transform: scale(1.22); }
-        100% { transform: scale(1); }
+        0% {
+          transform: scale(1);
+        }
+        40% {
+          transform: scale(1.22);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
       .auth-pin-input.err {
         border-color: var(--red);
-        box-shadow: 0 0 0 3px rgba(192,57,43,0.15);
+        box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
         animation: shake 0.4s ease;
       }
       #authLoadingMsg {
@@ -367,7 +434,9 @@
         text-transform: uppercase;
         border-bottom: 2px solid transparent;
       }
-      .sidebar-tab:hover { color: var(--text2); }
+      .sidebar-tab:hover {
+        color: var(--text2);
+      }
       .sidebar-tab.active {
         color: var(--accent);
         border-bottom-color: var(--accent);
@@ -381,7 +450,9 @@
         gap: 14px;
         -webkit-overflow-scrolling: touch;
       }
-      .sidebar-panel.active { display: flex; }
+      .sidebar-panel.active {
+        display: flex;
+      }
 
       /* ===== UPLOAD ZONE ===== */
       .drop-zone {
@@ -394,7 +465,8 @@
         background: var(--surface2);
         position: relative;
       }
-      .drop-zone:hover, .drop-zone.dragging {
+      .drop-zone:hover,
+      .drop-zone.dragging {
         border-color: var(--accent);
         background: var(--accent-glow);
       }
@@ -406,9 +478,20 @@
         width: 100%;
         height: 100%;
       }
-      .drop-zone-icon { font-size: 36px; margin-bottom: 12px; }
-      .drop-zone-label { font-size: 14px; font-weight: 600; color: var(--text2); }
-      .drop-zone-sub { font-size: 12px; color: var(--text3); margin-top: 5px; }
+      .drop-zone-icon {
+        font-size: 36px;
+        margin-bottom: 12px;
+      }
+      .drop-zone-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text2);
+      }
+      .drop-zone-sub {
+        font-size: 12px;
+        color: var(--text3);
+        margin-top: 5px;
+      }
 
       /* ===== MEDIA CARDS ===== */
       .media-card {
@@ -418,7 +501,9 @@
         overflow: hidden;
         transition: border-color 0.15s;
       }
-      .media-card:hover { border-color: var(--border2); }
+      .media-card:hover {
+        border-color: var(--border2);
+      }
       .media-thumb-wrap {
         width: 100%;
         height: 100px;
@@ -429,7 +514,8 @@
         position: relative;
         overflow: hidden;
       }
-      .media-thumb-wrap img, .media-thumb-wrap video {
+      .media-thumb-wrap img,
+      .media-thumb-wrap video {
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -438,7 +524,7 @@
         position: absolute;
         top: 8px;
         left: 8px;
-        background: rgba(255,255,255,0.85);
+        background: rgba(255, 255, 255, 0.85);
         border-radius: 5px;
         padding: 3px 8px;
         font-size: 10px;
@@ -446,7 +532,9 @@
         color: var(--text2);
         text-transform: uppercase;
       }
-      .media-card-body { padding: 12px 14px 14px; }
+      .media-card-body {
+        padding: 12px 14px 14px;
+      }
       .media-card-name {
         font-size: 13px;
         font-weight: 600;
@@ -460,8 +548,15 @@
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
         cursor: text;
       }
-      .media-card-name:focus { outline: none; color: var(--accent); }
-      .media-card-actions { display: flex; gap: 7px; margin-top: 10px; }
+      .media-card-name:focus {
+        outline: none;
+        color: var(--accent);
+      }
+      .media-card-actions {
+        display: flex;
+        gap: 7px;
+        margin-top: 10px;
+      }
 
       /* ===== BUTTONS ===== */
       .btn {
@@ -486,32 +581,67 @@
       }
       .btn:hover {
         background: var(--surface2);
-        border-color: rgba(0,0,0,0.18);
+        border-color: rgba(0, 0, 0, 0.18);
         transform: scale(1.03);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
       }
-      .btn:active { opacity: 0.85; transform: scale(0.95); box-shadow: none; }
+      .btn:active {
+        opacity: 0.85;
+        transform: scale(0.95);
+        box-shadow: none;
+      }
       .btn.primary {
         background: var(--accent);
         border-color: var(--accent);
         color: #fff;
       }
-      .btn.primary:hover { background: var(--accent2); border-color: var(--accent2); box-shadow: 0 4px 18px rgba(46,139,46,0.3); transform: scale(1.03); }
+      .btn.primary:hover {
+        background: var(--accent2);
+        border-color: var(--accent2);
+        box-shadow: 0 4px 18px rgba(46, 139, 46, 0.3);
+        transform: scale(1.03);
+      }
       .btn.danger {
-        background: rgba(192,57,43,0.08);
-        border-color: rgba(192,57,43,0.22);
+        background: rgba(192, 57, 43, 0.08);
+        border-color: rgba(192, 57, 43, 0.22);
         color: var(--red);
       }
-      .btn.danger:hover { background: rgba(192,57,43,0.16); }
-      .btn.ghost { background: transparent; border-color: transparent; color: var(--text3); }
-      .btn.ghost:hover { background: var(--surface3); color: var(--text2); }
-      .btn.sm { padding: 11px 18px; font-size: 14px; }
-      .btn.xs { padding: 9px 14px; font-size: 13px; border-radius: 8px; }
-      .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-      .btn.full { width: 100%; }
+      .btn.danger:hover {
+        background: rgba(192, 57, 43, 0.16);
+      }
+      .btn.ghost {
+        background: transparent;
+        border-color: transparent;
+        color: var(--text3);
+      }
+      .btn.ghost:hover {
+        background: var(--surface3);
+        color: var(--text2);
+      }
+      .btn.sm {
+        padding: 11px 18px;
+        font-size: 14px;
+      }
+      .btn.xs {
+        padding: 9px 14px;
+        font-size: 13px;
+        border-radius: 8px;
+      }
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .btn.full {
+        width: 100%;
+      }
 
       /* ===== MAIN AREA ===== */
-      .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
 
       /* ===== TOP BAR ===== */
       .topbar {
@@ -526,7 +656,7 @@
         position: sticky;
         top: 0;
         z-index: 50;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
       }
       .topbar-menu {
         display: none;
@@ -554,13 +684,18 @@
         text-overflow: ellipsis;
         min-width: 0;
       }
-      .topbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .topbar-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
       .badge-live {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         background: var(--green-glow);
-        border: 1px solid rgba(30,126,52,0.3);
+        border: 1px solid rgba(30, 126, 52, 0.3);
         color: var(--green);
         border-radius: 20px;
         padding: 5px 13px;
@@ -577,8 +712,13 @@
         animation: pulse 2s infinite;
       }
       @keyframes pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(30,126,52,0.4); }
-        50% { box-shadow: 0 0 0 5px rgba(30,126,52,0); }
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(30, 126, 52, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 5px rgba(30, 126, 52, 0);
+        }
       }
 
       /* ===== PRESENTATION TABS ===== */
@@ -613,8 +753,13 @@
         flex-shrink: 0;
         -webkit-tap-highlight-color: transparent;
       }
-      .pres-tab:hover { color: var(--text2); }
-      .pres-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+      .pres-tab:hover {
+        color: var(--text2);
+      }
+      .pres-tab.active {
+        color: var(--text);
+        border-bottom-color: var(--accent);
+      }
       .pres-tab-close {
         width: 18px;
         height: 18px;
@@ -627,7 +772,10 @@
         transition: all 0.1s;
         flex-shrink: 0;
       }
-      .pres-tab-close:hover { background: rgba(192,57,43,0.12); color: var(--red); }
+      .pres-tab-close:hover {
+        background: rgba(192, 57, 43, 0.12);
+        color: var(--red);
+      }
       .pres-tab-add {
         display: flex;
         align-items: center;
@@ -640,7 +788,9 @@
         transition: color 0.15s;
         -webkit-tap-highlight-color: transparent;
       }
-      .pres-tab-add:hover { color: var(--accent); }
+      .pres-tab-add:hover {
+        color: var(--accent);
+      }
       .chip {
         display: inline-flex;
         align-items: center;
@@ -654,16 +804,19 @@
       .chip-live {
         background: var(--green-glow);
         color: var(--green);
-        border: 1px solid rgba(30,126,52,0.3);
+        border: 1px solid rgba(30, 126, 52, 0.3);
       }
       .chip-sync {
         background: var(--accent-glow);
         color: var(--accent);
-        border: 1px solid rgba(46,139,46,0.3);
+        border: 1px solid rgba(46, 139, 46, 0.3);
       }
 
       /* ===== EDITOR LAYOUT ===== */
-      .editor-layout { flex: 1; display: flex; }
+      .editor-layout {
+        flex: 1;
+        display: flex;
+      }
       .editor-scroll {
         flex: 1;
         padding: 32px;
@@ -678,7 +831,7 @@
         border: 1px solid var(--border);
         border-radius: var(--r);
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
       }
       .card-header {
         padding: 30px 36px;
@@ -701,9 +854,15 @@
         gap: 12px;
         white-space: nowrap;
       }
-      .card-title-icon { font-size: 22px; }
-      .card-body { padding: 36px; }
-      .card-body.compact { padding: 28px 36px; }
+      .card-title-icon {
+        font-size: 22px;
+      }
+      .card-body {
+        padding: 36px;
+      }
+      .card-body.compact {
+        padding: 28px 36px;
+      }
 
       /* ===== FORM ELEMENTS ===== */
       label {
@@ -728,20 +887,39 @@
         color: var(--text);
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
         font-size: 16px;
-        transition: border-color 0.15s, box-shadow 0.15s;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
         -webkit-appearance: none;
       }
-      input:focus, select:focus, textarea:focus {
+      input:focus,
+      select:focus,
+      textarea:focus {
         outline: none;
         border-color: var(--accent);
         box-shadow: 0 0 0 3px var(--accent-glow);
       }
-      select option { background: var(--surface); }
-      .field { margin-bottom: 24px; }
-      .field:last-child { margin-bottom: 0; }
-      .row { display: flex; gap: 20px; }
-      .row > .field { flex: 1; }
-      input[type="checkbox"] { accent-color: var(--accent); width: 20px; height: 20px; }
+      select option {
+        background: var(--surface);
+      }
+      .field {
+        margin-bottom: 24px;
+      }
+      .field:last-child {
+        margin-bottom: 0;
+      }
+      .row {
+        display: flex;
+        gap: 20px;
+      }
+      .row > .field {
+        flex: 1;
+      }
+      input[type="checkbox"] {
+        accent-color: var(--accent);
+        width: 20px;
+        height: 20px;
+      }
       .check-row {
         display: flex;
         align-items: center;
@@ -768,20 +946,35 @@
       }
 
       /* ===== SLIDE ITEMS ===== */
-      .slides-area { display: flex; flex-direction: column; gap: 12px; }
+      .slides-area {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
       .slide-item {
         background: var(--surface2);
         border: 1px solid var(--border);
         border-radius: var(--r);
         overflow: hidden;
-        transition: border-color 0.2s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.25s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.2s cubic-bezier(0.25,0.46,0.45,0.94);
+        transition:
+          border-color 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+          transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1),
+          box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         cursor: grab;
         display: flex;
         align-items: stretch;
       }
-      .slide-item:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.09); transform: translateY(-1px); }
-      .slide-item:active { cursor: grabbing; }
-      .slide-item.drag-over { border-color: var(--accent); transform: scale(1.01); }
+      .slide-item:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09);
+        transform: translateY(-1px);
+      }
+      .slide-item:active {
+        cursor: grabbing;
+      }
+      .slide-item.drag-over {
+        border-color: var(--accent);
+        transform: scale(1.01);
+      }
       .slide-item-thumb {
         width: 160px;
         min-height: 110px;
@@ -793,13 +986,21 @@
         overflow: hidden;
         position: relative;
       }
-      .slide-item-thumb img, .slide-item-thumb video { width: 100%; height: 100%; object-fit: cover; }
-      .slide-item-thumb-yt { font-size: 28px; color: rgba(0,0,0,0.3); }
+      .slide-item-thumb img,
+      .slide-item-thumb video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .slide-item-thumb-yt {
+        font-size: 28px;
+        color: rgba(0, 0, 0, 0.3);
+      }
       .slide-item-thumb-badge {
         position: absolute;
         bottom: 6px;
         left: 6px;
-        background: rgba(255,255,255,0.85);
+        background: rgba(255, 255, 255, 0.85);
         border-radius: 4px;
         font-size: 10px;
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
@@ -810,7 +1011,7 @@
         position: absolute;
         top: 6px;
         left: 6px;
-        background: rgba(255,255,255,0.92);
+        background: rgba(255, 255, 255, 0.92);
         color: var(--text2);
         border-radius: 5px;
         font-size: 12px;
@@ -838,11 +1039,32 @@
         border-bottom: 1px solid transparent;
         transition: border-color 0.15s;
       }
-      .slide-item-name:focus { outline: none; color: var(--accent); border-bottom-color: var(--accent); }
-      .slide-item-fields { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-      .slide-item-fields .field { margin-bottom: 0; flex: 1; min-width: 80px; }
-      .slide-item-fields label { margin-bottom: 4px; }
-      .slide-item-actions { display: flex; gap: 5px; align-items: center; margin-left: auto; padding-bottom: 2px; }
+      .slide-item-name:focus {
+        outline: none;
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+      .slide-item-fields {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+      }
+      .slide-item-fields .field {
+        margin-bottom: 0;
+        flex: 1;
+        min-width: 80px;
+      }
+      .slide-item-fields label {
+        margin-bottom: 4px;
+      }
+      .slide-item-actions {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        margin-left: auto;
+        padding-bottom: 2px;
+      }
       .drag-handle {
         display: flex;
         align-items: center;
@@ -852,13 +1074,31 @@
         font-size: 18px;
         flex-shrink: 0;
       }
-      .drag-handle:hover { color: var(--text2); }
+      .drag-handle:hover {
+        color: var(--text2);
+      }
 
       /* Empty state */
-      .empty-state { text-align: center; padding: 80px 40px; color: var(--text3); }
-      .empty-state-icon { font-size: 60px; margin-bottom: 20px; opacity: 0.35; }
-      .empty-state-title { font-size: 20px; font-weight: 600; color: var(--text2); margin-bottom: 10px; }
-      .empty-state-sub { font-size: 16px; line-height: 1.6; }
+      .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        color: var(--text3);
+      }
+      .empty-state-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+        opacity: 0.35;
+      }
+      .empty-state-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text2);
+        margin-bottom: 10px;
+      }
+      .empty-state-sub {
+        font-size: 16px;
+        line-height: 1.6;
+      }
 
       /* ===== OVERLAY PREVIEW ===== */
       .overlay-preview {
@@ -872,20 +1112,38 @@
       }
 
       /* ===== SWATCHES ===== */
-      .swatch-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+      .swatch-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
       .swatch {
         width: 34px;
         height: 34px;
         border-radius: 50%;
         cursor: pointer;
         border: 2px solid transparent;
-        transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), border-color 0.15s ease, box-shadow 0.2s ease;
+        transition:
+          transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+          border-color 0.15s ease,
+          box-shadow 0.2s ease;
       }
-      .swatch:hover { transform: scale(1.28); box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
-      .swatch.active { border-color: #333; transform: scale(1.1); }
+      .swatch:hover {
+        transform: scale(1.28);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+      }
+      .swatch.active {
+        border-color: #333;
+        transform: scale(1.1);
+      }
 
       /* ===== MONITORS TABLE ===== */
-      .monitors-list { display: flex; flex-direction: column; gap: 10px; }
+      .monitors-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
       .monitor-row {
         background: var(--surface2);
         border: 1px solid var(--border);
@@ -896,23 +1154,59 @@
         gap: 18px;
         flex-wrap: wrap;
       }
-      .monitor-status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-      .monitor-status-dot.online { background: var(--green); box-shadow: 0 0 10px var(--green-glow); animation: pulse 2s infinite; }
-      .monitor-status-dot.offline { background: var(--surface3); }
-      .monitor-info { flex: 1; min-width: 0; }
-      .monitor-name { font-size: 16px; font-weight: 600; color: var(--text); }
-      .monitor-meta { font-size: 13px; color: var(--text3); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; margin-top: 4px; }
-      .monitor-pres { font-size: 14px; color: var(--text2); margin-top: 4px; }
-      .monitor-actions { display: flex; gap: 6px; }
+      .monitor-status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .monitor-status-dot.online {
+        background: var(--green);
+        box-shadow: 0 0 10px var(--green-glow);
+        animation: pulse 2s infinite;
+      }
+      .monitor-status-dot.offline {
+        background: var(--surface3);
+      }
+      .monitor-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .monitor-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .monitor-meta {
+        font-size: 13px;
+        color: var(--text3);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+        margin-top: 4px;
+      }
+      .monitor-pres {
+        font-size: 14px;
+        color: var(--text2);
+        margin-top: 4px;
+      }
+      .monitor-actions {
+        display: flex;
+        gap: 6px;
+      }
 
       /* ===== ASSIGNED BADGES ===== */
-      .assigned-wrap { display: flex; flex-wrap: wrap; gap: 10px; min-height: 38px; margin-top: 18px; }
+      .assigned-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        min-height: 38px;
+        margin-top: 18px;
+      }
       .assigned-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: rgba(46,139,46,0.08);
-        border: 1px solid rgba(46,139,46,0.22);
+        background: rgba(46, 139, 46, 0.08);
+        border: 1px solid rgba(46, 139, 46, 0.22);
         border-radius: 20px;
         padding: 8px 18px;
         font-size: 15px;
@@ -920,14 +1214,40 @@
       }
 
       /* ===== PROGRESS ===== */
-      .progress-wrap { margin-top: 14px; display: none; }
-      .progress-bar { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
-      .progress-fill { height: 100%; width: 0; background: var(--accent); transition: width 0.15s; border-radius: 2px; }
-      .progress-label { font-size: 12px; color: var(--text2); margin-top: 7px; text-align: center; }
+      .progress-wrap {
+        margin-top: 14px;
+        display: none;
+      }
+      .progress-bar {
+        height: 4px;
+        background: var(--surface3);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        width: 0;
+        background: var(--accent);
+        transition: width 0.15s;
+        border-radius: 2px;
+      }
+      .progress-label {
+        font-size: 12px;
+        color: var(--text2);
+        margin-top: 7px;
+        text-align: center;
+      }
 
       /* ===== STATUS ===== */
-      .status-text { font-size: 13px; color: var(--green); margin-top: 8px; text-align: center; }
-      .status-text.err { color: var(--red); }
+      .status-text {
+        font-size: 13px;
+        color: var(--green);
+        margin-top: 8px;
+        text-align: center;
+      }
+      .status-text.err {
+        color: var(--red);
+      }
 
       /* ===== SECTION DIVIDER ===== */
       .divider {
@@ -941,12 +1261,17 @@
         color: var(--text3);
         margin: 4px 0;
       }
-      .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
 
       /* ===== SYNC INFO ===== */
       .info-box {
         background: var(--accent-glow);
-        border: 1px solid rgba(46,139,46,0.22);
+        border: 1px solid rgba(46, 139, 46, 0.22);
         border-radius: var(--r-sm);
         padding: 18px 20px;
         font-size: 15px;
@@ -955,9 +1280,13 @@
         display: none;
         margin-top: 18px;
       }
-      .info-box.visible { display: block; }
+      .info-box.visible {
+        display: block;
+      }
 
-      .card-header .check-row span { font-size: 14px; }
+      .card-header .check-row span {
+        font-size: 14px;
+      }
 
       /* ===== NO PRESENTATION ===== */
       .no-pres {
@@ -971,19 +1300,36 @@
         text-align: center;
         padding: 40px;
       }
-      .no-pres-icon { font-size: 56px; opacity: 0.25; }
-      .no-pres-title { font-size: 18px; font-weight: 600; color: var(--text2); }
-      .no-pres-sub { font-size: 14px; line-height: 1.5; }
+      .no-pres-icon {
+        font-size: 56px;
+        opacity: 0.25;
+      }
+      .no-pres-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text2);
+      }
+      .no-pres-sub {
+        font-size: 14px;
+        line-height: 1.5;
+      }
 
-      .upload-name { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
-      .upload-name input { flex: 1; }
+      .upload-name {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .upload-name input {
+        flex: 1;
+      }
 
       /* ===== MOBILE OVERLAY ===== */
       .sidebar-backdrop {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.35);
+        background: rgba(0, 0, 0, 0.35);
         z-index: 99;
         backdrop-filter: blur(2px);
         -webkit-backdrop-filter: blur(2px);
@@ -1009,32 +1355,67 @@
         font-size: 13px;
         font-weight: 500;
         color: var(--text);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-        animation: toastIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), toastOut 0.3s cubic-bezier(0.25,0.46,0.45,0.94) 2.7s forwards;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        animation:
+          toastIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+          toastOut 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 2.7s forwards;
         display: flex;
         align-items: center;
         gap: 10px;
         pointer-events: all;
         min-width: 200px;
       }
-      .toast.success { border-left: 3px solid var(--green); }
-      .toast.error { border-left: 3px solid var(--red); }
-      .toast.info { border-left: 3px solid var(--accent); }
+      .toast.success {
+        border-left: 3px solid var(--green);
+      }
+      .toast.error {
+        border-left: 3px solid var(--red);
+      }
+      .toast.info {
+        border-left: 3px solid var(--accent);
+      }
       @keyframes toastIn {
-        0%   { opacity: 0; transform: translateY(18px) scale(0.92); filter: blur(3px); }
-        60%  { filter: blur(0); }
-        80%  { transform: translateY(-3px) scale(1.02); }
-        100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        0% {
+          opacity: 0;
+          transform: translateY(18px) scale(0.92);
+          filter: blur(3px);
+        }
+        60% {
+          filter: blur(0);
+        }
+        80% {
+          transform: translateY(-3px) scale(1.02);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          filter: blur(0);
+        }
       }
       @keyframes toastOut {
-        0%   { opacity: 1; transform: scale(1); filter: blur(0); }
-        100% { opacity: 0; transform: scale(0.9) translateY(8px); filter: blur(2px); }
+        0% {
+          opacity: 1;
+          transform: scale(1);
+          filter: blur(0);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.9) translateY(8px);
+          filter: blur(2px);
+        }
       }
 
-      .slide-item-fields input[type="number"] { padding: 14px 16px; font-size: 15px; }
+      .slide-item-fields input[type="number"] {
+        padding: 14px 16px;
+        font-size: 15px;
+      }
 
       /* YouTube card in sidebar */
-      .yt-library { display: flex; flex-direction: column; gap: 10px; }
+      .yt-library {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
       .yt-card {
         background: var(--surface2);
         border: 1px solid var(--border);
@@ -1049,10 +1430,12 @@
         align-items: center;
         justify-content: center;
         font-size: 28px;
-        color: rgba(0,0,0,0.3);
+        color: rgba(0, 0, 0, 0.3);
         position: relative;
       }
-      .yt-card-body { padding: 10px 12px 12px; }
+      .yt-card-body {
+        padding: 10px 12px 12px;
+      }
       .yt-card-name {
         font-size: 13px;
         font-weight: 600;
@@ -1066,13 +1449,20 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .yt-card-name:focus { outline: none; color: var(--accent); }
-      .yt-card-actions { display: flex; gap: 7px; margin-top: 8px; }
+      .yt-card-name:focus {
+        outline: none;
+        color: var(--accent);
+      }
+      .yt-card-actions {
+        display: flex;
+        gap: 7px;
+        margin-top: 8px;
+      }
       .yt-badge {
         position: absolute;
         top: 6px;
         right: 6px;
-        background: rgba(255,0,0,0.8);
+        background: rgba(255, 0, 0, 0.8);
         border-radius: 4px;
         padding: 2px 7px;
         font-size: 10px;
@@ -1086,7 +1476,7 @@
       .modal-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.35);
+        background: rgba(0, 0, 0, 0.35);
         backdrop-filter: blur(3px);
         z-index: 8000;
         display: flex;
@@ -1101,7 +1491,7 @@
         padding: 40px 36px 32px;
         width: 100%;
         max-width: 380px;
-        box-shadow: 0 24px 60px rgba(0,0,0,0.15);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
         animation: authIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
       }
       .modal-title {
@@ -1111,8 +1501,14 @@
         color: var(--text);
         margin-bottom: 6px;
       }
-      .modal-sub { font-size: 13px; color: var(--text3); margin-bottom: 28px; }
-      .modal-field { margin-bottom: 18px; }
+      .modal-sub {
+        font-size: 13px;
+        color: var(--text3);
+        margin-bottom: 28px;
+      }
+      .modal-field {
+        margin-bottom: 18px;
+      }
       .modal-field label {
         font-size: 11px;
         font-weight: 700;
@@ -1133,7 +1529,9 @@
         font-size: 16px;
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
         letter-spacing: 0.2em;
-        transition: border-color 0.15s, box-shadow 0.15s;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
         outline: none;
         -webkit-appearance: none;
       }
@@ -1141,60 +1539,158 @@
         border-color: var(--accent);
         box-shadow: 0 0 0 3px var(--accent-glow);
       }
-      .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
-      .modal-error { font-size: 13px; color: var(--red); margin-top: 10px; min-height: 18px; font-weight: 500; }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 6px;
+      }
+      .modal-error {
+        font-size: 13px;
+        color: var(--red);
+        margin-top: 10px;
+        min-height: 18px;
+        font-weight: 500;
+      }
 
       /* ===== RESPONSIVE — TABLET ===== */
       @media (max-width: 1024px) {
-        :root { --sidebar-w: 300px; }
-        .settings-grid { grid-template-columns: 1fr 1fr; }
-        .topbar-actions .btn.ghost { display: none; }
+        :root {
+          --sidebar-w: 300px;
+        }
+        .settings-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .topbar-actions .btn.ghost {
+          display: none;
+        }
       }
 
       /* ===== RESPONSIVE — MOBILE ===== */
       @media (max-width: 720px) {
-        :root { --sidebar-w: min(320px, 88vw); }
+        :root {
+          --sidebar-w: min(320px, 88vw);
+        }
         .sidebar {
           position: fixed;
-          top: 0; left: 0; bottom: 0;
+          top: 0;
+          left: 0;
+          bottom: 0;
           height: 100vh;
           transform: translateX(-105%);
-          box-shadow: 4px 0 40px rgba(0,0,0,0.15);
+          box-shadow: 4px 0 40px rgba(0, 0, 0, 0.15);
         }
-        .sidebar.open { transform: translateX(0); }
-        .sidebar-backdrop.visible { display: block; }
-        .sidebar-close { display: flex; }
-        .topbar { padding: 0 16px; height: 58px; }
-        .topbar-menu { display: flex; }
-        .topbar-title { font-size: 15px; }
-        .topbar-actions .btn.ghost { display: none; }
-        .topbar-actions .badge-live { display: none; }
-        .editor-scroll { padding: 16px; gap: 16px; }
-        .card-body { padding: 18px; }
-        .card-body.compact { padding: 16px 18px; }
-        .card-header { padding: 16px 18px; min-height: 56px; }
-        .settings-grid { grid-template-columns: 1fr; gap: 14px; }
-        .slide-item-thumb { width: 100px; }
-        .slide-item-body { padding: 12px 14px; }
-        .row { flex-direction: column; gap: 0; }
-        .pres-tabs { padding: 0 6px; height: 44px; }
-        .pres-tab { padding: 0 14px; font-size: 13px; }
-        .toast-wrap { left: 16px; right: 16px; bottom: 16px; max-width: 100%; }
-        .toast { min-width: unset; width: 100%; }
-        .monitor-row { gap: 10px; }
-        .monitor-actions { flex-wrap: wrap; }
-        .auth-box { padding: 32px 22px 28px; margin: 0 16px; }
-        .auth-pin-input { width: 56px; height: 56px; font-size: 20px; }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .sidebar-backdrop.visible {
+          display: block;
+        }
+        .sidebar-close {
+          display: flex;
+        }
+        .topbar {
+          padding: 0 16px;
+          height: 58px;
+        }
+        .topbar-menu {
+          display: flex;
+        }
+        .topbar-title {
+          font-size: 15px;
+        }
+        .topbar-actions .btn.ghost {
+          display: none;
+        }
+        .topbar-actions .badge-live {
+          display: none;
+        }
+        .editor-scroll {
+          padding: 16px;
+          gap: 16px;
+        }
+        .card-body {
+          padding: 18px;
+        }
+        .card-body.compact {
+          padding: 16px 18px;
+        }
+        .card-header {
+          padding: 16px 18px;
+          min-height: 56px;
+        }
+        .settings-grid {
+          grid-template-columns: 1fr;
+          gap: 14px;
+        }
+        .slide-item-thumb {
+          width: 100px;
+        }
+        .slide-item-body {
+          padding: 12px 14px;
+        }
+        .row {
+          flex-direction: column;
+          gap: 0;
+        }
+        .pres-tabs {
+          padding: 0 6px;
+          height: 44px;
+        }
+        .pres-tab {
+          padding: 0 14px;
+          font-size: 13px;
+        }
+        .toast-wrap {
+          left: 16px;
+          right: 16px;
+          bottom: 16px;
+          max-width: 100%;
+        }
+        .toast {
+          min-width: unset;
+          width: 100%;
+        }
+        .monitor-row {
+          gap: 10px;
+        }
+        .monitor-actions {
+          flex-wrap: wrap;
+        }
+        .auth-box {
+          padding: 32px 22px 28px;
+          margin: 0 16px;
+        }
+        .auth-pin-input {
+          width: 56px;
+          height: 56px;
+          font-size: 20px;
+        }
       }
 
       @media (max-width: 400px) {
-        .slide-item { flex-direction: column; }
-        .slide-item-thumb { width: 100%; height: 120px; }
-        .slide-item-body { padding: 12px; }
-        .drag-handle { display: none; }
-        .slide-item-fields { flex-direction: column; }
-        .slide-item-actions { margin-left: 0; width: 100%; }
-        .slide-item-actions .btn { flex: 1; }
+        .slide-item {
+          flex-direction: column;
+        }
+        .slide-item-thumb {
+          width: 100%;
+          height: 120px;
+        }
+        .slide-item-body {
+          padding: 12px;
+        }
+        .drag-handle {
+          display: none;
+        }
+        .slide-item-fields {
+          flex-direction: column;
+        }
+        .slide-item-actions {
+          margin-left: 0;
+          width: 100%;
+        }
+        .slide-item-actions .btn {
+          flex: 1;
+        }
       }
     </style>
   </head>
@@ -1203,9 +1699,10 @@
     <div id="authGate">
       <div class="auth-box">
         <div class="auth-logo">
-          <img src="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png"
-               alt="MRSC Logo"
-               style="width:72px;height:72px;object-fit:contain;border-radius:16px;" />
+          <img
+            src="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png"
+            alt="MRSC Logo"
+            style="width: 72px; height: 72px; object-fit: contain; border-radius: 16px" />
           <div class="auth-logo-row">
             <div class="dot"></div>
             PRESENTATION MGR
@@ -1227,7 +1724,7 @@
     </div>
 
     <!-- ===== CHANGE PIN MODAL ===== -->
-    <div id="changePinModal" class="modal-overlay" style="display:none">
+    <div id="changePinModal" class="modal-overlay" style="display: none">
       <div class="modal-box">
         <div class="modal-title">🔑 Change PIN</div>
         <div class="modal-sub">Enter your current PIN, then set a new 4-digit PIN.</div>
@@ -1245,7 +1742,7 @@
         </div>
         <div class="modal-error" id="cpError"></div>
         <div class="modal-actions">
-          <button class="btn primary" id="cpSaveBtn" style="flex:1">Save New PIN</button>
+          <button class="btn primary" id="cpSaveBtn" style="flex: 1">Save New PIN</button>
           <button class="btn" id="cpCancelBtn">Cancel</button>
         </div>
       </div>
@@ -1257,9 +1754,10 @@
       <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
           <div class="sidebar-logo">
-            <img src="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png"
-                 alt="MRSC Logo"
-                 style="width:28px;height:28px;object-fit:contain;border-radius:6px;flex-shrink:0;" />
+            <img
+              src="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png"
+              alt="MRSC Logo"
+              style="width: 28px; height: 28px; object-fit: contain; border-radius: 6px; flex-shrink: 0" />
             PRESENTATION MGR
           </div>
           <button class="sidebar-close" id="sidebarClose">×</button>
@@ -1333,9 +1831,10 @@
       <div class="main">
         <div class="topbar">
           <button class="topbar-menu" id="topbarMenu">☰</button>
-          <img src="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png"
-               alt="MRSC Logo"
-               style="width:34px;height:34px;object-fit:contain;border-radius:8px;flex-shrink:0;" />
+          <img
+            src="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png"
+            alt="MRSC Logo"
+            style="width: 34px; height: 34px; object-fit: contain; border-radius: 8px; flex-shrink: 0" />
           <div class="topbar-title" id="editorTitle">Select a Presentation</div>
           <div class="topbar-actions">
             <span id="liveIndicator" style="display: none" class="badge-live">DEFAULT</span>
@@ -1422,14 +1921,20 @@
                       <div class="swatch" style="background: #1a73e8" data-color="#1a73e8"></div>
                       <div class="swatch" style="background: #6a0dad" data-color="#6a0dad"></div>
                       <div class="swatch" style="background: #212121" data-color="#212121"></div>
-                      <div class="swatch" style="background: #f5f5f5; border: 1px solid #ccc" data-color="#f5f5f5"></div>
+                      <div
+                        class="swatch"
+                        style="background: #f5f5f5; border: 1px solid #ccc"
+                        data-color="#f5f5f5"></div>
                     </div>
                     <input id="overlayBgColor" type="color" value="#cc0000" />
                   </div>
                   <div class="field">
                     <label>Text Colour</label>
                     <div class="swatch-row" id="overlayTxtSwatches">
-                      <div class="swatch" style="background: #ffffff; border: 1px solid #ccc" data-color="#ffffff"></div>
+                      <div
+                        class="swatch"
+                        style="background: #ffffff; border: 1px solid #ccc"
+                        data-color="#ffffff"></div>
                       <div class="swatch" style="background: #000000" data-color="#000000"></div>
                       <div class="swatch" style="background: #f0b429" data-color="#f0b429"></div>
                       <div class="swatch" style="background: #ff6b6b" data-color="#ff6b6b"></div>
@@ -1508,7 +2013,7 @@
       };
       const CLOUD_NAME = "dgrmpcha9";
       const UPLOAD_PRESET = "Innovate";
-      const DEFAULT_PIN = "2456";
+      const DEFAULT_PIN = "1234";
 
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
@@ -1570,12 +2075,16 @@
         }
         authLoadingMsg.textContent = "";
         // Enable inputs now that PIN is loaded
-        pinInputs.forEach(inp => { inp.disabled = false; });
+        pinInputs.forEach((inp) => {
+          inp.disabled = false;
+        });
         pinInputs[0].focus();
       }
 
       // Disable pin inputs until PIN loaded
-      pinInputs.forEach(inp => { inp.disabled = true; });
+      pinInputs.forEach((inp) => {
+        inp.disabled = true;
+      });
       loadPinAndShowAuth();
 
       // ===== PIN AUTH HANDLERS =====
@@ -1632,9 +2141,15 @@
         inp.addEventListener("paste", (e) => {
           e.preventDefault();
           const paste = (e.clipboardData || window.clipboardData).getData("text").replace(/[^0-9]/g, "");
-          paste.split("").slice(0, 4).forEach((ch, i) => {
-            if (pinInputs[i]) { pinInputs[i].value = ch; pinInputs[i].classList.add("filled"); }
-          });
+          paste
+            .split("")
+            .slice(0, 4)
+            .forEach((ch, i) => {
+              if (pinInputs[i]) {
+                pinInputs[i].value = ch;
+                pinInputs[i].classList.add("filled");
+              }
+            });
           checkPin();
         });
       });
@@ -1648,17 +2163,30 @@
         changePinModal.style.display = "flex";
         setTimeout(() => cpCurrentPin.focus(), 50);
       };
-      cpCancelBtn.onclick = () => { changePinModal.style.display = "none"; };
-      changePinModal.onclick = (e) => { if (e.target === changePinModal) changePinModal.style.display = "none"; };
+      cpCancelBtn.onclick = () => {
+        changePinModal.style.display = "none";
+      };
+      changePinModal.onclick = (e) => {
+        if (e.target === changePinModal) changePinModal.style.display = "none";
+      };
 
       cpSaveBtn.onclick = async () => {
         cpError.textContent = "";
         const cur = cpCurrentPin.value.trim();
         const nw = cpNewPin.value.trim();
         const conf = cpConfirmPin.value.trim();
-        if (cur !== correctPin) { cpError.textContent = "Current PIN is incorrect."; return; }
-        if (!/^\d{4}$/.test(nw)) { cpError.textContent = "New PIN must be exactly 4 digits."; return; }
-        if (nw !== conf) { cpError.textContent = "New PINs do not match."; return; }
+        if (cur !== correctPin) {
+          cpError.textContent = "Current PIN is incorrect.";
+          return;
+        }
+        if (!/^\d{4}$/.test(nw)) {
+          cpError.textContent = "New PIN must be exactly 4 digits.";
+          return;
+        }
+        if (nw !== conf) {
+          cpError.textContent = "New PINs do not match.";
+          return;
+        }
         cpSaveBtn.disabled = true;
         try {
           await set(pinRef, nw);
@@ -1673,8 +2201,10 @@
       };
 
       // Allow Enter key in modal fields
-      [cpCurrentPin, cpNewPin, cpConfirmPin].forEach(inp => {
-        inp.addEventListener("keydown", (e) => { if (e.key === "Enter") cpSaveBtn.click(); });
+      [cpCurrentPin, cpNewPin, cpConfirmPin].forEach((inp) => {
+        inp.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") cpSaveBtn.click();
+        });
       });
 
       // ===== APP REFS (used after auth) =====
@@ -1739,8 +2269,16 @@
       const isLocked = (k) => editLocks.has(k);
 
       // ===== MOBILE SIDEBAR =====
-      function openSidebar() { sidebar.classList.add("open"); sidebarBackdrop.classList.add("visible"); document.body.style.overflow = "hidden"; }
-      function closeSidebar() { sidebar.classList.remove("open"); sidebarBackdrop.classList.remove("visible"); document.body.style.overflow = ""; }
+      function openSidebar() {
+        sidebar.classList.add("open");
+        sidebarBackdrop.classList.add("visible");
+        document.body.style.overflow = "hidden";
+      }
+      function closeSidebar() {
+        sidebar.classList.remove("open");
+        sidebarBackdrop.classList.remove("visible");
+        document.body.style.overflow = "";
+      }
       topbarMenu.onclick = openSidebar;
       sidebarClose.onclick = closeSidebar;
       sidebarBackdrop.onclick = closeSidebar;
@@ -1767,17 +2305,31 @@
 
       // ===== DRAG AND DROP UPLOAD =====
       const dropZone = $("dropZone");
-      dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragging"); });
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("dragging");
+      });
       dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragging"));
       dropZone.addEventListener("drop", (e) => {
         e.preventDefault();
         dropZone.classList.remove("dragging");
-        if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; uploadBtn.click(); }
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          uploadBtn.click();
+        }
       });
 
       // ===== HELPERS =====
-      function escHtml(s) { return s ? String(s).replaceAll("<", "&lt;").replaceAll(">", "&gt;") : ""; }
-      function debounce(fn, wait = 400) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); }; }
+      function escHtml(s) {
+        return s ? String(s).replaceAll("<", "&lt;").replaceAll(">", "&gt;") : "";
+      }
+      function debounce(fn, wait = 400) {
+        let t;
+        return (...args) => {
+          clearTimeout(t);
+          t = setTimeout(() => fn(...args), wait);
+        };
+      }
       function extractYtId(raw) {
         raw = (raw || "").trim();
         if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
@@ -1785,7 +2337,9 @@
           const u = new URL(raw);
           if (u.hostname.includes("youtu.be")) return u.pathname.slice(1).split("?")[0].slice(0, 11);
           return u.searchParams.get("v") || null;
-        } catch { return null; }
+        } catch {
+          return null;
+        }
       }
 
       // ===== SWATCHES =====
@@ -1796,13 +2350,30 @@
       }
       function setupSwatches(contId, inputEl, onSelect) {
         document.querySelectorAll(`#${contId} .swatch`).forEach((s) => {
-          s.onclick = () => { inputEl.value = s.dataset.color; setSwatchActive(contId, s.dataset.color); onSelect(s.dataset.color); };
+          s.onclick = () => {
+            inputEl.value = s.dataset.color;
+            setSwatchActive(contId, s.dataset.color);
+            onSelect(s.dataset.color);
+          };
         });
-        inputEl.addEventListener("input", () => { setSwatchActive(contId, inputEl.value); onSelect(inputEl.value); });
+        inputEl.addEventListener("input", () => {
+          setSwatchActive(contId, inputEl.value);
+          onSelect(inputEl.value);
+        });
       }
 
-      setupSwatches("overlayBgSwatches", overlayBgColorInput, (c) => { selectedOverlayBg = c; localOverlay.color = c; updateOverlayPreview(); scheduleOverlaySave(); });
-      setupSwatches("overlayTxtSwatches", overlayTxtColorInput, (c) => { selectedOverlayTxt = c; localOverlay.textColor = c; updateOverlayPreview(); scheduleOverlaySave(); });
+      setupSwatches("overlayBgSwatches", overlayBgColorInput, (c) => {
+        selectedOverlayBg = c;
+        localOverlay.color = c;
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+      setupSwatches("overlayTxtSwatches", overlayTxtColorInput, (c) => {
+        selectedOverlayTxt = c;
+        localOverlay.textColor = c;
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
 
       function updateOverlayPreview() {
         const txt = overlayTextEl.value;
@@ -1834,7 +2405,10 @@
           for (const [k, v] of Object.entries(raw)) {
             if (k !== "current") presentations[k] = v;
           }
-          if (Object.keys(presentations).length === 0) { createPresentation("Main"); return; }
+          if (Object.keys(presentations).length === 0) {
+            createPresentation("Main");
+            return;
+          }
           if (!selectedPresentationId || !presentations[selectedPresentationId]) {
             selectedPresentationId = Object.keys(presentations)[0];
           }
@@ -1976,7 +2550,8 @@
           .filter((id) => localMedia[id].resource_type !== "youtube")
           .sort((a, b) => localMedia[a].uploadedAt - localMedia[b].uploadedAt);
         if (sorted.length === 0) {
-          mediaListEl.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No media yet — upload above</div>';
+          mediaListEl.innerHTML =
+            '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No media yet — upload above</div>';
           return;
         }
         sorted.forEach((id) => {
@@ -1984,7 +2559,8 @@
           const div = document.createElement("div");
           div.className = "media-card";
           let thumb = "";
-          if (m.resource_type === "image") thumb = `<div class="media-thumb-wrap"><img src="${m.url}" loading="lazy" /></div>`;
+          if (m.resource_type === "image")
+            thumb = `<div class="media-thumb-wrap"><img src="${m.url}" loading="lazy" /></div>`;
           else thumb = `<div class="media-thumb-wrap"><video src="${m.url}" muted playsinline></video></div>`;
           const typeLabel = m.resource_type || "file";
           div.innerHTML = `
@@ -1997,7 +2573,12 @@
               </div>
             </div>`;
           const thumbEl = div.querySelector(".media-thumb-wrap");
-          if (thumbEl) { const badge = document.createElement("div"); badge.className = "media-thumb-type"; badge.textContent = typeLabel; thumbEl.appendChild(badge); }
+          if (thumbEl) {
+            const badge = document.createElement("div");
+            badge.className = "media-thumb-type";
+            badge.textContent = typeLabel;
+            thumbEl.appendChild(badge);
+          }
           mediaListEl.appendChild(div);
         });
         attachMediaCardHandlers(mediaListEl);
@@ -2009,7 +2590,8 @@
           .filter((id) => localMedia[id].resource_type === "youtube")
           .sort((a, b) => localMedia[a].uploadedAt - localMedia[b].uploadedAt);
         if (sorted.length === 0) {
-          ytLibraryEl.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No YouTube videos saved yet</div>';
+          ytLibraryEl.innerHTML =
+            '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No YouTube videos saved yet</div>';
           return;
         }
         sorted.forEach((id) => {
@@ -2028,11 +2610,23 @@
           ytLibraryEl.appendChild(card);
         });
         ytLibraryEl.querySelectorAll(".yt-rename-input").forEach((inp) => {
-          const save = async () => { const id = inp.dataset.id; const val = inp.value.trim(); if (!val || val === (localMedia[id]?.filename || "")) return; await update(ref(db, `media/${id}`), { filename: val }); };
+          const save = async () => {
+            const id = inp.dataset.id;
+            const val = inp.value.trim();
+            if (!val || val === (localMedia[id]?.filename || "")) return;
+            await update(ref(db, `media/${id}`), { filename: val });
+          };
           inp.addEventListener("blur", save);
-          inp.addEventListener("keydown", (e) => { if (e.key === "Enter") inp.blur(); });
+          inp.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") inp.blur();
+          });
         });
-        ytLibraryEl.querySelectorAll(".ytAddBtn").forEach((b) => { b.onclick = () => { addToPresentation(b.dataset.id); closeSidebar(); }; });
+        ytLibraryEl.querySelectorAll(".ytAddBtn").forEach((b) => {
+          b.onclick = () => {
+            addToPresentation(b.dataset.id);
+            closeSidebar();
+          };
+        });
         ytLibraryEl.querySelectorAll(".ytDeleteBtn").forEach((b) => {
           b.onclick = async () => {
             if (!confirm("Delete this YouTube video from all presentations?")) return;
@@ -2040,7 +2634,8 @@
             for (const [pid, p] of Object.entries(presentations)) {
               if (!p.items) continue;
               const filtered = p.items.filter((it) => it.mediaId !== b.dataset.id);
-              if (filtered.length !== p.items.length) await update(ref(db, `presentations/${pid}`), { items: filtered });
+              if (filtered.length !== p.items.length)
+                await update(ref(db, `presentations/${pid}`), { items: filtered });
             }
             toast("YouTube video removed");
           };
@@ -2049,11 +2644,24 @@
 
       function attachMediaCardHandlers(container) {
         container.querySelectorAll(".rename-input").forEach((inp) => {
-          const save = async () => { const id = inp.dataset.id; const val = inp.value.trim(); if (!val || val === (localMedia[id]?.filename || "")) return; await update(ref(db, `media/${id}`), { filename: val }); };
+          const save = async () => {
+            const id = inp.dataset.id;
+            const val = inp.value.trim();
+            if (!val || val === (localMedia[id]?.filename || "")) return;
+            await update(ref(db, `media/${id}`), { filename: val });
+          };
           inp.addEventListener("blur", save);
-          inp.addEventListener("keydown", (e) => { if (e.key === "Enter") inp.blur(); });
+          inp.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") inp.blur();
+          });
         });
-        container.querySelectorAll(".addBtn").forEach((b) => b.onclick = () => { addToPresentation(b.dataset.id); closeSidebar(); });
+        container.querySelectorAll(".addBtn").forEach(
+          (b) =>
+            (b.onclick = () => {
+              addToPresentation(b.dataset.id);
+              closeSidebar();
+            })
+        );
         container.querySelectorAll(".deleteBtn").forEach((b) => {
           b.onclick = async () => {
             if (!confirm("Delete this media from all presentations?")) return;
@@ -2061,7 +2669,8 @@
             for (const [pid, p] of Object.entries(presentations)) {
               if (!p.items) continue;
               const filtered = p.items.filter((it) => it.mediaId !== b.dataset.id);
-              if (filtered.length !== p.items.length) await update(ref(db, `presentations/${pid}`), { items: filtered });
+              if (filtered.length !== p.items.length)
+                await update(ref(db, `presentations/${pid}`), { items: filtered });
             }
             toast("Media removed");
           };
@@ -2115,17 +2724,31 @@
         if (!isLocked("syncPlayback")) syncPlaybackEl.checked = !!p.syncPlayback;
         syncInfoEl.classList.toggle("visible", !!p.syncPlayback);
 
-        if (!isLocked("overlayText")) { overlayTextEl.value = p.overlay?.text || ""; localOverlay.text = p.overlay?.text || ""; }
+        if (!isLocked("overlayText")) {
+          overlayTextEl.value = p.overlay?.text || "";
+          localOverlay.text = p.overlay?.text || "";
+        }
         overlayVisibleEl.checked = !!p.overlay?.visible;
         localOverlay.visible = !!p.overlay?.visible;
-        if (p.overlay?.color) { selectedOverlayBg = p.overlay.color; overlayBgColorInput.value = p.overlay.color; localOverlay.color = p.overlay.color; setSwatchActive("overlayBgSwatches", selectedOverlayBg); }
-        if (p.overlay?.textColor) { selectedOverlayTxt = p.overlay.textColor; overlayTxtColorInput.value = p.overlay.textColor; localOverlay.textColor = p.overlay.textColor; setSwatchActive("overlayTxtSwatches", selectedOverlayTxt); }
+        if (p.overlay?.color) {
+          selectedOverlayBg = p.overlay.color;
+          overlayBgColorInput.value = p.overlay.color;
+          localOverlay.color = p.overlay.color;
+          setSwatchActive("overlayBgSwatches", selectedOverlayBg);
+        }
+        if (p.overlay?.textColor) {
+          selectedOverlayTxt = p.overlay.textColor;
+          overlayTxtColorInput.value = p.overlay.textColor;
+          localOverlay.textColor = p.overlay.textColor;
+          setSwatchActive("overlayTxtSwatches", selectedOverlayTxt);
+        }
         updateOverlayPreview();
 
         const assigned = getAssignedMonitorNames(selectedPresentationId);
         assignedMonitorsList.innerHTML = "";
         if (assigned.length === 0) {
-          assignedMonitorsList.innerHTML = '<span style="font-size:13px;color:var(--text3)">No monitors assigned</span>';
+          assignedMonitorsList.innerHTML =
+            '<span style="font-size:13px;color:var(--text3)">No monitors assigned</span>';
         }
         assigned.forEach((name) => {
           const el = document.createElement("div");
@@ -2163,9 +2786,12 @@
           div.dataset.idx = index;
 
           let thumbHtml = "";
-          if (isYt) thumbHtml = `<div class="slide-item-thumb"><div class="slide-item-thumb-yt">▶</div><div class="slide-item-thumb-badge">YT</div><div class="slide-num">${index + 1}</div></div>`;
-          else if (m.resource_type === "image") thumbHtml = `<div class="slide-item-thumb"><img src="${m.url}" /><div class="slide-num">${index + 1}</div></div>`;
-          else thumbHtml = `<div class="slide-item-thumb"><video src="${m.url}" muted></video><div class="slide-num">${index + 1}</div></div>`;
+          if (isYt)
+            thumbHtml = `<div class="slide-item-thumb"><div class="slide-item-thumb-yt">▶</div><div class="slide-item-thumb-badge">YT</div><div class="slide-num">${index + 1}</div></div>`;
+          else if (m.resource_type === "image")
+            thumbHtml = `<div class="slide-item-thumb"><img src="${m.url}" /><div class="slide-num">${index + 1}</div></div>`;
+          else
+            thumbHtml = `<div class="slide-item-thumb"><video src="${m.url}" muted></video><div class="slide-num">${index + 1}</div></div>`;
 
           div.innerHTML = `
             <div class="drag-handle">⠿</div>
@@ -2188,9 +2814,20 @@
             </div>`;
           presentationItemsEl.appendChild(div);
 
-          div.addEventListener("dragstart", (e) => { dragSrcIdx = index; e.dataTransfer.effectAllowed = "move"; setTimeout(() => (div.style.opacity = "0.5"), 0); });
-          div.addEventListener("dragend", () => { div.style.opacity = ""; });
-          div.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; document.querySelectorAll(".slide-item").forEach((el) => el.classList.remove("drag-over")); div.classList.add("drag-over"); });
+          div.addEventListener("dragstart", (e) => {
+            dragSrcIdx = index;
+            e.dataTransfer.effectAllowed = "move";
+            setTimeout(() => (div.style.opacity = "0.5"), 0);
+          });
+          div.addEventListener("dragend", () => {
+            div.style.opacity = "";
+          });
+          div.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            document.querySelectorAll(".slide-item").forEach((el) => el.classList.remove("drag-over"));
+            div.classList.add("drag-over");
+          });
           div.addEventListener("dragleave", () => div.classList.remove("drag-over"));
           div.addEventListener("drop", async (e) => {
             e.preventDefault();
@@ -2205,23 +2842,44 @@
           });
         });
 
-        presentationItemsEl.querySelectorAll(".removeBtn").forEach((b) => b.onclick = async () => {
-          const p2 = await getP(); p2.items.splice(+b.dataset.idx, 1); await set(pRef2, p2); toast("Removed slide", "info");
-        });
+        presentationItemsEl.querySelectorAll(".removeBtn").forEach(
+          (b) =>
+            (b.onclick = async () => {
+              const p2 = await getP();
+              p2.items.splice(+b.dataset.idx, 1);
+              await set(pRef2, p2);
+              toast("Removed slide", "info");
+            })
+        );
         presentationItemsEl.querySelectorAll(".itemStart").forEach((inp) => {
           const k = `start-${inp.dataset.idx}`;
           inp.addEventListener("focus", () => lock(k));
-          inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].start = parseFloat(inp.value) || 0; await set(pRef2, p2); });
+          inp.addEventListener("blur", async () => {
+            unlock(k);
+            const p2 = await getP();
+            p2.items[+inp.dataset.idx].start = parseFloat(inp.value) || 0;
+            await set(pRef2, p2);
+          });
         });
         presentationItemsEl.querySelectorAll(".itemEnd").forEach((inp) => {
           const k = `end-${inp.dataset.idx}`;
           inp.addEventListener("focus", () => lock(k));
-          inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].end = inp.value === "" ? null : parseFloat(inp.value); await set(pRef2, p2); });
+          inp.addEventListener("blur", async () => {
+            unlock(k);
+            const p2 = await getP();
+            p2.items[+inp.dataset.idx].end = inp.value === "" ? null : parseFloat(inp.value);
+            await set(pRef2, p2);
+          });
         });
         presentationItemsEl.querySelectorAll(".itemLabel").forEach((inp) => {
           const k = `label-${inp.dataset.idx}`;
           inp.addEventListener("focus", () => lock(k));
-          inp.addEventListener("blur", async () => { unlock(k); const p2 = await getP(); p2.items[+inp.dataset.idx].label = inp.value; await set(pRef2, p2); });
+          inp.addEventListener("blur", async () => {
+            unlock(k);
+            const p2 = await getP();
+            p2.items[+inp.dataset.idx].label = inp.value;
+            await set(pRef2, p2);
+          });
         });
       }
 
@@ -2229,16 +2887,27 @@
         monitorsList.innerHTML = "";
         const entries = Object.entries(localMonitors || {}).sort((a, b) => a[0].localeCompare(b[0]));
         if (entries.length === 0) {
-          monitorsList.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No monitors connected yet</div>';
+          monitorsList.innerHTML =
+            '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No monitors connected yet</div>';
           return;
         }
         const now = Date.now();
         entries.forEach(([encodedName, data]) => {
           const name = decodeURIComponent(encodedName);
-          let lastSeen = 0, online = false, resolution = "—", pid = null;
-          if (typeof data === "string") { pid = data; }
-          else if (data && typeof data === "object") { lastSeen = data.lastSeen || 0; online = now - lastSeen < 20000 && data.status === "online"; resolution = data.resolution || "—"; pid = data.presentation || data.assigned || data.pid || null; }
-          const presName = pid && presentations[pid] ? presentations[pid].name : pid ? pid.slice(0, 8) + "…" : "Unassigned";
+          let lastSeen = 0,
+            online = false,
+            resolution = "—",
+            pid = null;
+          if (typeof data === "string") {
+            pid = data;
+          } else if (data && typeof data === "object") {
+            lastSeen = data.lastSeen || 0;
+            online = now - lastSeen < 20000 && data.status === "online";
+            resolution = data.resolution || "—";
+            pid = data.presentation || data.assigned || data.pid || null;
+          }
+          const presName =
+            pid && presentations[pid] ? presentations[pid].name : pid ? pid.slice(0, 8) + "…" : "Unassigned";
           const lastSeenStr = lastSeen ? new Date(lastSeen).toLocaleTimeString() : "Never";
           const row = document.createElement("div");
           row.className = "monitor-row";
@@ -2263,7 +2932,8 @@
             const key = b.dataset.name;
             const curSnap = await get(ref(db, `monitors/${key}`));
             const curVal = curSnap.val();
-            if (typeof curVal === "object" && curVal !== null) await update(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
+            if (typeof curVal === "object" && curVal !== null)
+              await update(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
             else await set(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
             toast("Monitor assigned");
           };
@@ -2273,8 +2943,13 @@
             const key = b.dataset.name;
             const curSnap = await get(ref(db, `monitors/${key}`));
             const curVal = curSnap.val();
-            if (curVal && typeof curVal === "object") await update(ref(db, `monitors/${key}`), { command: { cmd: "reloadPresentation", at: Date.now() } });
-            else await set(ref(db, `monitors/${key}`), { presentation: curVal || null, command: { cmd: "reloadPresentation", at: Date.now() } });
+            if (curVal && typeof curVal === "object")
+              await update(ref(db, `monitors/${key}`), { command: { cmd: "reloadPresentation", at: Date.now() } });
+            else
+              await set(ref(db, `monitors/${key}`), {
+                presentation: curVal || null,
+                command: { cmd: "reloadPresentation", at: Date.now() }
+              });
             toast("Reload sent", "info");
           };
         });
@@ -2287,20 +2962,63 @@
         });
       }
 
-      setInterval(() => { if (Object.keys(localMonitors).length > 0) renderMonitorsList(); }, 10000);
+      setInterval(() => {
+        if (Object.keys(localMonitors).length > 0) renderMonitorsList();
+      }, 10000);
 
-      modeEl.addEventListener("change", async () => { lock("mode"); await updatePresentationPartial({ mode: modeEl.value }); setTimeout(() => unlock("mode"), 250); });
-      transitionEl.addEventListener("change", async () => { lock("transition"); await updatePresentationPartial({ transition: transitionEl.value }); setTimeout(() => unlock("transition"), 250); });
+      modeEl.addEventListener("change", async () => {
+        lock("mode");
+        await updatePresentationPartial({ mode: modeEl.value });
+        setTimeout(() => unlock("mode"), 250);
+      });
+      transitionEl.addEventListener("change", async () => {
+        lock("transition");
+        await updatePresentationPartial({ transition: transitionEl.value });
+        setTimeout(() => unlock("transition"), 250);
+      });
       intervalSEl.addEventListener("focus", () => lock("interval"));
-      intervalSEl.addEventListener("blur", async () => { unlock("interval"); await updatePresentationPartial({ intervalMs: (parseInt(intervalSEl.value, 10) || 5) * 1000 }); });
-      syncPlaybackEl.addEventListener("change", async () => { lock("syncPlayback"); syncInfoEl.classList.toggle("visible", syncPlaybackEl.checked); await updatePresentationPartial({ syncPlayback: syncPlaybackEl.checked }); renderTabs(); setTimeout(() => unlock("syncPlayback"), 250); });
+      intervalSEl.addEventListener("blur", async () => {
+        unlock("interval");
+        await updatePresentationPartial({ intervalMs: (parseInt(intervalSEl.value, 10) || 5) * 1000 });
+      });
+      syncPlaybackEl.addEventListener("change", async () => {
+        lock("syncPlayback");
+        syncInfoEl.classList.toggle("visible", syncPlaybackEl.checked);
+        await updatePresentationPartial({ syncPlayback: syncPlaybackEl.checked });
+        renderTabs();
+        setTimeout(() => unlock("syncPlayback"), 250);
+      });
 
       overlayTextEl.addEventListener("focus", () => lock("overlayText"));
-      overlayTextEl.addEventListener("input", () => { localOverlay.text = overlayTextEl.value; updateOverlayPreview(); scheduleOverlaySave(); });
-      overlayTextEl.addEventListener("blur", () => { unlock("overlayText"); clearTimeout(overlaySaveTimer); commitOverlay(); });
-      overlayVisibleEl.addEventListener("change", () => { localOverlay.visible = overlayVisibleEl.checked; updateOverlayPreview(); scheduleOverlaySave(); });
-      overlayBgColorInput.addEventListener("change", () => { selectedOverlayBg = overlayBgColorInput.value; localOverlay.color = overlayBgColorInput.value; setSwatchActive("overlayBgSwatches", selectedOverlayBg); updateOverlayPreview(); scheduleOverlaySave(); });
-      overlayTxtColorInput.addEventListener("change", () => { selectedOverlayTxt = overlayTxtColorInput.value; localOverlay.textColor = overlayTxtColorInput.value; setSwatchActive("overlayTxtSwatches", selectedOverlayTxt); updateOverlayPreview(); scheduleOverlaySave(); });
+      overlayTextEl.addEventListener("input", () => {
+        localOverlay.text = overlayTextEl.value;
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+      overlayTextEl.addEventListener("blur", () => {
+        unlock("overlayText");
+        clearTimeout(overlaySaveTimer);
+        commitOverlay();
+      });
+      overlayVisibleEl.addEventListener("change", () => {
+        localOverlay.visible = overlayVisibleEl.checked;
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+      overlayBgColorInput.addEventListener("change", () => {
+        selectedOverlayBg = overlayBgColorInput.value;
+        localOverlay.color = overlayBgColorInput.value;
+        setSwatchActive("overlayBgSwatches", selectedOverlayBg);
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+      overlayTxtColorInput.addEventListener("change", () => {
+        selectedOverlayTxt = overlayTxtColorInput.value;
+        localOverlay.textColor = overlayTxtColorInput.value;
+        setSwatchActive("overlayTxtSwatches", selectedOverlayTxt);
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
 
       monitorAssignInput.addEventListener("focus", () => lock("monitorAssign"));
       monitorAssignInput.addEventListener("blur", () => unlock("monitorAssign"));
@@ -2308,16 +3026,23 @@
       assignMonitorsBtn.onclick = async () => {
         if (!selectedPresentationId) return toast("Select a presentation first.", "error");
         const raw = monitorAssignInput.value.trim();
-        const names = raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+        const names = raw
+          ? raw
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [];
         const keys = names.map((n) => encodeURIComponent(n));
         const snap = await get(monitorsRef);
         const cur = snap.val() || {};
-        const currentlyAssignedKeys = Object.entries(cur).filter(([mn, val]) => {
-          let pid = null;
-          if (typeof val === "string") pid = val;
-          else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
-          return pid === selectedPresentationId;
-        }).map(([mn]) => mn);
+        const currentlyAssignedKeys = Object.entries(cur)
+          .filter(([mn, val]) => {
+            let pid = null;
+            if (typeof val === "string") pid = val;
+            else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
+            return pid === selectedPresentationId;
+          })
+          .map(([mn]) => mn);
 
         for (const mn of currentlyAssignedKeys) {
           if (!keys.includes(mn)) {
@@ -2340,7 +3065,8 @@
           } else {
             const curSnap2 = await get(ref(db, `monitors/${k}`));
             const curVal2 = curSnap2.val();
-            if (typeof curVal2 === "object" && curVal2 !== null) await update(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+            if (typeof curVal2 === "object" && curVal2 !== null)
+              await update(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
             else await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
           }
         }
@@ -2385,13 +3111,24 @@
             const xhr = new XMLHttpRequest();
             xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`);
             xhr.upload.onprogress = (e) => {
-              if (e.lengthComputable) { const pct = Math.round((e.loaded / e.total) * 100); progressFill.style.width = pct + "%"; progressPct.textContent = pct + "%"; }
+              if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                progressFill.style.width = pct + "%";
+                progressPct.textContent = pct + "%";
+              }
             };
-            xhr.onload = () => xhr.status < 300 ? resolve(JSON.parse(xhr.responseText)) : reject(new Error("HTTP " + xhr.status));
+            xhr.onload = () =>
+              xhr.status < 300 ? resolve(JSON.parse(xhr.responseText)) : reject(new Error("HTTP " + xhr.status));
             xhr.onerror = () => reject(new Error("Network error"));
             xhr.send(fd);
           });
-          const mobj = { url: data.secure_url, resource_type: data.resource_type, filename: fname.value || file.name, uploadedAt: Date.now(), duration: data.duration || null };
+          const mobj = {
+            url: data.secure_url,
+            resource_type: data.resource_type,
+            filename: fname.value || file.name,
+            uploadedAt: Date.now(),
+            duration: data.duration || null
+          };
           const newRef3 = push(mediaRef);
           await set(newRef3, mobj);
           toast(`"${mobj.filename}" uploaded`);
