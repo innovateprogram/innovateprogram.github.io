@@ -67,7 +67,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
 .slide-card.sent{border-color:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.3)}
 .slide-text{color:#fff;font-size:10px;padding:6px;text-align:center;line-height:1.4;pointer-events:none;white-space:pre-line;text-shadow:1px 1px 3px rgba(0,0,0,.9)}
 .slide-index{position:absolute;bottom:3px;right:5px;font-size:9px;color:rgba(255,255,255,.3)}
-/* Media slide cards */
 .media-card-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);font-size:9px;color:rgba(255,255,255,.7);text-align:center;padding:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bottom-controls{background:#1a1f2e;border-top:1px solid #2d3748;padding:10px 18px;display:flex;justify-content:space-between;align-items:center}
 .fade-controls{display:flex;align-items:center;gap:12px}
@@ -173,9 +172,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
     <div class="top-bar">
       <div class="live-indicator" id="liveIndicator"><span class="live-dot"></span><span>Offline</span></div>
       <div style="display:flex;align-items:center;gap:10px">
-        <div class="kbd-hint"><span class="kbd">←</span><span class="kbd">→</span> navigate &nbsp;<span class="kbd">Space</span> send</div>
+        <div class="kbd-hint"><span class="kbd">←</span><span class="kbd">→</span> navigate &nbsp;<span class="kbd">Space</span> send &nbsp;<span class="kbd">T</span> bg &nbsp;<span class="kbd">L</span> logo &nbsp;<span class="kbd">B</span> blank</div>
+        <div class="control-buttons" id="fohControls" style="display:none;gap:6px">
+          <button class="btn blank-btn" onclick="fohCommand('toggleBackground')" title="Toggle FOH background (T)">BG</button>
+          <button class="btn blank-btn" onclick="fohCommand('toggleLogo')" title="Toggle FOH logo (L)">Logo</button>
+          <button class="btn blank-btn" onclick="sendBlank()" id="blankBtn" title="Blank FOH screen (B)">Blank</button>
+        </div>
         <div class="control-buttons">
-          <button class="btn blank-btn" onclick="sendBlank()" id="blankBtn" style="display:none">Blank</button>
           <button class="btn btn-success" onclick="goLive()">Go Live</button>
           <button class="btn btn-danger" onclick="stopPresentation()" id="stopBtn" style="display:none">Stop</button>
         </div>
@@ -283,7 +286,6 @@ window.bohWindow = null;
 window.isLive = false;
 window.selectedSong = null;
 
-// presentationState now tracks both song and sermon modes
 window.presentationState = {
   mode: null,           // 'song' | 'sermon'
   // Song
@@ -620,7 +622,6 @@ window.renderSermonInterface = function(sermon) {
   document.getElementById("contentArea").innerHTML=`<div class="slides-panel" id="slidesPanel" tabindex="0"></div>`;
   const panel = document.getElementById("slidesPanel");
 
-  // Section header
   const section = document.createElement("div"); section.className="part-section";
   const labelEl = document.createElement("div"); labelEl.className="part-section-label"; labelEl.textContent=sermon.title;
   section.appendChild(labelEl);
@@ -681,16 +682,18 @@ window.sendSermonSlide = function(i) {
   const slide = ps.sermonSlides[i];
   const nextSlide = i+1 < ps.sermonSlides.length ? ps.sermonSlides[i+1] : null;
   const fadeTime = parseInt(document.getElementById("fadeTime").value)||0;
+
+  // FIX: use type:"sermon" so FOH and BOH both recognise the content type
   const fohMsg = {
     type: "display",
-    content: { type: "media", url: slide.url, mediaType: slide.type },
+    content: { type: "sermon", url: slide.url, mediaType: slide.type },
     fadeTime,
     backgroundUrl: ps.backgroundUrl||null
   };
   const bohMsg = {
     type: "display",
-    content: { type: "media", url: slide.url, mediaType: slide.type, name: slide.name },
-    next: nextSlide ? { type: "media", url: nextSlide.url, mediaType: nextSlide.type, name: nextSlide.name } : null,
+    content: { type: "sermon", url: slide.url, mediaType: slide.type, name: slide.name },
+    next: nextSlide ? { type: "sermon", url: nextSlide.url, mediaType: nextSlide.type, name: nextSlide.name } : null,
     currentIndex: i+1,
     totalSlides: ps.sermonSlides.length,
     songTitle: ps.sermon.title
@@ -718,10 +721,19 @@ window.handleSlideKeyDown = function(e) {
 document.addEventListener("keydown", e => {
   if (["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName)) return;
   const ps = window.presentationState;
+  // FOH controls
+  if (e.key.toLowerCase() === 't') { fohCommand('toggleBackground'); return; }
+  if (e.key.toLowerCase() === 'l') { fohCommand('toggleLogo'); return; }
+  if (e.key.toLowerCase() === 'b') { sendBlank(); return; }
   const hasContent = (ps.mode==="song" && ps.parts.length) || (ps.mode==="sermon" && ps.sermonSlides.length);
   if (!hasContent) return;
   if (["ArrowRight","ArrowLeft","ArrowUp","ArrowDown"," "].includes(e.key)) { e.preventDefault(); handleSlideKeyDown(e); }
 });
+
+window.fohCommand = function(command) {
+  if (!window.fohWindow || window.fohWindow.closed) return;
+  window.fohWindow.postMessage({ type: 'fohCommand', command }, '*');
+};
 
 window.sendBlank = function() {
   if (!window.isLive) return;
@@ -795,7 +807,6 @@ window.showAddSegmentModal = () => {
   document.getElementById("songSearch").value="";
   document.getElementById("songResults").innerHTML='<p style="color:#64748b;font-size:13px">Start typing to search…</p>';
   window.selectedSong = null;
-  // Reset to song type
   document.getElementById("segmentType").value="song";
   document.getElementById("songSegmentForm").style.display="block";
   document.getElementById("sermonSegmentForm").style.display="none";
@@ -869,7 +880,8 @@ window.completeSetup = () => {
   const ind = document.getElementById("liveIndicator");
   ind.classList.add("active"); ind.querySelector("span:last-child").textContent="Live";
   document.getElementById("stopBtn").style.display="block";
-  document.getElementById("blankBtn").style.display="block";
+  document.getElementById("blankBtn").style.display="none"; // blankBtn is now inside fohControls
+  document.getElementById("fohControls").style.display="flex";
   closeModal("goLiveModal");
   const initMsg = { type:"init", fadeTime:parseInt(document.getElementById("fadeTime").value)||0, enableSongFade:document.getElementById("enableSongFade").checked, backgroundUrl:window.presentationState.backgroundUrl||null };
   if (window.fohWindow && !window.fohWindow.closed) window.fohWindow.postMessage(initMsg,"*");
@@ -879,7 +891,8 @@ window.stopPresentation = () => {
   window.isLive = false;
   const ind = document.getElementById("liveIndicator");
   ind.classList.remove("active"); ind.querySelector("span:last-child").textContent="Offline";
-  document.getElementById("stopBtn").style.display="none"; document.getElementById("blankBtn").style.display="none";
+  document.getElementById("stopBtn").style.display="none";
+  document.getElementById("fohControls").style.display="none";
   const msg = { type:"display", content:{type:"blank"}, next:null };
   if (window.fohWindow && !window.fohWindow.closed) window.fohWindow.postMessage(msg,"*");
   if (window.bohWindow && !window.bohWindow.closed) window.bohWindow.postMessage(msg,"*");
