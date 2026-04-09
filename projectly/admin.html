@@ -200,8 +200,6 @@
                 margin-bottom: 16px;
                 font-size: 13px;
             }
-
-            /* Song list */
             .song-item {
                 background: #0f1117;
                 padding: 16px;
@@ -234,8 +232,81 @@
                 gap: 8px;
                 flex-shrink: 0;
             }
-
-            /* Backgrounds */
+            .sermon-item {
+                background: #0f1117;
+                padding: 16px;
+                margin-bottom: 10px;
+                border-radius: 10px;
+                border: 2px solid transparent;
+                transition: all 0.2s;
+            }
+            .sermon-item:hover {
+                border-color: #3b82f6;
+                background: #111827;
+            }
+            .sermon-item-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .sermon-slides-preview {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 12px;
+            }
+            .sermon-slide-thumb {
+                width: 100px;
+                height: 56px;
+                object-fit: cover;
+                border-radius: 5px;
+                border: 1px solid #2d3748;
+                background: #000;
+            }
+            .sermon-slide-thumb.video-thumb,
+            .sermon-slide-thumb.pdf-thumb,
+            .sermon-slide-thumb.pptx-thumb,
+            .sermon-slide-thumb.media-thumb {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                color: #60a5fa;
+                background: #0c1f3a;
+                border: 1px solid #1e3a5f;
+            }
+            .sermon-slide-thumb.pdf-thumb {
+                background: #1f0a0a;
+                border-color: #5f1e1e;
+                color: #f87171;
+            }
+            .sermon-slide-thumb.pptx-thumb {
+                background: #0a1a0f;
+                border-color: #1e5f2a;
+                color: #4ade80;
+            }
+            .slide-remove-btn {
+                position: relative;
+                display: inline-block;
+            }
+            .slide-remove-btn button {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                background: #dc2626;
+                color: #fff;
+                border: none;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                font-size: 11px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+            }
             .background-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
@@ -284,8 +355,6 @@
                 border-radius: 10px;
                 letter-spacing: 0.5px;
             }
-
-            /* File upload */
             .file-upload {
                 border: 2px dashed #2d3748;
                 padding: 28px;
@@ -324,8 +393,6 @@
                 transition: width 0.3s;
                 width: 0%;
             }
-
-            /* Typography */
             .color-picker-row {
                 display: flex;
                 align-items: center;
@@ -394,8 +461,6 @@
             .editing-banner.active {
                 display: flex;
             }
-
-            /* Admin login overlay */
             .admin-login-overlay {
                 position: fixed;
                 inset: 0;
@@ -424,10 +489,168 @@
                 margin-bottom: 24px;
                 font-size: 13px;
             }
+
+            /* Upload type toggle — 4 buttons */
+            .upload-type-toggle {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+            .upload-type-btn {
+                padding: 10px 8px;
+                background: #0f1117;
+                border: 2px solid #2d3748;
+                border-radius: 8px;
+                color: #64748b;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 500;
+                text-align: center;
+                transition: all 0.2s;
+            }
+            .upload-type-btn:hover {
+                border-color: #3b82f6;
+                color: #e2e8f0;
+            }
+            .upload-type-btn.active {
+                border-color: #2563eb;
+                background: #1e3a5f;
+                color: #60a5fa;
+            }
+
+            /* Batch upload progress */
+            .batch-progress-list {
+                margin-top: 10px;
+                display: none;
+            }
+            .batch-progress-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 6px 0;
+                border-bottom: 1px solid #1e293b;
+                font-size: 12px;
+                color: #94a3b8;
+            }
+            .batch-progress-item:last-child {
+                border-bottom: none;
+            }
+            .batch-progress-item .bp-name {
+                flex: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .batch-progress-item .bp-bar {
+                width: 80px;
+                height: 4px;
+                background: #2d3748;
+                border-radius: 2px;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+            .batch-progress-item .bp-fill {
+                height: 100%;
+                background: #2563eb;
+                border-radius: 2px;
+                transition: width 0.2s;
+            }
+            .batch-progress-item .bp-status {
+                min-width: 32px;
+                text-align: right;
+                font-size: 11px;
+            }
+
+            /* Cloudinary usage */
+            .cloudinary-usage-card {
+                background: #0f1117;
+                border: 1px solid #2d3748;
+                border-radius: 10px;
+                padding: 18px;
+                margin-bottom: 20px;
+            }
+            .cloudinary-usage-card h4 {
+                font-size: 13px;
+                font-weight: 600;
+                color: #94a3b8;
+                margin-bottom: 14px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .usage-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 12px;
+            }
+            .usage-stat {
+                background: #1a1f2e;
+                border-radius: 8px;
+                padding: 12px 14px;
+            }
+            .usage-stat-label {
+                font-size: 11px;
+                color: #64748b;
+                margin-bottom: 6px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .usage-stat-value {
+                font-size: 18px;
+                font-weight: 700;
+                color: #e2e8f0;
+                margin-bottom: 6px;
+            }
+            .usage-stat-bar {
+                height: 5px;
+                background: #2d3748;
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            .usage-stat-bar-fill {
+                height: 100%;
+                border-radius: 3px;
+                transition: width 0.5s;
+            }
+            .usage-stat-bar-fill.low {
+                background: #22c55e;
+            }
+            .usage-stat-bar-fill.medium {
+                background: #f59e0b;
+            }
+            .usage-stat-bar-fill.high {
+                background: #ef4444;
+            }
+            .usage-stat-sub {
+                font-size: 11px;
+                color: #475569;
+                margin-top: 4px;
+            }
+            .usage-refresh-btn {
+                background: none;
+                border: none;
+                color: #3b82f6;
+                cursor: pointer;
+                font-size: 12px;
+                padding: 0;
+                text-decoration: underline;
+            }
+            .plan-badge {
+                display: inline-block;
+                background: #1e3a5f;
+                color: #60a5fa;
+                font-size: 11px;
+                font-weight: 600;
+                padding: 2px 10px;
+                border-radius: 10px;
+                margin-left: 8px;
+                vertical-align: middle;
+            }
         </style>
     </head>
     <body>
-        <!-- ADMIN LOGIN OVERLAY (always shown first) -->
+        <!-- ADMIN LOGIN OVERLAY -->
         <div id="adminLoginOverlay" class="admin-login-overlay">
             <div class="admin-login-box">
                 <h2>Admin Area</h2>
@@ -459,7 +682,7 @@
 
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('songs',this)">Songs</button>
-                <button class="tab" onclick="switchTab('sermons',this)">Sermon Slides</button>
+                <button class="tab" onclick="switchTab('sermons',this)">Media</button>
                 <button class="tab" onclick="switchTab('backgrounds',this)">Backgrounds & Logos</button>
                 <button class="tab" onclick="switchTab('typography',this)">Typography</button>
                 <button class="tab" onclick="switchTab('settings',this)">Settings</button>
@@ -498,17 +721,17 @@ Praise the Lord</pre
                     >
                 </div>
                 <div class="form-group">
-                    <label>Song Title</label
-                    ><input type="text" id="songTitle" placeholder="Enter song title" autocomplete="new-password" />
+                    <label>Song Title</label>
+                    <input type="text" id="songTitle" placeholder="Enter song title" autocomplete="new-password" />
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Author / Artist</label
-                        ><input type="text" id="songAuthor" placeholder="e.g., Hillsong" autocomplete="new-password" />
+                        <label>Author / Artist</label>
+                        <input type="text" id="songAuthor" placeholder="e.g., Hillsong" autocomplete="new-password" />
                     </div>
                     <div class="form-group">
-                        <label>CCLI / License (optional)</label
-                        ><input
+                        <label>CCLI / License (optional)</label>
+                        <input
                             type="text"
                             id="songLicense"
                             placeholder="e.g., CCLI #1234567"
@@ -528,36 +751,79 @@ Praise the Lord</pre
                 </div>
                 <br />
                 <button class="btn btn-primary" id="saveSongBtn" onclick="saveSong()">Save Song</button>
-
-                <div id="songList" style="margin-top: 28px">
-                    <h3 style="margin-bottom: 14px">My Songs</h3>
-                </div>
+                <div id="songList" style="margin-top: 28px"><h3 style="margin-bottom: 14px">My Songs</h3></div>
             </div>
 
             <!-- SERMONS TAB -->
             <div id="sermonsTab" class="tab-content">
-                <h2 style="margin-bottom: 18px">Sermon Slides</h2>
+                <h2 style="margin-bottom: 18px">Media</h2>
                 <div id="sermonMessage"></div>
                 <div class="info-box">
-                    Upload images for each sermon slide. Requires Cloudinary configured in Settings.
+                    Create your own segments for your playlists here, add images, PDF's for sermons as well as
+                    powerpoints plus photo's or videos. <br />(Requires Cloudinary API in settings)
                 </div>
                 <div class="form-group">
-                    <label>Sermon Title</label
-                    ><input
+                    <label>Sermon Title</label>
+                    <input
                         type="text"
                         id="sermonTitle"
                         placeholder="e.g., Sunday Morning Message"
                         autocomplete="new-password" />
                 </div>
-                <div class="file-upload" onclick="document.getElementById('sermonFile').click()">
-                    <div class="upload-icon">📄</div>
-                    <p><strong>Click to upload slide images</strong></p>
-                    <p style="color: #64748b; font-size: 13px; margin-top: 5px">PNG, JPG — one image per slide</p>
-                    <input type="file" id="sermonFile" accept="image/*" multiple onchange="handleSermonUpload(this)" />
+
+                <!-- 4-way upload type toggle -->
+                <div class="upload-type-toggle">
+                    <div class="upload-type-btn active" id="uploadTypeImages" onclick="setUploadType('images')">
+                        🖼️ Images<br /><span style="font-size: 10px; opacity: 0.7">Multiple</span>
+                    </div>
+                    <div class="upload-type-btn" id="uploadTypePdf" onclick="setUploadType('pdf')">
+                        📄 PDF<br /><span style="font-size: 10px; opacity: 0.7">Single file</span>
+                    </div>
+                    <div class="upload-type-btn" id="uploadTypePptx" onclick="setUploadType('pptx')">
+                        📊 PowerPoint<br /><span style="font-size: 10px; opacity: 0.7">Single file</span>
+                    </div>
+                    <div class="upload-type-btn" id="uploadTypeMedia" onclick="setUploadType('media')">
+                        🎬 Media<br /><span style="font-size: 10px; opacity: 0.7">Video or photo</span>
+                    </div>
                 </div>
+
+                <div class="file-upload" id="sermonDropZone" onclick="document.getElementById('sermonFile').click()">
+                    <div class="upload-icon" id="sermonUploadIcon">🖼️</div>
+                    <p><strong id="sermonUploadLabel">Click to upload images</strong></p>
+                    <p style="color: #64748b; font-size: 13px; margin-top: 5px" id="sermonUploadHint">
+                        PNG, JPG — select multiple at once
+                    </p>
+                    <input
+                        type="file"
+                        id="sermonFile"
+                        accept="image/*"
+                        multiple
+                        onchange="handleSermonSlideUpload(this)" />
+                </div>
+
+                <!-- Batch progress list -->
+                <div class="batch-progress-list" id="batchProgressList"></div>
+
+                <!-- Single-file progress (PDF / PPTX / media) -->
                 <div id="sermonUploadProgress" class="upload-progress" style="display: none">
                     <div style="font-size: 13px; color: #64748b" id="sermonProgressLabel">Uploading…</div>
                     <div class="progress-bar"><div class="progress-fill" id="sermonProgressFill"></div></div>
+                </div>
+
+                <div id="pendingSlidesSection" style="display: none; margin-top: 20px">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px">
+                        <h4 style="font-size: 13px; color: #94a3b8">
+                            Slides to save (<span id="pendingCount">0</span>)
+                        </h4>
+                        <button class="btn btn-danger btn-sm" onclick="clearPendingSlides()">Clear All</button>
+                    </div>
+                    <div id="pendingSlidesList" class="sermon-slides-preview"></div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap">
+                    <button class="btn btn-primary" onclick="saveSermon()">Save Sermon</button>
+                    <button class="btn btn-secondary" onclick="clearSermonForm()">Reset Form</button>
                 </div>
                 <div id="sermonList" style="margin-top: 28px"><h3 style="margin-bottom: 14px">My Sermons</h3></div>
             </div>
@@ -567,8 +833,7 @@ Praise the Lord</pre
                 <h2 style="margin-bottom: 18px">Backgrounds & Logos</h2>
                 <div id="backgroundMessage"></div>
                 <div class="info-box">
-                    Upload backgrounds, then click <strong>Set Active</strong> to use one on all slides. Click
-                    <strong>Delete</strong> to permanently remove it.
+                    Upload backgrounds, then click <strong>Set Active</strong> to use one on all slides.
                 </div>
                 <div class="tabs" style="margin-bottom: 18px">
                     <button class="tab active" onclick="switchBackgroundTab('backgrounds',this)">Backgrounds</button>
@@ -653,10 +918,8 @@ Praise the Lord</pre
                 <div class="form-group">
                     <label>Text Color</label>
                     <div class="color-picker-row">
-                        <input type="color" id="textColor" value="#ffffff" /><span
-                            style="font-size: 13px; color: #64748b"
-                            >Default: white</span
-                        >
+                        <input type="color" id="textColor" value="#ffffff" />
+                        <span style="font-size: 13px; color: #64748b">Default: white</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -725,25 +988,22 @@ Praise the Lord</pre
             <div id="settingsTab" class="tab-content">
                 <h2 style="margin-bottom: 18px">Settings</h2>
                 <div id="settingsMessage"></div>
-
                 <h3 style="margin-bottom: 13px; font-size: 16px">Admin Password</h3>
-                <div class="info-box">This password gates access to the admin area. Set something secure.</div>
+                <div class="info-box">This password gates access to the admin area.</div>
                 <div class="form-group">
-                    <label>New Admin Password</label
-                    ><input
+                    <label>New Admin Password</label>
+                    <input
                         type="password"
                         id="adminPassword"
                         placeholder="Enter admin password"
                         autocomplete="new-password" />
                 </div>
                 <button class="btn btn-primary" onclick="saveAdminPassword()">Save Admin Password</button>
-
                 <hr style="margin: 36px 0; border: none; border-top: 1px solid #2d3748" />
-
                 <h3 style="margin-bottom: 13px; font-size: 16px">Your Firebase Config</h3>
                 <div class="info-box">
-                    Stored in your browser only. Update any field and click save. Find these values in
-                    <strong>Firebase Console → Project Settings → Your apps → SDK setup</strong>.
+                    Changes here are saved to <strong>both your browser and your account</strong> — so any device you
+                    log into will automatically get the latest config.
                 </div>
                 <div class="form-group">
                     <label>API Key</label
@@ -806,36 +1066,86 @@ Praise the Lord</pre
                         spellcheck="false" />
                 </div>
                 <button class="btn btn-primary" onclick="saveFirebaseConfigFromAdmin()">Update Firebase Config</button>
-
                 <hr style="margin: 36px 0; border: none; border-top: 1px solid #2d3748" />
-
                 <h3 style="margin-bottom: 13px; font-size: 16px">Cloudinary Configuration</h3>
                 <div class="info-box">
-                    Used for storing backgrounds, logos, and sermon slides. Free at
+                    Used for backgrounds, logos, and sermon slides. Free at
                     <a href="https://cloudinary.com" target="_blank" style="color: #60a5fa">cloudinary.com</a
                     >.<br /><br />
-                    Create an <strong>unsigned upload preset</strong> in Cloudinary → Settings → Upload → Upload presets
-                    → Add preset → Unsigned.
+                    Create an <strong>unsigned upload preset</strong>: Cloudinary → Settings → Upload → Upload presets →
+                    Add preset → Unsigned.<br /><br />
+                    To increase storage/bandwidth, upgrade your Cloudinary plan or add
+                    <strong>multiple Cloudinary accounts</strong> below — uploads will rotate across them automatically.
                 </div>
-                <div class="form-group">
-                    <label>Cloud Name</label
-                    ><input type="text" id="cloudinaryName" placeholder="my-cloud-name" autocomplete="new-password" />
+                <div
+                    style="
+                        background: #0f1117;
+                        border: 1px solid #2d3748;
+                        border-radius: 10px;
+                        padding: 16px;
+                        margin-bottom: 12px;
+                    ">
+                    <div
+                        style="
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #64748b;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            margin-bottom: 12px;
+                        ">
+                        Primary Account
+                    </div>
+                    <div class="form-group">
+                        <label>Cloud Name</label
+                        ><input
+                            type="text"
+                            id="cloudinaryName"
+                            placeholder="my-cloud-name"
+                            autocomplete="new-password" />
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Preset (unsigned)</label
+                        ><input
+                            type="text"
+                            id="cloudinaryPreset"
+                            placeholder="projectly_preset"
+                            autocomplete="new-password" />
+                    </div>
+                    <div class="form-group">
+                        <label
+                            >API Key
+                            <span style="font-weight: 400; color: #64748b">(needed for usage stats)</span></label
+                        ><input type="text" id="cloudinaryKey" placeholder="Your API key" autocomplete="new-password" />
+                    </div>
+                    <div class="form-group">
+                        <label
+                            >API Secret
+                            <span style="font-weight: 400; color: #64748b">(needed for usage stats)</span></label
+                        ><input
+                            type="password"
+                            id="cloudinarySecret"
+                            placeholder="Your API secret"
+                            autocomplete="new-password" />
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Upload Preset (unsigned)</label
-                    ><input
-                        type="text"
-                        id="cloudinaryPreset"
-                        placeholder="projectly_preset"
-                        autocomplete="new-password" />
-                </div>
-                <div class="form-group">
-                    <label>API Key (optional reference)</label
-                    ><input type="text" id="cloudinaryKey" placeholder="Your API key" autocomplete="new-password" />
-                </div>
-                <div style="display: flex; gap: 10px">
+                <div id="extraCloudinaryAccounts"></div>
+                <button class="btn btn-secondary" style="margin-bottom: 20px" onclick="addExtraCloudinaryAccount()">
+                    + Add Another Cloudinary Account
+                </button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px">
                     <button class="btn btn-primary" onclick="saveCloudinaryConfig()">Save Cloudinary Config</button>
                     <button class="btn btn-secondary" onclick="testCloudinaryConnection()">Test Connection</button>
+                </div>
+                <div class="cloudinary-usage-card" id="cloudinaryUsageCard" style="display: none">
+                    <h4>
+                        ☁️ Cloudinary Usage <span id="cloudinaryPlanBadge" class="plan-badge"></span
+                        ><button class="usage-refresh-btn" onclick="loadCloudinaryUsage()" style="margin-left: auto">
+                            ↻ Refresh
+                        </button>
+                    </h4>
+                    <div class="usage-grid" id="cloudinaryUsageGrid"></div>
+                    <div id="extraAccountsUsage" style="margin-top: 16px"></div>
                 </div>
             </div>
         </div>
@@ -855,7 +1165,6 @@ Praise the Lord</pre
                 deleteDoc
             } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-            // ── Shared auth ──
             const sharedConfig = {
                 apiKey: "AIzaSyCga_ur-qA08HV2otci3ivw3PkWm-Uh-OM",
                 authDomain: "notey-4455f.firebaseapp.com",
@@ -866,11 +1175,15 @@ Praise the Lord</pre
             };
             const sharedApp = getApps().find((a) => a.name === "shared") || initializeApp(sharedConfig, "shared");
             const sharedAuth = getAuth(sharedApp);
+            const sharedDb = getFirestore(sharedApp);
 
             window.currentUser = null;
             window.userDb = null;
             window.adminUnlocked = false;
             window.editState = { isEditing: false, songId: null };
+            window.pendingSlides = [];
+            window.currentUploadType = "images";
+            window.extraAccounts = [];
 
             function getUserFirebaseApp() {
                 const raw = localStorage.getItem("projectly_user_firebase");
@@ -881,6 +1194,21 @@ Praise the Lord</pre
                     return existing || initializeApp(cfg, "userapp");
                 } catch (e) {
                     return null;
+                }
+            }
+
+            async function persistUserFirebaseConfig(cfg) {
+                localStorage.setItem("projectly_user_firebase", JSON.stringify(cfg));
+                if (window.currentUser) {
+                    try {
+                        await setDoc(
+                            doc(sharedDb, "user_configs", window.currentUser.uid),
+                            { firebaseConfig: cfg, updatedAt: new Date().toISOString() },
+                            { merge: true }
+                        );
+                    } catch (e) {
+                        console.warn("Could not sync Firebase config to cloud:", e);
+                    }
                 }
             }
 
@@ -896,29 +1224,23 @@ Praise the Lord</pre
                     return;
                 }
                 window.userDb = getFirestore(userApp);
-                // Admin login overlay — always shown
                 document.getElementById("adminLoginInput").focus();
             });
 
-            // ── Admin password check ──
             window.checkAdminLogin = async function () {
                 const entered = document.getElementById("adminLoginInput").value;
                 const errDiv = document.getElementById("adminLoginError");
                 errDiv.style.display = "none";
                 if (!window.currentUser || !window.userDb) {
-                    errDiv.textContent = "Not authenticated. Return to control page.";
+                    errDiv.textContent = "Not authenticated.";
                     errDiv.style.display = "block";
                     return;
                 }
                 try {
                     const snap = await getDoc(doc(window.userDb, "users", window.currentUser.uid));
                     const stored = snap.exists() ? snap.data().adminPassword : null;
-                    if (!stored) {
-                        // No password set — allow bypass
-                        unlockAdmin();
-                    } else if (entered === stored) {
-                        unlockAdmin();
-                    } else {
+                    if (!stored || entered === stored) unlockAdmin();
+                    else {
                         errDiv.textContent = "Incorrect admin password.";
                         errDiv.style.display = "block";
                         document.getElementById("adminLoginInput").value = "";
@@ -936,8 +1258,9 @@ Praise the Lord</pre
                 loadUserData();
             }
 
-            window.loadUserData = async function () {
+            window.loadUserData = function () {
                 loadSongs();
+                loadSermons();
                 loadSettings();
                 loadTypography();
             };
@@ -1004,14 +1327,6 @@ Praise the Lord</pre
                     return;
                 }
                 try {
-                    const data = {
-                        title,
-                        author: author || "Unknown",
-                        license: license || null,
-                        parts,
-                        createdBy: window.currentUser.uid,
-                        updatedAt: new Date().toISOString()
-                    };
                     const es = window.editState;
                     if (es.isEditing && es.songId) {
                         await updateDoc(doc(window.userDb, "songs", es.songId), {
@@ -1023,8 +1338,15 @@ Praise the Lord</pre
                         });
                         msgDiv.innerHTML = '<div class="success-message">Song updated!</div>';
                     } else {
-                        data.createdAt = new Date().toISOString();
-                        await addDoc(collection(window.userDb, "songs"), data);
+                        await addDoc(collection(window.userDb, "songs"), {
+                            title,
+                            author: author || "Unknown",
+                            license: license || null,
+                            parts,
+                            createdBy: window.currentUser.uid,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        });
                         msgDiv.innerHTML = '<div class="success-message">Song saved!</div>';
                     }
                     clearSongForm();
@@ -1099,6 +1421,243 @@ Praise the Lord</pre
                 }
             };
 
+            // ── SERMONS — upload type ──
+            window.setUploadType = function (type) {
+                window.currentUploadType = type;
+                const fi = document.getElementById("sermonFile");
+                ["images", "pdf", "pptx", "media"].forEach((t) =>
+                    document
+                        .getElementById("uploadType" + t.charAt(0).toUpperCase() + t.slice(1))
+                        .classList.toggle("active", t === type)
+                );
+                switch (type) {
+                    case "images":
+                        fi.accept = "image/*";
+                        fi.multiple = true;
+                        document.getElementById("sermonUploadIcon").textContent = "🖼️";
+                        document.getElementById("sermonUploadLabel").textContent = "Click to upload images";
+                        document.getElementById("sermonUploadHint").textContent = "PNG, JPG — select multiple at once";
+                        break;
+                    case "pdf":
+                        fi.accept = "application/pdf";
+                        fi.multiple = false;
+                        document.getElementById("sermonUploadIcon").textContent = "📄";
+                        document.getElementById("sermonUploadLabel").textContent = "Click to upload a PDF";
+                        document.getElementById("sermonUploadHint").textContent = "PDF file";
+                        break;
+                    case "pptx":
+                        fi.accept =
+                            ".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation";
+                        fi.multiple = false;
+                        document.getElementById("sermonUploadIcon").textContent = "📊";
+                        document.getElementById("sermonUploadLabel").textContent = "Click to upload a PowerPoint";
+                        document.getElementById("sermonUploadHint").textContent = ".pptx or .ppt file";
+                        break;
+                    case "media":
+                        fi.accept = "image/*,video/mp4,video/webm,video/quicktime";
+                        fi.multiple = false;
+                        document.getElementById("sermonUploadIcon").textContent = "🎬";
+                        document.getElementById("sermonUploadLabel").textContent = "Click to upload a photo or video";
+                        document.getElementById("sermonUploadHint").textContent = "Single image or MP4/WebM/MOV";
+                        break;
+                }
+                fi.value = "";
+            };
+
+            // ── SERMONS — handle upload ──
+            window.handleSermonSlideUpload = async function (input) {
+                const files = Array.from(input.files);
+                if (!files.length) return;
+                const msgDiv = document.getElementById("sermonMessage");
+                msgDiv.innerHTML = "";
+                const type = window.currentUploadType;
+
+                if (type === "images" && files.length > 1) {
+                    // Batch upload — show per-file progress
+                    const batchDiv = document.getElementById("batchProgressList");
+                    batchDiv.style.display = "block";
+                    batchDiv.innerHTML = files
+                        .map(
+                            (f, i) =>
+                                `<div class="batch-progress-item" id="bpi_${i}"><span class="bp-name">${f.name}</span><div class="bp-bar"><div class="bp-fill" id="bpf_${i}" style="width:0%"></div></div><span class="bp-status" id="bps_${i}">0%</span></div>`
+                        )
+                        .join("");
+                    let successCount = 0,
+                        failCount = 0;
+                    await Promise.all(
+                        files.map(async (file, i) => {
+                            try {
+                                const result = await uploadToCloudinaryFile(file, "sermons", `bpf_${i}`, `bps_${i}`);
+                                window.pendingSlides.push({ url: result.secure_url, type: "image", name: file.name });
+                                document.getElementById(`bps_${i}`).textContent = "✓";
+                                document.getElementById(`bps_${i}`).style.color = "#4ade80";
+                                successCount++;
+                            } catch (e) {
+                                document.getElementById(`bps_${i}`).textContent = "✗";
+                                document.getElementById(`bps_${i}`).style.color = "#f87171";
+                                failCount++;
+                            }
+                        })
+                    );
+                    renderPendingSlides();
+                    setTimeout(() => {
+                        batchDiv.style.display = "none";
+                        batchDiv.innerHTML = "";
+                    }, 3000);
+                    msgDiv.innerHTML = `<div class="success-message">${successCount} image${successCount !== 1 ? "s" : ""} uploaded${failCount ? ` (${failCount} failed)` : ""}. Add more or click Save Sermon.</div>`;
+                } else {
+                    // Single-file upload (including single image drag)
+                    const file = files[0];
+                    const progressDiv = document.getElementById("sermonUploadProgress");
+                    progressDiv.style.display = "block";
+                    document.getElementById("sermonProgressFill").style.width = "0%";
+                    document.getElementById("sermonProgressLabel").textContent = "Uploading…";
+                    const slideType =
+                        type === "pdf"
+                            ? "pdf"
+                            : type === "pptx"
+                              ? "pptx"
+                              : file.type.startsWith("video")
+                                ? "video"
+                                : "image";
+                    try {
+                        const result = await uploadToCloudinaryFile(
+                            file,
+                            "sermons",
+                            "sermonProgressFill",
+                            "sermonProgressLabel",
+                            slideType === "pdf" || slideType === "pptx"
+                        );
+                        progressDiv.style.display = "none";
+                        window.pendingSlides.push({ url: result.secure_url, type: slideType, name: file.name });
+                        renderPendingSlides();
+                        msgDiv.innerHTML =
+                            '<div class="success-message">Uploaded! Add more or click Save Sermon.</div>';
+                        setTimeout(() => {
+                            if (msgDiv.innerHTML.includes("Uploaded")) msgDiv.innerHTML = "";
+                        }, 3000);
+                    } catch (e) {
+                        progressDiv.style.display = "none";
+                        msgDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
+                    }
+                }
+                input.value = "";
+            };
+
+            window.renderPendingSlides = function () {
+                const section = document.getElementById("pendingSlidesSection");
+                const list = document.getElementById("pendingSlidesList");
+                const count = document.getElementById("pendingCount");
+                if (!window.pendingSlides.length) {
+                    section.style.display = "none";
+                    return;
+                }
+                section.style.display = "block";
+                count.textContent = window.pendingSlides.length;
+                list.innerHTML = window.pendingSlides
+                    .map((slide, i) => {
+                        let thumb;
+                        if (slide.type === "image")
+                            thumb = `<img class="sermon-slide-thumb" src="${slide.url}" loading="lazy">`;
+                        else if (slide.type === "video")
+                            thumb = `<div class="sermon-slide-thumb video-thumb" title="Video">🎬</div>`;
+                        else if (slide.type === "pdf")
+                            thumb = `<div class="sermon-slide-thumb pdf-thumb" title="${slide.name || "PDF"}">📄</div>`;
+                        else if (slide.type === "pptx")
+                            thumb = `<div class="sermon-slide-thumb pptx-thumb" title="${slide.name || "PowerPoint"}">📊</div>`;
+                        else thumb = `<div class="sermon-slide-thumb media-thumb">🎬</div>`;
+                        return `<div class="slide-remove-btn">${thumb}<button onclick="removePendingSlide(${i})" title="Remove">×</button></div>`;
+                    })
+                    .join("");
+            };
+
+            window.removePendingSlide = function (i) {
+                window.pendingSlides.splice(i, 1);
+                renderPendingSlides();
+            };
+            window.clearPendingSlides = function () {
+                window.pendingSlides = [];
+                renderPendingSlides();
+            };
+            window.clearSermonForm = function () {
+                document.getElementById("sermonTitle").value = "";
+                window.pendingSlides = [];
+                renderPendingSlides();
+                document.getElementById("sermonMessage").innerHTML = "";
+                document.getElementById("batchProgressList").style.display = "none";
+                document.getElementById("batchProgressList").innerHTML = "";
+            };
+
+            window.saveSermon = async function () {
+                const title = document.getElementById("sermonTitle").value.trim();
+                const msgDiv = document.getElementById("sermonMessage");
+                if (!title) {
+                    msgDiv.innerHTML = '<div class="error-message">Enter a sermon title first.</div>';
+                    return;
+                }
+                if (!window.pendingSlides.length) {
+                    msgDiv.innerHTML = '<div class="error-message">Upload at least one slide first.</div>';
+                    return;
+                }
+                try {
+                    await addDoc(collection(window.userDb, "sermons"), {
+                        title,
+                        slides: window.pendingSlides.map((s) => s.url),
+                        slideTypes: window.pendingSlides.map((s) => s.type),
+                        slideNames: window.pendingSlides.map((s) => s.name || ""),
+                        createdBy: window.currentUser.uid,
+                        createdAt: new Date().toISOString()
+                    });
+                    msgDiv.innerHTML = '<div class="success-message">Sermon saved!</div>';
+                    clearSermonForm();
+                    loadSermons();
+                } catch (e) {
+                    msgDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
+                }
+            };
+
+            window.loadSermons = async function () {
+                const list = document.getElementById("sermonList");
+                try {
+                    const snap = await getDocs(collection(window.userDb, "sermons"));
+                    if (snap.empty) {
+                        list.innerHTML =
+                            '<h3 style="margin-bottom:14px">My Sermons</h3><p style="color:#64748b">No sermons yet.</p>';
+                        return;
+                    }
+                    let html = '<h3 style="margin-bottom:14px">My Sermons</h3>';
+                    snap.forEach((d) => {
+                        const s = d.data();
+                        const st = s.slideTypes || s.slides.map(() => "image");
+                        const sn = s.slideNames || s.slides.map(() => "");
+                        const thumbs = (s.slides || [])
+                            .map((url, i) => {
+                                const t = st[i] || "image";
+                                if (t === "image")
+                                    return `<img class="sermon-slide-thumb" src="${url}" loading="lazy">`;
+                                if (t === "video")
+                                    return `<div class="sermon-slide-thumb video-thumb" title="Video">🎬</div>`;
+                                if (t === "pdf")
+                                    return `<div class="sermon-slide-thumb pdf-thumb" title="${sn[i] || "PDF"}">📄</div>`;
+                                if (t === "pptx")
+                                    return `<div class="sermon-slide-thumb pptx-thumb" title="${sn[i] || "PPTX"}">📊</div>`;
+                                return `<div class="sermon-slide-thumb media-thumb">🎬</div>`;
+                            })
+                            .join("");
+                        html += `<div class="sermon-item"><div class="sermon-item-header"><div><div class="song-title">${s.title}</div><div class="song-meta">${s.slides ? s.slides.length : 0} slides · ${new Date(s.createdAt).toLocaleDateString()}</div></div><div class="song-actions"><button class="btn btn-danger btn-sm" onclick="deleteSermon('${d.id}')">Delete</button></div></div>${thumbs ? `<div class="sermon-slides-preview">${thumbs}</div>` : ""}</div>`;
+                    });
+                    list.innerHTML = html;
+                } catch (e) {
+                    list.innerHTML = `<div class="error-message">Error loading sermons: ${e.message}</div>`;
+                }
+            };
+
+            window.deleteSermon = async function (id) {
+                if (!confirm("Delete this sermon?")) return;
+                await deleteDoc(doc(window.userDb, "sermons", id));
+                loadSermons();
+            };
+
             // ── BACKGROUNDS ──
             window.handleBackgroundUpload = async function (input, type) {
                 const file = input.files[0];
@@ -1110,7 +1669,7 @@ Praise the Lord</pre
                 document.getElementById("bgProgressFill").style.width = "0%";
                 document.getElementById("bgProgressLabel").textContent = "Starting…";
                 try {
-                    const result = await uploadToCloudinary(
+                    const result = await uploadToCloudinaryFile(
                         file,
                         type === "logo" ? "logos" : "backgrounds",
                         "bgProgressFill",
@@ -1133,14 +1692,15 @@ Praise the Lord</pre
             };
 
             window.setActiveBackground = async function (url) {
-                const msgDiv = document.getElementById("backgroundMessage");
                 try {
                     await updateDoc(doc(window.userDb, "users", window.currentUser.uid), { activeBackground: url });
-                    msgDiv.innerHTML = '<div class="success-message">Active background set!</div>';
-                    setTimeout(() => (msgDiv.innerHTML = ""), 3000);
+                    document.getElementById("backgroundMessage").innerHTML =
+                        '<div class="success-message">Active background set!</div>';
+                    setTimeout(() => (document.getElementById("backgroundMessage").innerHTML = ""), 3000);
                     loadBackgrounds();
                 } catch (e) {
-                    msgDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
+                    document.getElementById("backgroundMessage").innerHTML =
+                        `<div class="error-message">${e.message}</div>`;
                 }
             };
 
@@ -1153,8 +1713,7 @@ Praise the Lord</pre
             };
 
             window.deleteBackground = async function (url, type) {
-                if (!confirm("Delete this image permanently from your library?")) return;
-                const msgDiv = document.getElementById("backgroundMessage");
+                if (!confirm("Delete this image permanently?")) return;
                 const field = type === "logo" ? "logos" : "backgrounds";
                 const userRef = doc(window.userDb, "users", window.currentUser.uid);
                 const snap = await getDoc(userRef);
@@ -1163,8 +1722,9 @@ Praise the Lord</pre
                 const updates = { [field]: arr };
                 if (snap.data().activeBackground === url) updates.activeBackground = null;
                 await updateDoc(userRef, updates);
-                msgDiv.innerHTML = '<div class="success-message">Image deleted.</div>';
-                setTimeout(() => (msgDiv.innerHTML = ""), 3000);
+                document.getElementById("backgroundMessage").innerHTML =
+                    '<div class="success-message">Image deleted.</div>';
+                setTimeout(() => (document.getElementById("backgroundMessage").innerHTML = ""), 3000);
                 loadBackgrounds();
             };
 
@@ -1184,18 +1744,7 @@ Praise the Lord</pre
                     ? bgs
                           .map((url) => {
                               const isActive = url === active;
-                              return `<div class="background-item ${isActive ? "active-bg" : ""}">
-      ${isActive ? '<div class="active-bg-badge">ACTIVE</div>' : ""}
-      <img src="${url}" loading="lazy">
-      <div class="background-item-actions">
-        ${
-            isActive
-                ? `<button class="btn btn-secondary btn-sm" onclick="removeActiveBackground()">Clear Active</button>`
-                : `<button class="btn btn-success btn-sm" onclick="setActiveBackground('${url.replace(/'/g, "\\'")}')">Set Active</button>`
-        }
-        <button class="btn btn-danger btn-sm" onclick="deleteBackground('${url.replace(/'/g, "\\'")}','background')">Delete</button>
-      </div>
-    </div>`;
+                              return `<div class="background-item ${isActive ? "active-bg" : ""}">${isActive ? '<div class="active-bg-badge">ACTIVE</div>' : ""}<img src="${url}" loading="lazy"><div class="background-item-actions">${isActive ? `<button class="btn btn-secondary btn-sm" onclick="removeActiveBackground()">Clear Active</button>` : `<button class="btn btn-success btn-sm" onclick="setActiveBackground('${url.replace(/'/g, "\\'")}')">Set Active</button>`}<button class="btn btn-danger btn-sm" onclick="deleteBackground('${url.replace(/'/g, "\\'")}','background')">Delete</button></div></div>`;
                           })
                           .join("")
                     : '<p style="color:#64748b;grid-column:1/-1">No backgrounds yet.</p>';
@@ -1203,89 +1752,12 @@ Praise the Lord</pre
                 logoGrid.innerHTML = logos.length
                     ? logos
                           .map(
-                              (url) => `
-    <div class="background-item">
-      <img src="${url}" loading="lazy">
-      <div class="background-item-actions">
-        <button class="btn btn-danger btn-sm" onclick="deleteLogo('${url.replace(/'/g, "\\'")}')">Delete</button>
-      </div>
-    </div>`
+                              (url) =>
+                                  `<div class="background-item"><img src="${url}" loading="lazy"><div class="background-item-actions"><button class="btn btn-danger btn-sm" onclick="deleteLogo('${url.replace(/'/g, "\\'")}')">Delete</button></div></div>`
                           )
                           .join("")
                     : '<p style="color:#64748b;grid-column:1/-1">No logos yet.</p>';
             }
-
-            // ── SERMONS ──
-            window.handleSermonUpload = async function (input) {
-                const files = Array.from(input.files);
-                if (!files.length) return;
-                const title = document.getElementById("sermonTitle").value.trim();
-                const msgDiv = document.getElementById("sermonMessage");
-                const progressDiv = document.getElementById("sermonUploadProgress");
-                if (!title) {
-                    msgDiv.innerHTML = '<div class="error-message">Enter a sermon title first.</div>';
-                    return;
-                }
-                msgDiv.innerHTML = "";
-                progressDiv.style.display = "block";
-                const urls = [];
-                for (let i = 0; i < files.length; i++) {
-                    document.getElementById("sermonProgressLabel").textContent =
-                        `Uploading slide ${i + 1} of ${files.length}…`;
-                    document.getElementById("sermonProgressFill").style.width = (i / files.length) * 100 + "%";
-                    try {
-                        const r = await uploadToCloudinary(files[i], "sermons", null, null);
-                        urls.push(r.secure_url);
-                    } catch (e) {
-                        progressDiv.style.display = "none";
-                        msgDiv.innerHTML = `<div class="error-message">Upload failed on slide ${i + 1}: ${e.message}</div>`;
-                        return;
-                    }
-                }
-                document.getElementById("sermonProgressFill").style.width = "100%";
-                try {
-                    await addDoc(collection(window.userDb, "sermons"), {
-                        title,
-                        slides: urls,
-                        createdBy: window.currentUser.uid,
-                        createdAt: new Date().toISOString()
-                    });
-                    progressDiv.style.display = "none";
-                    msgDiv.innerHTML = '<div class="success-message">Sermon saved!</div>';
-                    document.getElementById("sermonTitle").value = "";
-                    loadSermons();
-                } catch (e) {
-                    progressDiv.style.display = "none";
-                    msgDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
-                }
-                input.value = "";
-            };
-
-            async function loadSermons() {
-                const list = document.getElementById("sermonList");
-                try {
-                    const snap = await getDocs(collection(window.userDb, "sermons"));
-                    if (snap.empty) {
-                        list.innerHTML =
-                            '<h3 style="margin-bottom:14px">My Sermons</h3><p style="color:#64748b">No sermons yet.</p>';
-                        return;
-                    }
-                    let html = '<h3 style="margin-bottom:14px">My Sermons</h3>';
-                    snap.forEach((d) => {
-                        const s = d.data();
-                        html += `<div class="song-item"><div class="song-item-header"><div><div class="song-title">${s.title}</div><div class="song-meta">${s.slides ? s.slides.length : 0} slides · ${new Date(s.createdAt).toLocaleDateString()}</div></div><div class="song-actions"><button class="btn btn-danger btn-sm" onclick="deleteSermon('${d.id}')">Delete</button></div></div></div>`;
-                    });
-                    list.innerHTML = html;
-                } catch (e) {
-                    list.innerHTML = `<div class="error-message">Error: ${e.message}</div>`;
-                }
-            }
-
-            window.deleteSermon = async function (id) {
-                if (!confirm("Delete this sermon?")) return;
-                await deleteDoc(doc(window.userDb, "sermons", id));
-                loadSermons();
-            };
 
             // ── TYPOGRAPHY ──
             window.loadTypography = async function () {
@@ -1338,10 +1810,10 @@ Praise the Lord</pre
                     lineHeight: parseInt(document.getElementById("lineHeight").value)
                 };
                 try {
-                    const ref = doc(window.userDb, "users", window.currentUser.uid);
-                    const snap = await getDoc(ref);
-                    if (snap.exists()) await updateDoc(ref, { typography });
-                    else await setDoc(ref, { typography });
+                    const r = doc(window.userDb, "users", window.currentUser.uid);
+                    const snap = await getDoc(r);
+                    if (snap.exists()) await updateDoc(r, { typography });
+                    else await setDoc(r, { typography });
                     msgDiv.innerHTML = '<div class="success-message">Typography saved!</div>';
                     setTimeout(() => (msgDiv.innerHTML = ""), 3000);
                 } catch (e) {
@@ -1358,6 +1830,11 @@ Praise the Lord</pre
                         document.getElementById("cloudinaryName").value = d.cloudinaryConfig.cloudName || "";
                         document.getElementById("cloudinaryPreset").value = d.cloudinaryConfig.uploadPreset || "";
                         document.getElementById("cloudinaryKey").value = d.cloudinaryConfig.apiKey || "";
+                        document.getElementById("cloudinarySecret").value = d.cloudinaryConfig.apiSecret || "";
+                    }
+                    if (d.cloudinaryExtraAccounts) {
+                        window.extraAccounts = d.cloudinaryExtraAccounts || [];
+                        renderExtraAccountFields();
                     }
                 }
                 const raw = localStorage.getItem("projectly_user_firebase");
@@ -1384,10 +1861,10 @@ Praise the Lord</pre
                 const pw = document.getElementById("adminPassword").value;
                 const msgDiv = document.getElementById("settingsMessage");
                 try {
-                    const ref = doc(window.userDb, "users", window.currentUser.uid);
-                    const snap = await getDoc(ref);
-                    if (snap.exists()) await updateDoc(ref, { adminPassword: pw });
-                    else await setDoc(ref, { adminPassword: pw });
+                    const r = doc(window.userDb, "users", window.currentUser.uid);
+                    const snap = await getDoc(r);
+                    if (snap.exists()) await updateDoc(r, { adminPassword: pw });
+                    else await setDoc(r, { adminPassword: pw });
                     msgDiv.innerHTML = '<div class="success-message">Admin password saved!</div>';
                     setTimeout(() => (msgDiv.innerHTML = ""), 3000);
                 } catch (e) {
@@ -1395,11 +1872,7 @@ Praise the Lord</pre
                 }
             };
 
-            function parseFirebaseConfig(raw) {
-                return null;
-            } // unused but kept for safety
-
-            window.saveFirebaseConfigFromAdmin = function () {
+            window.saveFirebaseConfigFromAdmin = async function () {
                 const msgDiv = document.getElementById("settingsMessage");
                 const cfg = {
                     apiKey: document.getElementById("fb_apiKey").value.trim(),
@@ -1421,26 +1894,41 @@ Praise the Lord</pre
                 Object.keys(cfg).forEach((k) => {
                     if (!cfg[k]) delete cfg[k];
                 });
-                localStorage.setItem("projectly_user_firebase", JSON.stringify(cfg));
-                msgDiv.innerHTML = `<div class="success-message">✓ Firebase config saved for project "${cfg.projectId}". Reload the page to apply.</div>`;
+                await persistUserFirebaseConfig(cfg);
+                msgDiv.innerHTML = `<div class="success-message">✓ Firebase config saved and synced to your account. Reload to apply.</div>`;
             };
 
             window.saveCloudinaryConfig = async function () {
                 const cloudName = document.getElementById("cloudinaryName").value.trim();
                 const uploadPreset = document.getElementById("cloudinaryPreset").value.trim();
                 const apiKey = document.getElementById("cloudinaryKey").value.trim();
+                const apiSecret = document.getElementById("cloudinarySecret").value.trim();
                 const msgDiv = document.getElementById("settingsMessage");
                 if (!cloudName || !uploadPreset) {
                     msgDiv.innerHTML = '<div class="error-message">Cloud Name and Preset are required.</div>';
                     return;
                 }
+                const extras = [];
+                document.querySelectorAll(".extra-cloudinary-row").forEach((row) => {
+                    const n = row.querySelector(".extra-cloud-name").value.trim();
+                    const p = row.querySelector(".extra-preset").value.trim();
+                    const k = row.querySelector(".extra-api-key").value.trim();
+                    const s = row.querySelector(".extra-api-secret").value.trim();
+                    if (n && p) extras.push({ cloudName: n, uploadPreset: p, apiKey: k, apiSecret: s });
+                });
+                window.extraAccounts = extras;
                 try {
-                    const ref = doc(window.userDb, "users", window.currentUser.uid);
-                    const snap = await getDoc(ref);
-                    if (snap.exists()) await updateDoc(ref, { cloudinaryConfig: { cloudName, uploadPreset, apiKey } });
-                    else await setDoc(ref, { cloudinaryConfig: { cloudName, uploadPreset, apiKey } });
+                    const r = doc(window.userDb, "users", window.currentUser.uid);
+                    const snap = await getDoc(r);
+                    const data = {
+                        cloudinaryConfig: { cloudName, uploadPreset, apiKey, apiSecret },
+                        cloudinaryExtraAccounts: extras
+                    };
+                    if (snap.exists()) await updateDoc(r, data);
+                    else await setDoc(r, data);
                     msgDiv.innerHTML = '<div class="success-message">Cloudinary config saved!</div>';
                     setTimeout(() => (msgDiv.innerHTML = ""), 3000);
+                    loadCloudinaryUsage();
                 } catch (e) {
                     msgDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
                 }
@@ -1467,24 +1955,157 @@ Praise the Lord</pre
                         body: fd
                     });
                     const data = await res.json();
-                    if (data.secure_url)
+                    if (data.secure_url) {
                         msgDiv.innerHTML = '<div class="success-message">✓ Cloudinary connection works!</div>';
-                    else
+                        loadCloudinaryUsage();
+                    } else
                         msgDiv.innerHTML = `<div class="error-message">Cloudinary error: ${data.error?.message || JSON.stringify(data)}</div>`;
                 } catch (e) {
                     msgDiv.innerHTML = `<div class="error-message">Connection failed: ${e.message}</div>`;
                 }
             };
 
+            window.loadCloudinaryUsage = async function () {
+                const snap = await getDoc(doc(window.userDb, "users", window.currentUser.uid));
+                if (!snap.exists() || !snap.data().cloudinaryConfig) return;
+                const cfg = snap.data().cloudinaryConfig;
+                const extras = snap.data().cloudinaryExtraAccounts || [];
+                const card = document.getElementById("cloudinaryUsageCard");
+                card.style.display = "block";
+                document.getElementById("cloudinaryUsageGrid").innerHTML =
+                    '<div style="color:#64748b;font-size:13px;grid-column:1/-1">Loading usage data…</div>';
+                await fetchAndRenderUsage(
+                    cfg,
+                    document.getElementById("cloudinaryUsageGrid"),
+                    document.getElementById("cloudinaryPlanBadge"),
+                    true
+                );
+                const extraDiv = document.getElementById("extraAccountsUsage");
+                extraDiv.innerHTML = "";
+                for (let i = 0; i < extras.length; i++) {
+                    if (!extras[i].apiKey || !extras[i].apiSecret) continue;
+                    const wrapper = document.createElement("div");
+                    wrapper.style.marginTop = "16px";
+                    const title = document.createElement("div");
+                    title.style.cssText =
+                        "font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px";
+                    title.textContent = `Account ${i + 2}: ${extras[i].cloudName}`;
+                    wrapper.appendChild(title);
+                    const grid = document.createElement("div");
+                    grid.className = "usage-grid";
+                    wrapper.appendChild(grid);
+                    extraDiv.appendChild(wrapper);
+                    await fetchAndRenderUsage(extras[i], grid, null, false);
+                }
+            };
+
+            async function fetchAndRenderUsage(cfg, gridEl, planBadgeEl, isPrimary) {
+                if (!cfg.apiKey || !cfg.apiSecret) {
+                    gridEl.innerHTML =
+                        '<div style="color:#64748b;font-size:12px;grid-column:1/-1">Add API Key & Secret to see usage stats.</div>';
+                    return;
+                }
+                try {
+                    const credentials = btoa(`${cfg.apiKey}:${cfg.apiSecret}`);
+                    const res = await fetch(`https://api.cloudinary.com/v1_1/${cfg.cloudName}/usage`, {
+                        headers: { Authorization: `Basic ${credentials}` }
+                    });
+                    if (!res.ok) {
+                        gridEl.innerHTML = `<div style="color:#f87171;font-size:12px;grid-column:1/-1">Could not load usage (HTTP ${res.status}). Check your API Key & Secret.</div>`;
+                        return;
+                    }
+                    const u = await res.json();
+                    if (planBadgeEl) planBadgeEl.textContent = u.plan || "Free";
+                    const stats = [
+                        {
+                            label: "Storage",
+                            used: u.storage?.usage,
+                            limit: u.storage?.limit,
+                            unit: "GB",
+                            divisor: 1073741824
+                        },
+                        {
+                            label: "Bandwidth",
+                            used: u.bandwidth?.usage,
+                            limit: u.bandwidth?.limit,
+                            unit: "GB",
+                            divisor: 1073741824
+                        },
+                        {
+                            label: "Transformations",
+                            used: u.transformations?.usage,
+                            limit: u.transformations?.limit,
+                            unit: "",
+                            divisor: 1
+                        },
+                        { label: "Resources", used: u.resources, limit: null, unit: "files", divisor: 1 },
+                        {
+                            label: "Derived Resources",
+                            used: u.derived_resources,
+                            limit: null,
+                            unit: "files",
+                            divisor: 1
+                        }
+                    ];
+                    gridEl.innerHTML = stats
+                        .map((s) => {
+                            const usedVal = s.used != null ? s.used / s.divisor : null;
+                            const limitVal = s.limit != null ? s.limit / s.divisor : null;
+                            const pct = usedVal != null && limitVal ? (usedVal / limitVal) * 100 : null;
+                            const fillClass = pct == null ? "low" : pct < 60 ? "low" : pct < 85 ? "medium" : "high";
+                            const usedStr =
+                                usedVal != null
+                                    ? s.divisor === 1073741824
+                                        ? usedVal.toFixed(2)
+                                        : Math.round(usedVal).toLocaleString()
+                                    : "—";
+                            const limitStr =
+                                limitVal != null
+                                    ? s.divisor === 1073741824
+                                        ? limitVal.toFixed(2)
+                                        : Math.round(limitVal).toLocaleString()
+                                    : null;
+                            return `<div class="usage-stat"><div class="usage-stat-label">${s.label}</div><div class="usage-stat-value">${usedStr}${s.unit ? " " + s.unit : ""}</div>${limitVal != null ? `<div class="usage-stat-bar"><div class="usage-stat-bar-fill ${fillClass}" style="width:${Math.min(pct, 100).toFixed(1)}%"></div></div><div class="usage-stat-sub">${pct.toFixed(1)}% of ${limitStr} ${s.unit}</div>` : '<div class="usage-stat-sub">No limit / untracked</div>'}</div>`;
+                        })
+                        .join("");
+                } catch (e) {
+                    gridEl.innerHTML = `<div style="color:#f87171;font-size:12px;grid-column:1/-1">Error fetching usage: ${e.message}</div>`;
+                }
+            }
+
+            window.addExtraCloudinaryAccount = function () {
+                window.extraAccounts.push({ cloudName: "", uploadPreset: "", apiKey: "", apiSecret: "" });
+                renderExtraAccountFields();
+            };
+            window.removeExtraAccount = function (i) {
+                window.extraAccounts.splice(i, 1);
+                renderExtraAccountFields();
+            };
+            window.renderExtraAccountFields = function () {
+                const container = document.getElementById("extraCloudinaryAccounts");
+                container.innerHTML = "";
+                window.extraAccounts.forEach((acc, i) => {
+                    container.innerHTML += `<div class="extra-cloudinary-row" style="background:#0f1117;border:1px solid #2d3748;border-radius:10px;padding:16px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Account ${i + 2}</div><button class="btn btn-danger btn-sm" onclick="removeExtraAccount(${i})">Remove</button></div><div class="form-group"><label>Cloud Name</label><input type="text" class="extra-cloud-name" value="${acc.cloudName || ""}" placeholder="my-other-cloud"/></div><div class="form-group"><label>Upload Preset</label><input type="text" class="extra-preset" value="${acc.uploadPreset || ""}" placeholder="projectly_preset"/></div><div class="form-group"><label>API Key</label><input type="text" class="extra-api-key" value="${acc.apiKey || ""}" placeholder="API key"/></div><div class="form-group"><label>API Secret</label><input type="password" class="extra-api-secret" value="${acc.apiSecret || ""}" placeholder="API secret"/></div></div>`;
+                });
+            };
+
+            // ── Cloudinary round-robin config ──
+            window._uploadRoundRobinIndex = 0;
             async function getCloudinaryConfig() {
                 const snap = await getDoc(doc(window.userDb, "users", window.currentUser.uid));
                 if (!snap.exists() || !snap.data().cloudinaryConfig) return null;
                 const c = snap.data().cloudinaryConfig;
                 if (!c.cloudName || !c.uploadPreset) return null;
-                return c;
+                const extras = snap.data().cloudinaryExtraAccounts || [];
+                const all = [c, ...extras.filter((a) => a.cloudName && a.uploadPreset)];
+                const idx = window._uploadRoundRobinIndex % all.length;
+                window._uploadRoundRobinIndex++;
+                return all[idx];
             }
 
-            async function uploadToCloudinary(file, folder, fillId, labelId) {
+            // ── Core upload — handles image, video, and raw (PDF/PPTX) ──
+            // fillId/labelId can point to either a single progress bar or a batch status span
+            async function uploadToCloudinaryFile(file, folder, fillId, labelId, isRaw = false) {
                 const config = await getCloudinaryConfig();
                 if (!config) throw new Error("Cloudinary not configured. Go to Settings.");
                 const fill = fillId ? document.getElementById(fillId) : null;
@@ -1493,15 +2114,23 @@ Praise the Lord</pre
                 fd.append("file", file);
                 fd.append("upload_preset", config.uploadPreset);
                 fd.append("folder", `projectly/${folder}`);
+                let rt = "image";
+                if (isRaw) rt = "raw";
+                else if (file.type.startsWith("video")) rt = "video";
                 return new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
-                    const rt = file.type.startsWith("video") ? "video" : "image";
                     xhr.open("POST", `https://api.cloudinary.com/v1_1/${config.cloudName}/${rt}/upload`);
                     xhr.upload.onprogress = (e) => {
-                        if (e.lengthComputable && fill) {
+                        if (e.lengthComputable) {
                             const p = Math.round((e.loaded / e.total) * 100);
-                            fill.style.width = p + "%";
-                            if (label) label.textContent = `Uploading… ${p}%`;
+                            if (fill) {
+                                fill.style.width = p + "%";
+                            }
+                            if (label && label.tagName) {
+                                if (label.classList && label.classList.contains("bp-status"))
+                                    label.textContent = p + "%";
+                                else label.textContent = `Uploading… ${p}%`;
+                            }
                         }
                     };
                     xhr.onload = () => {
@@ -1515,6 +2144,8 @@ Praise the Lord</pre
                     xhr.send(fd);
                 });
             }
+            // Alias for background/logo code that calls uploadToCloudinary
+            window.uploadToCloudinary = uploadToCloudinaryFile;
         </script>
 
         <script>
@@ -1526,64 +2157,38 @@ Praise the Lord</pre
                     .forEach((b) => b.classList.remove("active"));
                 document.getElementById(name + "Tab").classList.add("active");
                 btn.classList.add("active");
-                if (name === "backgrounds" && window.adminUnlocked) {
-                    import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(
-                        ({ getDoc, doc }) => {
-                            getDoc(doc(window.userDb, "users", window.currentUser.uid)).then((snap) => {
-                                if (!snap.exists()) return;
-                                const d = snap.data();
-                                const active = d.activeBackground || null;
-                                const bg = document.getElementById("backgroundGrid");
-                                const lg = document.getElementById("logoGrid");
-                                const bgs = d.backgrounds || [];
-                                bg.innerHTML = bgs.length
-                                    ? bgs
-                                          .map((url) => {
-                                              const isActive = url === active;
-                                              return `<div class="background-item ${isActive ? "active-bg" : ""}">
-            ${isActive ? '<div class="active-bg-badge">ACTIVE</div>' : ""}
-            <img src="${url}" loading="lazy">
-            <div class="background-item-actions">
-              ${isActive ? `<button class="btn btn-secondary btn-sm" onclick="removeActiveBackground()">Clear Active</button>` : `<button class="btn btn-success btn-sm" onclick="setActiveBackground('${url.replace(/'/g, "\\'")}')">Set Active</button>`}
-              <button class="btn btn-danger btn-sm" onclick="deleteBackground('${url.replace(/'/g, "\\'")}','background')">Delete</button>
-            </div>
-          </div>`;
-                                          })
-                                          .join("")
-                                    : '<p style="color:#64748b;grid-column:1/-1">No backgrounds yet.</p>';
-                                const logos = d.logos || [];
-                                lg.innerHTML = logos.length
-                                    ? logos
-                                          .map(
-                                              (url) =>
-                                                  `<div class="background-item"><img src="${url}" loading="lazy"><div class="background-item-actions"><button class="btn btn-danger btn-sm" onclick="deleteLogo('${url.replace(/'/g, "\\'")}')">Delete</button></div></div>`
-                                          )
-                                          .join("")
-                                    : '<p style="color:#64748b;grid-column:1/-1">No logos yet.</p>';
-                            });
-                        }
-                    );
-                }
-                if (name === "sermons" && window.adminUnlocked) {
-                    import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(
-                        ({ getDocs, collection }) => {
-                            getDocs(collection(window.userDb, "sermons")).then((snap) => {
-                                const list = document.getElementById("sermonList");
-                                if (snap.empty) {
-                                    list.innerHTML =
-                                        '<h3 style="margin-bottom:14px">My Sermons</h3><p style="color:#64748b">No sermons yet.</p>';
-                                    return;
-                                }
-                                let html = '<h3 style="margin-bottom:14px">My Sermons</h3>';
-                                snap.forEach((d) => {
-                                    const s = d.data();
-                                    html += `<div class="song-item"><div class="song-item-header"><div><div class="song-title">${s.title}</div><div class="song-meta">${s.slides ? s.slides.length : 0} slides</div></div><div class="song-actions"><button class="btn btn-danger btn-sm" onclick="deleteSermon('${d.id}')">Delete</button></div></div></div>`;
-                                });
-                                list.innerHTML = html;
-                            });
-                        }
-                    );
-                }
+                if (name === "backgrounds" && window.adminUnlocked) loadBackgroundsOnTab();
+                if (name === "settings" && window.adminUnlocked) loadCloudinaryUsage();
+            }
+
+            function loadBackgroundsOnTab() {
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(({ getDoc, doc }) => {
+                    getDoc(doc(window.userDb, "users", window.currentUser.uid)).then((snap) => {
+                        if (!snap.exists()) return;
+                        const d = snap.data();
+                        const active = d.activeBackground || null;
+                        const bgGrid = document.getElementById("backgroundGrid");
+                        const lgGrid = document.getElementById("logoGrid");
+                        const bgs = d.backgrounds || [];
+                        bgGrid.innerHTML = bgs.length
+                            ? bgs
+                                  .map((url) => {
+                                      const isActive = url === active;
+                                      return `<div class="background-item ${isActive ? "active-bg" : ""}">${isActive ? '<div class="active-bg-badge">ACTIVE</div>' : ""}<img src="${url}" loading="lazy"><div class="background-item-actions">${isActive ? `<button class="btn btn-secondary btn-sm" onclick="removeActiveBackground()">Clear Active</button>` : `<button class="btn btn-success btn-sm" onclick="setActiveBackground('${url.replace(/'/g, "\\'")}')">Set Active</button>`}<button class="btn btn-danger btn-sm" onclick="deleteBackground('${url.replace(/'/g, "\\'")}','background')">Delete</button></div></div>`;
+                                  })
+                                  .join("")
+                            : '<p style="color:#64748b;grid-column:1/-1">No backgrounds yet.</p>';
+                        const logos = d.logos || [];
+                        lgGrid.innerHTML = logos.length
+                            ? logos
+                                  .map(
+                                      (url) =>
+                                          `<div class="background-item"><img src="${url}" loading="lazy"><div class="background-item-actions"><button class="btn btn-danger btn-sm" onclick="deleteLogo('${url.replace(/'/g, "\\'")}')">Delete</button></div></div>`
+                                  )
+                                  .join("")
+                            : '<p style="color:#64748b;grid-column:1/-1">No logos yet.</p>';
+                    });
+                });
             }
 
             function switchBackgroundTab(name, btn) {
