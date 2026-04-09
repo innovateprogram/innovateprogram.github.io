@@ -5,14 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projectly - FOH Display</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #000;
             color: white;
             overflow: hidden;
@@ -31,48 +27,31 @@
 
         #backgroundLayer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 1;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
         }
-
-        #backgroundLayer.visible {
-            opacity: 1;
-        }
-
+        #backgroundLayer.visible { opacity: 1; }
         #backgroundLayer img,
         #backgroundLayer video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            width: 100%; height: 100%; object-fit: cover;
         }
 
         #logoLayer {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             z-index: 2;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
-            max-width: 80%;
-            max-height: 80%;
+            max-width: 80%; max-height: 80%;
         }
+        #logoLayer.visible { opacity: 1; }
+        #logoLayer img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        #logoLayer.visible {
-            opacity: 1;
-        }
-
-        #logoLayer img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
+        /* Content layer — fades in/out */
         #contentLayer {
             position: relative;
             z-index: 3;
@@ -82,218 +61,201 @@
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
         }
+        #contentLayer.visible { opacity: 1; }
 
-        #contentLayer.visible {
-            opacity: 1;
-        }
-
-        #contentLayer.fade-enabled {
-            transition: opacity 1s ease-in-out;
-        }
-
-        .lyrics-display {
+        .lyrics-text {
             font-size: 4rem;
             line-height: 1.5;
-            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
-            font-weight: 600;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            white-space: pre-line;
             padding: 40px;
         }
 
         .sermon-slide {
-            max-width: 100%;
-            max-height: 90vh;
-            object-fit: contain;
+            max-width: 100%; max-height: 90vh; object-fit: contain;
         }
 
-        .license-display {
+        #licenseDisplay {
             position: absolute;
-            bottom: 20px;
-            right: 30px;
+            bottom: 20px; right: 30px;
             font-size: 1rem;
-            color: rgba(255, 255, 255, 0.7);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            color: rgba(255,255,255,0.6);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            z-index: 10;
             opacity: 0;
             transition: opacity 0.3s;
         }
-
-        .license-display.visible {
-            opacity: 1;
-        }
-
-        .blank-screen {
-            width: 100%;
-            height: 100%;
-            background: #000;
-        }
+        #licenseDisplay.visible { opacity: 1; }
 
         #keyboardHelp {
             position: absolute;
-            bottom: 20px;
-            left: 30px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            bottom: 20px; left: 30px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.4);
             z-index: 100;
+            transition: opacity 1s;
+        }
+
+        #statusMsg {
+            position: absolute;
+            top: 20px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.3);
+            z-index: 100;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div id="displayContainer">
-        <!-- Background Layer -->
-        <div id="backgroundLayer"></div>
+<div id="displayContainer">
+    <div id="backgroundLayer"></div>
+    <div id="logoLayer"></div>
+    <div id="contentLayer"></div>
+    <div id="licenseDisplay"></div>
+    <div id="keyboardHelp">T = toggle background &nbsp;|&nbsp; L = toggle logo &nbsp;|&nbsp; B = blank</div>
+    <div id="statusMsg">FOH — Waiting for content…</div>
+</div>
 
-        <!-- Logo Layer -->
-        <div id="logoLayer"></div>
+<script>
+    let currentBackground = null;
+    let currentLogo = null;
+    let backgroundVisible = false;
+    let logoVisible = false;
+    let fadeTime = 500;
+    let enableSongFade = false;
+    let licenseTimer = null;
 
-        <!-- Content Layer -->
-        <div id="contentLayer">
-            <div class="blank-screen"></div>
-        </div>
+    // ── Receive messages from the control window ──
+    window.addEventListener('message', (event) => {
+        const data = event.data;
+        if (!data || !data.type) return;
 
-        <!-- License Display -->
-        <div id="licenseDisplay" class="license-display"></div>
+        switch (data.type) {
+            case 'init':
+                fadeTime = data.fadeTime || 500;
+                enableSongFade = data.enableSongFade || false;
+                document.getElementById('statusMsg').textContent = 'FOH — Live';
+                break;
 
-        <!-- Keyboard Help -->
-        <div id="keyboardHelp">
-            Press T for background • Press L for logo
-        </div>
-    </div>
+            case 'display':
+                displayContent(data.content, data.typography, data.fadeTime, data.enableSongFade);
+                break;
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+            case 'setBackground':
+                currentBackground = data.url;
+                break;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCga_ur-qA08HV2otci3ivw3PkWm-Uh-OM",
-            authDomain: "notey-4455f.firebaseapp.com",
-            databaseURL: "https://notey-4455f-default-rtdb.firebaseio.com",
-            projectId: "notey-4455f",
-            storageBucket: "notey-4455f.firebasestorage.app",
-            messagingSenderId: "554664934050",
-            appId: "1:554664934050:web:5c1f5f673bb32301fa35fb",
-            measurementId: "G-YW5B4R6HJV"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const rtdb = getDatabase(app);
-
-        let currentBackground = null;
-        let currentLogo = null;
-        let backgroundVisible = false;
-        let logoVisible = false;
-        let fadeTime = 500;
-        let enableSongFade = false;
-        let currentLicense = null;
-
-        // Listen for display updates from main window
-        window.addEventListener('message', (event) => {
-            if (event.data.type === 'display') {
-                displayContent(event.data.content);
-            } else if (event.data.type === 'setBackground') {
-                currentBackground = event.data.url;
-            } else if (event.data.type === 'setLogo') {
-                currentLogo = event.data.url;
-            } else if (event.data.type === 'setFadeTime') {
-                fadeTime = event.data.fadeTime;
-            } else if (event.data.type === 'setEnableSongFade') {
-                enableSongFade = event.data.enabled;
-            } else if (event.data.type === 'setLicense') {
-                currentLicense = event.data.license;
-            }
-        });
-
-        // Keyboard controls
-        document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 't') {
-                toggleBackground();
-            } else if (e.key.toLowerCase() === 'l') {
-                toggleLogo();
-            }
-        });
-
-        function toggleBackground() {
-            const bgLayer = document.getElementById('backgroundLayer');
-            
-            if (backgroundVisible) {
-                bgLayer.classList.remove('visible');
-                backgroundVisible = false;
-            } else if (currentBackground) {
-                const isVideo = currentBackground.endsWith('.mp4');
-                
-                if (isVideo) {
-                    bgLayer.innerHTML = `<video autoplay loop muted><source src="${currentBackground}" type="video/mp4"></video>`;
-                } else {
-                    bgLayer.innerHTML = `<img src="${currentBackground}" alt="Background">`;
-                }
-                
-                bgLayer.classList.add('visible');
-                backgroundVisible = true;
-            }
+            case 'setLogo':
+                currentLogo = data.url;
+                break;
         }
+    });
 
-        function toggleLogo() {
-            const logoLayer = document.getElementById('logoLayer');
-            
-            if (logoVisible) {
-                logoLayer.classList.remove('visible');
-                logoVisible = false;
-            } else if (currentLogo) {
-                logoLayer.innerHTML = `<img src="${currentLogo}" alt="Logo">`;
-                logoLayer.classList.add('visible');
-                logoVisible = true;
-            }
+    // ── Keyboard controls ──
+    document.addEventListener('keydown', (e) => {
+        switch(e.key.toLowerCase()) {
+            case 't': toggleBackground(); break;
+            case 'l': toggleLogo(); break;
+            case 'b': displayContent({ type: 'blank' }); break;
         }
+    });
 
-        function displayContent(content) {
-            const contentLayer = document.getElementById('contentLayer');
-            const licenseDisplay = document.getElementById('licenseDisplay');
-            
-            // Apply fade settings
-            if (enableSongFade && content.type === 'lyrics') {
-                contentLayer.style.transition = `opacity ${fadeTime}ms ease-in-out`;
-                contentLayer.classList.add('fade-enabled');
-            } else {
-                contentLayer.style.transition = `opacity ${fadeTime}ms ease-in-out`;
-                contentLayer.classList.remove('fade-enabled');
-            }
-
-            // Fade out
-            contentLayer.classList.remove('visible');
-
-            setTimeout(() => {
-                if (content.type === 'lyrics') {
-                    contentLayer.innerHTML = `<div class="lyrics-display">${content.text}</div>`;
-                    
-                    // Show license if present
-                    if (content.license) {
-                        licenseDisplay.textContent = content.license;
-                        licenseDisplay.classList.add('visible');
-                        
-                        // Hide license after 5 seconds
-                        setTimeout(() => {
-                            licenseDisplay.classList.remove('visible');
-                        }, 5000);
-                    }
-                } else if (content.type === 'sermon') {
-                    contentLayer.innerHTML = `<img src="${content.url}" class="sermon-slide" alt="Sermon Slide">`;
-                } else if (content.type === 'blank') {
-                    contentLayer.innerHTML = '<div class="blank-screen"></div>';
-                }
-
-                // Fade in
-                contentLayer.classList.add('visible');
-            }, fadeTime);
+    function toggleBackground() {
+        const bgLayer = document.getElementById('backgroundLayer');
+        if (backgroundVisible) {
+            bgLayer.classList.remove('visible');
+            backgroundVisible = false;
+        } else if (currentBackground) {
+            const isVideo = currentBackground.match(/\.mp4/i);
+            bgLayer.innerHTML = isVideo
+                ? `<video autoplay loop muted playsinline><source src="${currentBackground}" type="video/mp4"></video>`
+                : `<img src="${currentBackground}" alt="Background">`;
+            bgLayer.classList.add('visible');
+            backgroundVisible = true;
         }
+    }
 
-        // Notify opener that FOH is ready
-        if (window.opener) {
-            window.opener.postMessage({ type: 'fohReady' }, '*');
+    function toggleLogo() {
+        const logoLayer = document.getElementById('logoLayer');
+        if (logoVisible) {
+            logoLayer.classList.remove('visible');
+            logoVisible = false;
+        } else if (currentLogo) {
+            logoLayer.innerHTML = `<img src="${currentLogo}" alt="Logo">`;
+            logoLayer.classList.add('visible');
+            logoVisible = true;
         }
+    }
 
-        // Hide keyboard help after 10 seconds
+    function displayContent(content, typography, customFadeTime, customSongFade) {
+        const contentLayer = document.getElementById('contentLayer');
+        const licenseDisplay = document.getElementById('licenseDisplay');
+        const statusMsg = document.getElementById('statusMsg');
+
+        // Use per-message fade settings if provided, otherwise use stored
+        const ft = (customFadeTime !== undefined) ? customFadeTime : fadeTime;
+
+        // Hide status once we receive real content
+        statusMsg.style.opacity = '0';
+
+        // Fade out existing content
+        contentLayer.style.transition = `opacity ${ft}ms ease-in-out`;
+        contentLayer.classList.remove('visible');
+
         setTimeout(() => {
-            document.getElementById('keyboardHelp').style.opacity = '0';
-        }, 10000);
-    </script>
+            if (content.type === 'blank') {
+                contentLayer.innerHTML = '';
+                licenseDisplay.classList.remove('visible');
+            } else if (content.type === 'lyrics') {
+                // Apply typography from control window
+                const t = typography || {};
+                const style = [
+                    `font-family: ${t.fontFamily || "'Segoe UI', sans-serif"}`,
+                    `font-weight: ${t.fontWeight || 700}`,
+                    `font-size: ${t.fontSize || 64}px`,
+                    `color: ${t.textColor || '#ffffff'}`,
+                    `text-shadow: ${t.textShadow || '2px 2px 4px rgba(0,0,0,0.8)'}`,
+                    `text-align: ${t.textAlign || 'center'}`,
+                    `line-height: ${((t.lineHeight || 140) / 100)}`
+                ].join(';');
+
+                contentLayer.innerHTML = `<div class="lyrics-text" style="${style}">${escapeHtml(content.text)}</div>`;
+
+                // Show license briefly
+                if (content.license) {
+                    clearTimeout(licenseTimer);
+                    licenseDisplay.textContent = content.license;
+                    licenseDisplay.classList.add('visible');
+                    licenseTimer = setTimeout(() => licenseDisplay.classList.remove('visible'), 5000);
+                }
+            } else if (content.type === 'sermon') {
+                contentLayer.innerHTML = `<img src="${content.url}" class="sermon-slide" alt="Sermon Slide">`;
+            }
+
+            // Fade in
+            contentLayer.classList.add('visible');
+        }, ft);
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // Hide keyboard help after 8 seconds
+    setTimeout(() => {
+        document.getElementById('keyboardHelp').style.opacity = '0';
+    }, 8000);
+
+    // Notify opener that FOH is ready
+    if (window.opener) {
+        window.opener.postMessage({ type: 'fohReady' }, '*');
+    }
+</script>
 </body>
 </html>
