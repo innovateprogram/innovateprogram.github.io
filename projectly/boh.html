@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Projectly - BOH Display</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+                    sans-serif;
+                background: #1f2937;
+                color: white;
+                overflow: hidden;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .header {
+                background: #111827;
+                padding: 15px 30px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 2px solid #374151;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                color: #60a5fa;
+            }
+
+            .clock {
+                font-size: 24px;
+                font-weight: 600;
+                color: #10b981;
+            }
+
+            .main-display {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                padding: 30px;
+                overflow: hidden;
+            }
+
+            .current-slide {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #111827;
+                border-radius: 12px;
+                padding: 40px;
+                margin-bottom: 20px;
+                border: 3px solid #374151;
+            }
+
+            .current-content {
+                font-size: 3.5rem;
+                line-height: 1.6;
+                text-align: center;
+                max-width: 90%;
+                font-weight: 600;
+            }
+
+            .current-content.sermon {
+                font-size: 2rem;
+            }
+
+            .sermon-image {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+
+            .next-info {
+                background: #111827;
+                border-radius: 12px;
+                padding: 20px 30px;
+                border: 3px solid #374151;
+            }
+
+            .next-info-header {
+                font-size: 14px;
+                color: #9ca3af;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 10px;
+                font-weight: 600;
+            }
+
+            .next-content {
+                font-size: 1.5rem;
+                color: #e5e7eb;
+            }
+
+            .slide-counter {
+                background: #374151;
+                padding: 8px 16px;
+                border-radius: 6px;
+                display: inline-block;
+                font-weight: 600;
+            }
+
+            .blank-state {
+                color: #6b7280;
+                font-size: 2rem;
+                text-align: center;
+            }
+
+            .status-indicator {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 12px;
+                background: #065f46;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .status-dot {
+                width: 8px;
+                height: 8px;
+                background: #10b981;
+                border-radius: 50%;
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+            }
+
+            .lyric-preview {
+                font-size: 1.2rem;
+                color: #9ca3af;
+                margin-top: 10px;
+                font-style: italic;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div>
+                <h1>Projectly - Back of House</h1>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span>Connected</span>
+                </div>
+            </div>
+            <div class="clock" id="clock">00:00:00</div>
+        </div>
+
+        <div class="main-display">
+            <div class="current-slide">
+                <div id="currentContent" class="current-content blank-state">Waiting for content...</div>
+            </div>
+
+            <div class="next-info">
+                <div class="next-info-header">Next</div>
+                <div id="nextContent" class="next-content">No upcoming content</div>
+            </div>
+        </div>
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+            import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyCga_ur-qA08HV2otci3ivw3PkWm-Uh-OM",
+                authDomain: "notey-4455f.firebaseapp.com",
+                databaseURL: "https://notey-4455f-default-rtdb.firebaseio.com",
+                projectId: "notey-4455f",
+                storageBucket: "notey-4455f.firebasestorage.app",
+                messagingSenderId: "554664934050",
+                appId: "1:554664934050:web:5c1f5f673bb32301fa35fb",
+                measurementId: "G-YW5B4R6HJV"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const rtdb = getDatabase(app);
+
+            let currentSlideIndex = 0;
+            let totalSlides = 0;
+            let contentType = "blank";
+
+            // Update clock
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, "0");
+                const minutes = String(now.getMinutes()).padStart(2, "0");
+                const seconds = String(now.getSeconds()).padStart(2, "0");
+                document.getElementById("clock").textContent = `${hours}:${minutes}:${seconds}`;
+            }
+
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // Listen for display updates from main window
+            window.addEventListener("message", (event) => {
+                if (event.data.type === "display") {
+                    displayContent(event.data.content, event.data.next);
+                }
+            });
+
+            function displayContent(content, next) {
+                const currentContentDiv = document.getElementById("currentContent");
+                const nextContentDiv = document.getElementById("nextContent");
+
+                // Display current content
+                currentContentDiv.className = "current-content";
+
+                if (content.type === "lyrics") {
+                    currentContentDiv.textContent = content.text;
+                    contentType = "lyrics";
+
+                    // Show next lyric if available
+                    if (next) {
+                        if (next.type === "lyrics") {
+                            nextContentDiv.innerHTML = `
+                            <div class="lyric-preview">"${next.text.substring(0, 100)}${next.text.length > 100 ? "..." : ""}"</div>
+                        `;
+                        } else if (next.type === "sermon") {
+                            nextContentDiv.innerHTML = `Next slide (${next.slideIndex} of ${next.totalSlides})`;
+                        } else {
+                            nextContentDiv.textContent = "End of segment";
+                        }
+                    } else {
+                        nextContentDiv.textContent = "No upcoming content";
+                    }
+                } else if (content.type === "sermon") {
+                    currentContentDiv.className = "current-content sermon";
+                    currentContentDiv.innerHTML = `<img src="${content.url}" class="sermon-image" alt="Current Slide">`;
+                    contentType = "sermon";
+
+                    // Show slide counter
+                    currentSlideIndex = content.slideIndex || 1;
+                    totalSlides = content.totalSlides || 1;
+
+                    if (next && next.type === "sermon") {
+                        nextContentDiv.innerHTML = `
+                        <span class="slide-counter">Slide ${next.slideIndex} of ${next.totalSlides}</span>
+                    `;
+                    } else {
+                        nextContentDiv.innerHTML = `
+                        <span class="slide-counter">Slide ${currentSlideIndex} of ${totalSlides}</span>
+                        <div style="margin-top: 10px; color: #9ca3af;">Last slide</div>
+                    `;
+                    }
+                } else if (content.type === "blank") {
+                    currentContentDiv.className = "current-content blank-state";
+                    currentContentDiv.textContent = "Blank screen";
+                    nextContentDiv.textContent = "No upcoming content";
+                }
+            }
+
+            // Notify opener that BOH is ready
+            if (window.opener) {
+                window.opener.postMessage({ type: "bohReady" }, "*");
+            }
+        </script>
+    </body>
+</html>
