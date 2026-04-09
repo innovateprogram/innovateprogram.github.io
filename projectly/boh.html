@@ -78,6 +78,7 @@
             border: 2px solid #374151;
             min-height: 0;
             transition: border-color 0.3s;
+            overflow: hidden;
         }
         .current-slide.has-content { border-color: #2563eb; }
 
@@ -94,6 +95,29 @@
             font-size: 1.5rem;
             color: #4b5563;
             text-align: center;
+        }
+
+        .sermon-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .media-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .media-placeholder .media-icon { font-size: 4rem; }
+        .media-placeholder .media-label { font-size: 1rem; color: #9ca3af; text-align: center; }
+        .media-placeholder .media-type-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 20px;
         }
 
         .next-panel {
@@ -120,20 +144,13 @@
         }
         .next-text.end-of-segment { color: #ef4444; font-style: italic; font-size: 1rem; }
         .next-text.blank-state { color: #4b5563; font-style: italic; font-size: 1rem; }
-
-        .sermon-image {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            border-radius: 4px;
-        }
     </style>
 </head>
 <body>
 <div class="header">
     <div class="header-left">
         <h1>Projectly — Back of House</h1>
-        <div class="song-title-display" id="songTitleDisplay">No song selected</div>
+        <div class="song-title-display" id="songTitleDisplay">No content selected</div>
         <div class="slide-counter-display" id="slideCounterDisplay"></div>
     </div>
     <div class="status-row">
@@ -168,7 +185,6 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Track fade state so BOH can show it
     let currentFadeMs = 500;
     let currentFadeEnabled = true;
 
@@ -193,7 +209,6 @@
             updateFadeIndicator(currentFadeMs, currentFadeEnabled);
 
         } else if (data.type === 'display') {
-            // Sync fade indicator on every slide send so it stays in sync
             if (data.fadeTime !== undefined) currentFadeMs = data.fadeTime;
             if (data.enableSongFade !== undefined) currentFadeEnabled = data.enableSongFade;
             updateFadeIndicator(currentFadeMs, currentFadeEnabled);
@@ -236,12 +251,52 @@
 
         } else if (content.type === 'sermon') {
             currentSlide.classList.add('has-content');
-            currentContentEl.className = '';
-            currentContentEl.innerHTML = `<img src="${content.url}" class="sermon-image" alt="Slide">`;
+            const mediaType = content.mediaType || 'image';
 
+            if (mediaType === 'image') {
+                // Show thumbnail image
+                currentContentEl.className = '';
+                currentContentEl.innerHTML = `<img src="${content.url}" class="sermon-image" alt="Slide">`;
+
+            } else if (mediaType === 'video') {
+                currentContentEl.className = '';
+                currentContentEl.innerHTML = `
+                    <div class="media-placeholder">
+                        <div class="media-icon">🎬</div>
+                        <div class="media-type-badge" style="background:#1e3a5f;color:#60a5fa">VIDEO</div>
+                        <div class="media-label">${content.name || 'Video clip'}</div>
+                    </div>`;
+
+            } else if (mediaType === 'pdf') {
+                currentContentEl.className = '';
+                currentContentEl.innerHTML = `
+                    <div class="media-placeholder">
+                        <div class="media-icon">📄</div>
+                        <div class="media-type-badge" style="background:#2d1515;color:#f87171">PDF</div>
+                        <div class="media-label">${content.name || 'PDF document'}</div>
+                    </div>`;
+
+            } else if (mediaType === 'pptx') {
+                currentContentEl.className = '';
+                currentContentEl.innerHTML = `
+                    <div class="media-placeholder">
+                        <div class="media-icon">📊</div>
+                        <div class="media-type-badge" style="background:#0a1a0f;color:#4ade80">PPTX</div>
+                        <div class="media-label">${content.name || 'Presentation'}</div>
+                    </div>`;
+
+            } else {
+                currentContentEl.className = '';
+                currentContentEl.innerHTML = `<img src="${content.url}" class="sermon-image" alt="Slide">`;
+            }
+
+            // Next slide preview
             if (next && next.type === 'sermon') {
                 nextContentEl.className = 'next-text';
-                nextContentEl.textContent = `Slide ${(currentIndex||1)+1}`;
+                const nextType = next.mediaType || 'image';
+                const typeIcon = nextType === 'video' ? '🎬' : nextType === 'pdf' ? '📄' : nextType === 'pptx' ? '📊' : '🖼';
+                const nextLabel = next.name ? ` — ${next.name}` : '';
+                nextContentEl.textContent = `${typeIcon} Slide ${(currentIndex||1) + 1}${nextLabel}`;
             } else {
                 nextContentEl.className = 'next-text end-of-segment';
                 nextContentEl.textContent = '— Last slide —';
@@ -253,7 +308,7 @@
             currentContentEl.textContent = 'Screen is blank';
             nextContentEl.className = 'next-text blank-state';
             nextContentEl.textContent = 'No upcoming content';
-            songTitleDisplay.textContent = 'No song selected';
+            songTitleDisplay.textContent = 'No content selected';
             slideCounterDisplay.textContent = '';
         }
     }
