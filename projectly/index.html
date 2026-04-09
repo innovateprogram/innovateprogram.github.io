@@ -7,8 +7,6 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f0;display:flex;height:100vh;overflow:hidden}
-
-/* ── LOGIN ── */
 .login-screen{display:flex;align-items:flex-start;justify-content:center;width:100%;min-height:100vh;background:linear-gradient(135deg,#0f1117 0%,#1a1f2e 50%,#0f1117 100%);overflow-y:auto;padding:40px 20px}
 .login-box{background:#1a1f2e;padding:44px 40px;border-radius:16px;box-shadow:0 25px 60px rgba(0,0,0,0.5);max-width:440px;width:100%;border:1px solid #2d3748;margin:auto}
 .login-box h1{color:#60a5fa;margin-bottom:6px;font-size:30px;font-weight:700;letter-spacing:-0.5px}
@@ -22,22 +20,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
 .info-box{background:#0c1f3a;border:1px solid #1e3a5f;color:#93c5fd;padding:13px 15px;border-radius:8px;margin-bottom:16px;font-size:13px;line-height:1.6}
 .info-box code{background:#1e3a5f;padding:1px 6px;border-radius:4px;font-size:12px}
 .btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;transition:all .2s;font-size:14px}
-.btn-primary{background:#2563eb;color:#fff}
-.btn-primary:hover{background:#1d4ed8}
-.btn-secondary{background:#1e293b;color:#cbd5e1;border:1px solid #2d3748}
-.btn-secondary:hover{background:#2d3748}
-.btn-danger{background:#dc2626;color:#fff}
-.btn-danger:hover{background:#b91c1c}
-.btn-success{background:#059669;color:#fff}
-.btn-success:hover{background:#047857}
-.btn-warning{background:#d97706;color:#fff}
-.btn-warning:hover{background:#b45309}
+.btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}
+.btn-secondary{background:#1e293b;color:#cbd5e1;border:1px solid #2d3748}.btn-secondary:hover{background:#2d3748}
+.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-success{background:#059669;color:#fff}.btn-success:hover{background:#047857}
+.btn-warning{background:#d97706;color:#fff}.btn-warning:hover{background:#b45309}
 .setup-wizard{background:#0c1f3a;border:1px solid #1e3a5f;padding:18px;border-radius:10px;margin-bottom:20px}
 .setup-wizard h3{font-size:14px;color:#93c5fd;margin-bottom:13px;font-weight:600}
 .setup-step{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:13px;color:#7dd3fc;line-height:1.5}
 .setup-step-num{background:#2563eb;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
-
-/* ── APP LAYOUT ── */
+.loading-screen{display:flex;align-items:center;justify-content:center;width:100%;height:100vh;background:#0f1117;flex-direction:column;gap:12px}
+.loading-spinner{width:36px;height:36px;border:3px solid #2d3748;border-top-color:#60a5fa;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .sidebar{width:272px;background:#1a1f2e;border-right:1px solid #2d3748;display:flex;flex-direction:column}
 .sidebar-header{padding:18px 16px;border-bottom:1px solid #2d3748}
 .sidebar-header h1{font-size:22px;color:#60a5fa;font-weight:700;letter-spacing:-0.5px}
@@ -86,10 +80,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .kbd-hint{font-size:11px;color:#475569;display:flex;gap:5px;align-items:center}
 .kbd{background:#1e293b;border:1px solid #2d3748;border-radius:3px;padding:1px 5px;font-family:monospace;font-size:10px;color:#94a3b8}
-.blank-btn{background:#1e293b;color:#94a3b8;border:1px solid #374151}
-.blank-btn:hover{background:#2d3748}
-
-/* ── MODAL ── */
+.blank-btn{background:#1e293b;color:#94a3b8;border:1px solid #374151}.blank-btn:hover{background:#2d3748}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center}
 .modal.active{display:flex}
 .modal-content{background:#1a1f2e;border-radius:12px;padding:28px;max-width:520px;width:90%;max-height:88vh;overflow-y:auto;border:1px solid #2d3748}
@@ -105,94 +96,63 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
 .song-result.selected{background:#1e3a5f;border-color:#3b82f6}
 .song-result-title{font-weight:600;margin-bottom:3px;font-size:14px}
 .song-result-meta{font-size:11px;color:#64748b}
-.song-result .match-score{font-size:10px;color:#3b82f6;float:right;margin-top:2px}
 </style>
 </head>
 <body>
 
+<!-- LOADING SCREEN (shown while checking auth + fetching config) -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-spinner"></div>
+  <div style="color:#64748b;font-size:13px" id="loadingMsg">Signing in…</div>
+</div>
+
 <!-- LOGIN SCREEN -->
-<div id="loginScreen" class="login-screen">
+<div id="loginScreen" class="login-screen" style="display:none">
   <div class="login-box">
     <h1>Projectly</h1>
     <p>Church Presentation Software</p>
     <div id="loginError" class="error-message" style="display:none"></div>
     <div id="loginSuccess" class="success-message" style="display:none"></div>
 
-    <!-- Step 1: Account login with shared Firebase -->
     <div id="loginForm">
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email"/>
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password"/>
-      </div>
+      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')loginUser()"/></div>
       <button class="btn btn-primary" style="width:100%" onclick="loginUser()">Login</button>
       <p style="text-align:center;margin-top:14px;font-size:13px;color:#64748b">
         No account? <a href="#" onclick="showRegister();return false;" style="color:#60a5fa">Register</a>
       </p>
     </div>
 
-    <!-- Register -->
     <div id="registerForm" style="display:none">
       <div class="setup-wizard">
         <h3>🚀 Getting Started</h3>
-        <div class="setup-step"><div class="setup-step-num">1</div><div>Create your account — used for login only.</div></div>
-        <div class="setup-step"><div class="setup-step-num">2</div><div>After login, go to <strong>Admin → Settings</strong> and paste your own Firebase config. All your songs, backgrounds, and sermons live in your Firebase project.</div></div>
-        <div class="setup-step"><div class="setup-step-num">3</div><div>Optionally configure Cloudinary for image uploads.</div></div>
+        <div class="setup-step"><div class="setup-step-num">1</div><div>Create your account — used for login across all devices.</div></div>
+        <div class="setup-step"><div class="setup-step-num">2</div><div>Enter your Firebase config once. It's saved to your account and synced automatically on future logins.</div></div>
+        <div class="setup-step"><div class="setup-step-num">3</div><div>Optionally configure Cloudinary for image/video uploads in Admin → Settings.</div></div>
       </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="registerEmail" placeholder="your@email.com" autocomplete="email"/>
-      </div>
-      <div class="form-group">
-        <label>Password (min 6 chars)</label>
-        <input type="password" id="registerPassword" placeholder="Choose a password" autocomplete="new-password"/>
-      </div>
+      <div class="form-group"><label>Email</label><input type="email" id="registerEmail" placeholder="your@email.com" autocomplete="email"/></div>
+      <div class="form-group"><label>Password (min 6 chars)</label><input type="password" id="registerPassword" placeholder="Choose a password" autocomplete="new-password"/></div>
       <button class="btn btn-primary" style="width:100%" onclick="registerUser()">Create Account</button>
       <p style="text-align:center;margin-top:14px;font-size:13px;color:#64748b">
         Have an account? <a href="#" onclick="showLogin();return false;" style="color:#60a5fa">Login</a>
       </p>
     </div>
 
-    <!-- Step 2: User Firebase config (shown after auth) -->
     <div id="firebaseConfigForm" style="display:none">
       <div class="info-box">
-        ✅ You're logged in! Fill in your Firebase project details below.<br><br>
-        Go to <a href="https://console.firebase.google.com" target="_blank" style="color:#93c5fd">Firebase Console</a> → your project → ⚙️ <strong>Project Settings</strong> → scroll to <strong>Your apps</strong> → select your web app → find each value in the config block and paste it into the matching field below.
+        ✅ Logged in! Enter your Firebase config once — it will be saved to your account and auto-loaded on any device.<br><br>
+        <a href="https://console.firebase.google.com" target="_blank" style="color:#93c5fd">Firebase Console</a> → your project → ⚙️ <strong>Project Settings</strong> → <strong>Your apps</strong> → web app → SDK config.
       </div>
-      <div class="form-group">
-        <label>API Key <span style="color:#64748b;font-weight:400">— the long string after <code style="background:#1e3a5f;padding:1px 5px;border-radius:3px">apiKey:</code></span></label>
-        <input type="text" id="fb_apiKey" placeholder="AIzaSy..." autocomplete="off" spellcheck="false"/>
-      </div>
-      <div class="form-group">
-        <label>Auth Domain <span style="color:#64748b;font-weight:400">— after <code style="background:#1e3a5f;padding:1px 5px;border-radius:3px">authDomain:</code></span></label>
-        <input type="text" id="fb_authDomain" placeholder="your-app.firebaseapp.com" autocomplete="off" spellcheck="false"/>
-      </div>
-      <div class="form-group">
-        <label>Project ID <span style="color:#64748b;font-weight:400">— after <code style="background:#1e3a5f;padding:1px 5px;border-radius:3px">projectId:</code></span></label>
-        <input type="text" id="fb_projectId" placeholder="your-app-id" autocomplete="off" spellcheck="false"/>
-      </div>
-      <div class="form-group">
-        <label>Storage Bucket <span style="color:#64748b;font-weight:400">— after <code style="background:#1e3a5f;padding:1px 5px;border-radius:3px">storageBucket:</code></span></label>
-        <input type="text" id="fb_storageBucket" placeholder="your-app.firebasestorage.app" autocomplete="off" spellcheck="false"/>
-      </div>
-      <div class="form-group">
-        <label>Messaging Sender ID <span style="color:#64748b;font-weight:400">— after <code style="background:#1e3a5f;padding:1px 5px;border-radius:3px">messagingSenderId:</code></span></label>
-        <input type="text" id="fb_messagingSenderId" placeholder="123456789000" autocomplete="off" spellcheck="false"/>
-      </div>
-      <div class="form-group">
-        <label>App ID <span style="color:#64748b;font-weight:400">— after <code style="background:#1e3a5f;padding:1px 5px;border-radius:3px">appId:</code></span></label>
-        <input type="text" id="fb_appId" placeholder="1:123456789000:web:abc123..." autocomplete="off" spellcheck="false"/>
-      </div>
-      <div class="form-group">
-        <label>Database URL <span style="color:#64748b;font-weight:400">— after <code style="background:#1e3a5f;padding:1px 5px;border-radius:3px">databaseURL:</code> (optional but needed for playlists)</span></label>
-        <input type="text" id="fb_databaseURL" placeholder="https://your-app-default-rtdb.firebaseio.com" autocomplete="off" spellcheck="false"/>
-      </div>
+      <div class="form-group"><label>API Key</label><input type="text" id="fb_apiKey" placeholder="AIzaSy..." autocomplete="off" spellcheck="false"/></div>
+      <div class="form-group"><label>Auth Domain</label><input type="text" id="fb_authDomain" placeholder="your-app.firebaseapp.com" autocomplete="off" spellcheck="false"/></div>
+      <div class="form-group"><label>Project ID</label><input type="text" id="fb_projectId" placeholder="your-app-id" autocomplete="off" spellcheck="false"/></div>
+      <div class="form-group"><label>Storage Bucket</label><input type="text" id="fb_storageBucket" placeholder="your-app.firebasestorage.app" autocomplete="off" spellcheck="false"/></div>
+      <div class="form-group"><label>Messaging Sender ID</label><input type="text" id="fb_messagingSenderId" placeholder="123456789000" autocomplete="off" spellcheck="false"/></div>
+      <div class="form-group"><label>App ID</label><input type="text" id="fb_appId" placeholder="1:123456789000:web:abc123..." autocomplete="off" spellcheck="false"/></div>
+      <div class="form-group"><label>Database URL <span style="font-weight:400;color:#64748b">(needed for playlists)</span></label><input type="text" id="fb_databaseURL" placeholder="https://your-app-default-rtdb.firebaseio.com" autocomplete="off" spellcheck="false"/></div>
       <div id="configError" class="error-message" style="display:none"></div>
-      <button class="btn btn-primary" style="width:100%" onclick="saveUserFirebaseConfig()">Connect My Firebase →</button>
-      <p style="margin-top:10px;font-size:12px;color:#475569;text-align:center">Stored in this browser only — never sent anywhere.</p>
+      <button class="btn btn-primary" style="width:100%" onclick="saveUserFirebaseConfig()">Save & Connect →</button>
+      <p style="margin-top:10px;font-size:12px;color:#475569;text-align:center">Saved to your account — no need to re-enter on other devices.</p>
     </div>
   </div>
 </div>
@@ -205,17 +165,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
       <div class="user-info" id="userEmail">Loading…</div>
     </div>
     <div class="sidebar-section">
-      <div class="section-header">
-        <span class="section-title">Playlists</span>
-        <button class="add-btn" onclick="showAddPlaylistModal()">+</button>
-      </div>
+      <div class="section-header"><span class="section-title">Playlists</span><button class="add-btn" onclick="showAddPlaylistModal()">+</button></div>
       <div id="playlistsList"></div>
     </div>
     <div class="sidebar-section grow">
-      <div class="section-header">
-        <span class="section-title">Segments</span>
-        <button class="add-btn" onclick="showAddSegmentModal()">+</button>
-      </div>
+      <div class="section-header"><span class="section-title">Segments</span><button class="add-btn" onclick="showAddSegmentModal()">+</button></div>
       <div id="segmentsList"></div>
     </div>
     <div class="sidebar-section">
@@ -223,7 +177,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
       <button class="btn btn-secondary" style="width:100%" onclick="logout()">Logout</button>
     </div>
   </div>
-
   <div class="main-content">
     <div class="top-bar">
       <div class="live-indicator" id="liveIndicator"><span class="live-dot"></span><span>Offline</span></div>
@@ -245,10 +198,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
       <div class="fade-controls">
         <label for="fadeTime">Fade (ms):</label>
         <input type="number" id="fadeTime" value="500" min="0" max="5000" step="100"/>
-        <div class="checkbox-control">
-          <input type="checkbox" id="enableSongFade" checked/>
-          <label for="enableSongFade">Song Fade</label>
-        </div>
+        <div class="checkbox-control"><input type="checkbox" id="enableSongFade" checked/><label for="enableSongFade">Song Fade</label></div>
       </div>
       <div class="current-slide-info" id="currentSlideInfo"></div>
     </div>
@@ -275,7 +225,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
       <label>Segment Type</label>
       <select id="segmentType" onchange="onSegmentTypeChange()">
         <option value="song">Song</option>
-        <option value="sermon">Sermon Slides</option>
+        <option value="sermon">Media</option>
       </select>
     </div>
     <div id="songSegmentForm">
@@ -283,7 +233,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
       <div id="songResults"><p style="color:#64748b;font-size:13px">Start typing to search…</p></div>
     </div>
     <div id="sermonSegmentForm" style="display:none">
-      <div class="form-group"><label>Select Sermon</label><select id="sermonSelect"><option value="">Choose a sermon…</option></select></div>
+      <div class="form-group"><label>Select Media</label><select id="sermonSelect"><option value="">Choose Your Media</option></select></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('addSegmentModal')">Cancel</button>
@@ -310,12 +260,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
 </div>
 
 <script type="module">
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// ── SHARED FIREBASE (account only) ──
+// ── SHARED FIREBASE (accounts + config sync) ──
 const sharedConfig = {
   apiKey: "AIzaSyCga_ur-qA08HV2otci3ivw3PkWm-Uh-OM",
   authDomain: "notey-4455f.firebaseapp.com",
@@ -325,9 +275,9 @@ const sharedConfig = {
   messagingSenderId: "554664934050",
   appId: "1:554664934050:web:5c1f5f673bb32301fa35fb"
 };
-
 const sharedApp = initializeApp(sharedConfig, "shared");
 const sharedAuth = getAuth(sharedApp);
+const sharedDb = getFirestore(sharedApp);
 
 window.currentUser = null;
 window.userDb = null;
@@ -337,26 +287,107 @@ window.fohWindow = null;
 window.bohWindow = null;
 window.isLive = false;
 window.selectedSong = null;
+window.presentationState = { song: null, parts: [], flatIndex: 0, sentIndex: -1, typography: {}, backgroundUrl: null };
 
-window.presentationState = {
-  song: null, parts: [], flatIndex: 0, sentIndex: -1,
-  typography: {}, backgroundUrl: null
-};
-
-// ── Try load user Firebase config from localStorage ──
-function getUserFirebaseApp() {
-  const raw = localStorage.getItem("projectly_user_firebase");
-  if (!raw) return null;
-  try {
-    const cfg = JSON.parse(raw);
-    const existing = getApps().find(a => a.name === "userapp");
-    if (existing) return existing;
-    return initializeApp(cfg, "userapp");
-  } catch(e) { return null; }
+function setLoading(msg) {
+  document.getElementById("loadingScreen").style.display = "flex";
+  document.getElementById("loadingMsg").textContent = msg || "Loading…";
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("mainApp").style.display = "none";
+}
+function showLogin() {
+  document.getElementById("loadingScreen").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("mainApp").style.display = "none";
+  document.getElementById("loginForm").style.display = "block";
+  document.getElementById("registerForm").style.display = "none";
+  document.getElementById("firebaseConfigForm").style.display = "none";
+}
+function showApp() {
+  document.getElementById("loadingScreen").style.display = "none";
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("mainApp").style.display = "flex";
+  document.getElementById("userEmail").textContent = window.currentUser.email;
+}
+function showFirebaseForm() {
+  document.getElementById("loadingScreen").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("mainApp").style.display = "none";
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("registerForm").style.display = "none";
+  document.getElementById("firebaseConfigForm").style.display = "block";
 }
 
-window.saveUserFirebaseConfig = function() {
-  const errDiv = document.getElementById("configError") || document.getElementById("loginError");
+// ── Save Firebase config to BOTH localStorage AND shared Firestore ──
+async function persistUserFirebaseConfig(cfg) {
+  localStorage.setItem("projectly_user_firebase", JSON.stringify(cfg));
+  if (window.currentUser) {
+    try {
+      await setDoc(doc(sharedDb, "user_configs", window.currentUser.uid), { firebaseConfig: cfg, updatedAt: new Date().toISOString() }, { merge: true });
+    } catch(e) { console.warn("Could not sync config to cloud:", e); }
+  }
+}
+
+// ── Try to get config: localStorage first, then shared Firestore ──
+async function resolveUserFirebaseConfig() {
+  const local = localStorage.getItem("projectly_user_firebase");
+  if (local) {
+    try { return JSON.parse(local); } catch(e) {}
+  }
+  if (!window.currentUser) return null;
+  try {
+    const snap = await getDoc(doc(sharedDb, "user_configs", window.currentUser.uid));
+    if (snap.exists() && snap.data().firebaseConfig) {
+      const cfg = snap.data().firebaseConfig;
+      localStorage.setItem("projectly_user_firebase", JSON.stringify(cfg));
+      return cfg;
+    }
+  } catch(e) { console.warn("Could not fetch config from cloud:", e); }
+  return null;
+}
+
+function getUserFirebaseApp(cfg) {
+  const existing = getApps().find(a => a.name === "userapp");
+  if (existing) return existing;
+  if (!cfg) return null;
+  try { return initializeApp(cfg, "userapp"); } catch(e) { return null; }
+}
+
+function initUserFirebase(cfg) {
+  try {
+    const app = getUserFirebaseApp(cfg);
+    if (!app) throw new Error("Could not init Firebase app");
+    window.userDb = getFirestore(app);
+    window.userRtdb = getDatabase(app);
+    showApp();
+    loadUserData();
+  } catch(e) {
+    const errDiv = document.getElementById("loginError");
+    errDiv.textContent = "Firebase error: " + e.message;
+    errDiv.style.display = "block";
+    showFirebaseForm();
+  }
+}
+
+// ── Auth state ──
+onAuthStateChanged(sharedAuth, async user => {
+  if (user) {
+    window.currentUser = user;
+    setLoading("Fetching your config…");
+    const cfg = await resolveUserFirebaseConfig();
+    if (cfg) {
+      initUserFirebase(cfg);
+    } else {
+      showFirebaseForm();
+    }
+  } else {
+    window.currentUser = null;
+    showLogin();
+  }
+});
+
+window.saveUserFirebaseConfig = async function() {
+  const errDiv = document.getElementById("configError");
   errDiv.style.display = "none";
   const cfg = {
     apiKey:            document.getElementById("fb_apiKey").value.trim(),
@@ -367,70 +398,13 @@ window.saveUserFirebaseConfig = function() {
     appId:             document.getElementById("fb_appId").value.trim(),
     databaseURL:       document.getElementById("fb_databaseURL").value.trim()
   };
-  if (!cfg.apiKey)     { errDiv.textContent = "API Key is required.";    errDiv.style.display = "block"; return; }
-  if (!cfg.projectId)  { errDiv.textContent = "Project ID is required."; errDiv.style.display = "block"; return; }
-  // Remove empty optional fields
+  if (!cfg.apiKey)    { errDiv.textContent = "API Key is required.";    errDiv.style.display = "block"; return; }
+  if (!cfg.projectId) { errDiv.textContent = "Project ID is required."; errDiv.style.display = "block"; return; }
   Object.keys(cfg).forEach(k => { if (!cfg[k]) delete cfg[k]; });
-  localStorage.setItem("projectly_user_firebase", JSON.stringify(cfg));
+  setLoading("Saving config…");
+  await persistUserFirebaseConfig(cfg);
   initUserFirebase(cfg);
 };
-
-function initUserFirebase(cfg) {
-  try {
-    const existing = getApps().find(a => a.name === "userapp");
-    const app = existing || initializeApp(cfg, "userapp");
-    window.userDb = getFirestore(app);
-    window.userRtdb = getDatabase(app);
-    document.getElementById("firebaseConfigForm").style.display = "none";
-    document.getElementById("mainApp").style.display = "flex";
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("userEmail").textContent = window.currentUser.email;
-    loadUserData();
-  } catch(e) {
-    const errDiv = document.getElementById("loginError");
-    errDiv.textContent = "Firebase error: " + e.message;
-    errDiv.style.display = "block";
-  }
-}
-
-// ── Auth state ──
-onAuthStateChanged(sharedAuth, user => {
-  if (user) {
-    window.currentUser = user;
-    const userApp = getUserFirebaseApp();
-    if (userApp) {
-      window.userDb = getFirestore(userApp);
-      window.userRtdb = getDatabase(userApp);
-      document.getElementById("loginScreen").style.display = "none";
-      document.getElementById("mainApp").style.display = "flex";
-      document.getElementById("userEmail").textContent = user.email;
-      loadUserData();
-    } else {
-      const existingRaw = localStorage.getItem("projectly_user_firebase");
-      if (existingRaw) {
-        try {
-          const ex = JSON.parse(existingRaw);
-          ["apiKey","authDomain","projectId","storageBucket","messagingSenderId","appId","databaseURL"].forEach(k => {
-            const el = document.getElementById("fb_" + k);
-            if (el && ex[k]) el.value = ex[k];
-          });
-        } catch(e) {}
-      }
-      document.getElementById("loginForm").style.display = "none";
-      document.getElementById("registerForm").style.display = "none";
-      document.getElementById("firebaseConfigForm").style.display = "block";
-      document.getElementById("loginScreen").style.display = "flex";
-      document.getElementById("mainApp").style.display = "none";
-    }
-  } else {
-    window.currentUser = null;
-    document.getElementById("loginScreen").style.display = "flex";
-    document.getElementById("mainApp").style.display = "none";
-    document.getElementById("loginForm").style.display = "block";
-    document.getElementById("registerForm").style.display = "none";
-    document.getElementById("firebaseConfigForm").style.display = "none";
-  }
-});
 
 window.registerUser = async function() {
   const email = document.getElementById("registerEmail").value;
@@ -450,8 +424,9 @@ window.loginUser = async function() {
   const password = document.getElementById("loginPassword").value;
   const err = document.getElementById("loginError");
   err.style.display = "none";
+  setLoading("Signing in…");
   try { await signInWithEmailAndPassword(sharedAuth, email, password); }
-  catch(e) { err.textContent = e.message; err.style.display = "block"; }
+  catch(e) { err.style.display = "block"; err.textContent = e.message; showLogin(); }
 };
 
 window.logout = async function() {
@@ -461,13 +436,10 @@ window.logout = async function() {
 };
 
 window.showRegister = () => { document.getElementById("loginForm").style.display="none"; document.getElementById("registerForm").style.display="block"; };
-window.showLogin = () => { document.getElementById("registerForm").style.display="none"; document.getElementById("loginForm").style.display="block"; };
+window.showLoginForm = () => { document.getElementById("registerForm").style.display="none"; document.getElementById("loginForm").style.display="block"; };
 
-// ── Load user data from their Firebase ──
 window.loadUserData = async function() {
-  const db = window.userDb;
-  const rtdb = window.userRtdb;
-  const userId = window.currentUser.uid;
+  const db = window.userDb; const userId = window.currentUser.uid;
   try {
     const userSnap = await getDoc(doc(db, "users", userId));
     if (userSnap.exists()) {
@@ -477,8 +449,7 @@ window.loadUserData = async function() {
       else if (d.backgrounds && d.backgrounds.length > 0) window.presentationState.backgroundUrl = d.backgrounds[0];
     }
   } catch(e) { console.warn("Could not load user doc", e); }
-
-  const playlistsRef = ref(rtdb, `users/${userId}/playlists`);
+  const playlistsRef = ref(window.userRtdb, `users/${userId}/playlists`);
   onValue(playlistsRef, snap => { renderPlaylists(snap.val() || {}); });
 };
 
@@ -488,24 +459,20 @@ window.renderPlaylists = function(playlists) {
   const arr = Object.entries(playlists).map(([id,data]) => ({id,...data}));
   if (!arr.length) { list.innerHTML = '<div style="padding:8px;color:#475569;font-size:12px">No playlists yet</div>'; return; }
   arr.forEach(pl => {
-    const div = document.createElement("div");
-    div.className = "playlist-item";
-    const info = document.createElement("div");
-    info.className = "playlist-item-info";
+    const div = document.createElement("div"); div.className = "playlist-item";
+    const info = document.createElement("div"); info.className = "playlist-item-info";
     info.innerHTML = `<div class="item-name">${pl.name}</div><div class="item-count">${(pl.segments||[]).length} segments</div>`;
     info.onclick = () => selectPlaylist(pl.id, pl, div);
-    const rm = document.createElement("button");
-    rm.className = "item-remove-btn"; rm.textContent = "×"; rm.title = "Delete playlist";
+    const rm = document.createElement("button"); rm.className = "item-remove-btn"; rm.textContent = "×"; rm.title = "Delete playlist";
     rm.onclick = e => { e.stopPropagation(); removePlaylist(pl.id, pl.name); };
-    div.appendChild(info); div.appendChild(rm);
-    list.appendChild(div);
+    div.appendChild(info); div.appendChild(rm); list.appendChild(div);
   });
 };
 
 window.removePlaylist = async function(id, name) {
   if (!confirm(`Delete playlist "${name}"?`)) return;
   await remove(ref(window.userRtdb, `users/${window.currentUser.uid}/playlists/${id}`));
-  if (window.currentPlaylist && window.currentPlaylist.id === id) {
+  if (window.currentPlaylist?.id === id) {
     window.currentPlaylist = null;
     document.getElementById("segmentsList").innerHTML = "";
     document.getElementById("contentArea").innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#0a0d14"><div class="slides-panel-empty"><h3>Select a playlist</h3></div></div>';
@@ -520,33 +487,27 @@ window.selectPlaylist = function(id, data, el) {
 };
 
 window.renderSegments = function(segments) {
-  const list = document.getElementById("segmentsList");
-  list.innerHTML = "";
+  const list = document.getElementById("segmentsList"); list.innerHTML = "";
   if (!segments.length) { list.innerHTML = '<div style="padding:8px;color:#475569;font-size:12px">No segments yet</div>'; return; }
   segments.forEach((seg, i) => {
-    const div = document.createElement("div");
-    div.className = "segment-item"; div.dataset.index = i;
-    const info = document.createElement("div");
-    info.className = "segment-item-info";
-    info.innerHTML = `<div class="item-name">${seg.name || seg.type}</div><div class="item-count">${seg.type}</div>`;
+    const div = document.createElement("div"); div.className = "segment-item"; div.dataset.index = i;
+    const info = document.createElement("div"); info.className = "segment-item-info";
+    info.innerHTML = `<div class="item-name">${seg.name||seg.type}</div><div class="item-count">${seg.type}</div>`;
     info.onclick = () => selectSegment(seg, i, div);
-    const rm = document.createElement("button");
-    rm.className = "item-remove-btn"; rm.textContent = "×"; rm.title = "Remove segment";
+    const rm = document.createElement("button"); rm.className = "item-remove-btn"; rm.textContent = "×";
     rm.onclick = e => { e.stopPropagation(); removeSegment(i); };
-    div.appendChild(info); div.appendChild(rm);
-    list.appendChild(div);
+    div.appendChild(info); div.appendChild(rm); list.appendChild(div);
   });
 };
 
 window.removeSegment = async function(index) {
   if (!window.currentPlaylist) return;
   const seg = window.currentPlaylist.segments[index];
-  if (!confirm(`Remove "${seg.name || 'this segment'}" from playlist?`)) return;
-  const segs = [...(window.currentPlaylist.segments || [])];
+  if (!confirm(`Remove "${seg.name||'this segment'}" from playlist?`)) return;
+  const segs = [...(window.currentPlaylist.segments||[])];
   segs.splice(index, 1);
   await set(ref(window.userRtdb, `users/${window.currentUser.uid}/playlists/${window.currentPlaylist.id}/segments`), segs);
-  window.currentPlaylist.segments = segs;
-  renderSegments(segs);
+  window.currentPlaylist.segments = segs; renderSegments(segs);
 };
 
 window.selectSegment = function(seg, index, el) {
@@ -579,36 +540,28 @@ window.renderSongInterface = function(song, typography) {
   renderSlideGrid(song, typography);
   focusSlide(0, false);
   const panel = document.getElementById("slidesPanel");
-  panel.focus();
-  panel.onkeydown = handleSlideKeyDown;
+  panel.focus(); panel.onkeydown = handleSlideKeyDown;
 };
 
 window.renderSlideGrid = function(song, typography) {
-  const panel = document.getElementById("slidesPanel");
-  if (!panel) return;
+  const panel = document.getElementById("slidesPanel"); if (!panel) return;
   panel.innerHTML = "";
-  const ps = window.presentationState;
-  const bgUrl = ps.backgroundUrl;
+  const ps = window.presentationState; const bgUrl = ps.backgroundUrl;
   const textStyle = buildTextStyle(typography, true);
   song.parts.forEach((part, pi) => {
-    const section = document.createElement("div");
-    section.className = "part-section"; section.dataset.partIndex = pi;
-    const label = document.createElement("div");
-    label.className = "part-section-label"; label.textContent = part.label;
+    const section = document.createElement("div"); section.className = "part-section"; section.dataset.partIndex = pi;
+    const label = document.createElement("div"); label.className = "part-section-label"; label.textContent = part.label;
     section.appendChild(label);
-    const grid = document.createElement("div");
-    grid.className = "slides-grid";
+    const grid = document.createElement("div"); grid.className = "slides-grid";
     ps.parts.forEach((item, fi) => {
       if (item.partIndex !== pi) return;
-      const card = document.createElement("div");
-      card.className = "slide-card"; card.dataset.fi = fi; card.tabIndex = -1;
+      const card = document.createElement("div"); card.className = "slide-card"; card.dataset.fi = fi; card.tabIndex = -1;
       if (bgUrl) card.style.backgroundImage = `url('${bgUrl}')`;
       card.innerHTML = `<div class="slide-text" style="${textStyle}">${item.text}</div><div class="slide-index">${item.slideIndex+1}</div>`;
       card.onclick = () => { focusSlide(fi, false); sendSlide(fi); };
       grid.appendChild(card);
     });
-    section.appendChild(grid);
-    panel.appendChild(section);
+    section.appendChild(grid); panel.appendChild(section);
   });
 };
 
@@ -632,15 +585,13 @@ window.focusSlide = function(fi, scroll=true) {
 };
 
 window.sendSlide = function(fi) {
-  const ps = window.presentationState;
-  if (fi < 0 || fi >= ps.parts.length) return;
+  const ps = window.presentationState; if (fi < 0 || fi >= ps.parts.length) return;
   ps.sentIndex = fi;
   document.querySelectorAll(".slide-card").forEach(c => c.classList.remove("sent"));
   const card = document.querySelector(`.slide-card[data-fi="${fi}"]`);
   if (card) card.classList.add("sent");
   if (!window.isLive) return;
-  const item = ps.parts[fi];
-  const nextItem = fi+1 < ps.parts.length ? ps.parts[fi+1] : null;
+  const item = ps.parts[fi]; const nextItem = fi+1 < ps.parts.length ? ps.parts[fi+1] : null;
   const fadeTime = parseInt(document.getElementById("fadeTime").value)||0;
   const enableSongFade = document.getElementById("enableSongFade").checked;
   const fohMsg = { type:"display", content:{type:"lyrics",text:item.text,license:ps.song.license||null}, typography:ps.typography||{}, fadeTime, enableSongFade, backgroundUrl:ps.backgroundUrl||null };
@@ -658,8 +609,7 @@ window.sendBlank = function() {
 };
 
 window.handleSlideKeyDown = function(e) {
-  const ps = window.presentationState;
-  if (!ps.parts.length) return;
+  const ps = window.presentationState; if (!ps.parts.length) return;
   if (e.key==="ArrowRight"||e.key==="ArrowDown") { e.preventDefault(); focusSlide(ps.flatIndex+1,true); }
   else if (e.key==="ArrowLeft"||e.key==="ArrowUp") { e.preventDefault(); focusSlide(ps.flatIndex-1,true); }
   else if (e.key===" "||e.key==="Enter") { e.preventDefault(); sendSlide(ps.flatIndex); }
@@ -671,7 +621,6 @@ document.addEventListener("keydown", e => {
   if (["ArrowRight","ArrowLeft","ArrowUp","ArrowDown"," "].includes(e.key)) { e.preventDefault(); handleSlideKeyDown(e); }
 });
 
-// ── Song search with ranked results ──
 window.searchSongs = async function() {
   const term = document.getElementById("songSearch").value.trim().toLowerCase();
   const resultsDiv = document.getElementById("songResults");
@@ -681,27 +630,15 @@ window.searchSongs = async function() {
     const snap = await getDocs(collection(window.userDb, "songs"));
     const scored = [];
     snap.forEach(d => {
-      const s = d.data();
-      const title = (s.title||"").toLowerCase();
-      const author = (s.author||"").toLowerCase();
+      const s = d.data(); const title = (s.title||"").toLowerCase(); const author = (s.author||"").toLowerCase();
       let score = 0;
-      if (title === term) score = 100;
-      else if (title.startsWith(term)) score = 80;
-      else if (title.includes(term)) score = 60;
-      else if (author.includes(term)) score = 30;
-      else return;
-      scored.push({ id: d.id, score, ...s });
+      if (title===term) score=100; else if (title.startsWith(term)) score=80; else if (title.includes(term)) score=60; else if (author.includes(term)) score=30; else return;
+      scored.push({ id:d.id, score, ...s });
     });
-    scored.sort((a,b) => b.score - a.score);
+    scored.sort((a,b) => b.score-a.score);
     if (!scored.length) { resultsDiv.innerHTML = '<p style="color:#64748b;font-size:13px">No songs found</p>'; return; }
-    resultsDiv.innerHTML = scored.map(s => `
-      <div class="song-result" onclick="selectSong('${s.id}','${(s.title||'').replace(/'/g,"\\'")}',this)">
-        <div class="song-result-title">${s.title}</div>
-        <div class="song-result-meta">${s.author||'Unknown'} • ${s.parts?s.parts.length:0} parts</div>
-      </div>`).join("");
-  } catch(e) {
-    resultsDiv.innerHTML = `<p style="color:#f87171;font-size:13px">Error: ${e.message}</p>`;
-  }
+    resultsDiv.innerHTML = scored.map(s => `<div class="song-result" onclick="selectSong('${s.id}','${(s.title||'').replace(/'/g,"\\'")}',this)"><div class="song-result-title">${s.title}</div><div class="song-result-meta">${s.author||'Unknown'} • ${s.parts?s.parts.length:0} parts</div></div>`).join("");
+  } catch(e) { resultsDiv.innerHTML = `<p style="color:#f87171;font-size:13px">Error: ${e.message}</p>`; }
 };
 
 window.selectSong = function(id, title, el) {
@@ -730,8 +667,7 @@ window.addPlaylist = async function() {
   if (!name) { alert("Enter a name"); return; }
   const id = Date.now().toString();
   await set(ref(window.userRtdb, `users/${window.currentUser.uid}/playlists/${id}`), { name, segments:[], createdAt:new Date().toISOString() });
-  document.getElementById("playlistName").value = "";
-  closeModal("addPlaylistModal");
+  document.getElementById("playlistName").value = ""; closeModal("addPlaylistModal");
 };
 
 window.addSegment = async function() {
@@ -740,14 +676,11 @@ window.addSegment = async function() {
   let seg = { type };
   if (type === "song") {
     if (!window.selectedSong) { alert("Select a song"); return; }
-    seg.songId = window.selectedSong.id;
-    seg.name = window.selectedSong.title;
+    seg.songId = window.selectedSong.id; seg.name = window.selectedSong.title;
   }
   const segs = [...(window.currentPlaylist.segments||[]), seg];
   await set(ref(window.userRtdb, `users/${window.currentUser.uid}/playlists/${window.currentPlaylist.id}/segments`), segs);
-  window.currentPlaylist.segments = segs;
-  renderSegments(segs);
-  closeModal("addSegmentModal");
+  window.currentPlaylist.segments = segs; renderSegments(segs); closeModal("addSegmentModal");
   window.selectedSong = null;
   const newEl = document.querySelector(`.segment-item[data-index="${segs.length-1}"]`);
   if (newEl) selectSegment(seg, segs.length-1, newEl);
@@ -786,8 +719,7 @@ window.stopPresentation = () => {
   window.isLive = false;
   const ind = document.getElementById("liveIndicator");
   ind.classList.remove("active"); ind.querySelector("span:last-child").textContent = "Offline";
-  document.getElementById("stopBtn").style.display = "none";
-  document.getElementById("blankBtn").style.display = "none";
+  document.getElementById("stopBtn").style.display = "none"; document.getElementById("blankBtn").style.display = "none";
   const msg = { type:"display", content:{type:"blank"}, next:null };
   if (window.fohWindow && !window.fohWindow.closed) window.fohWindow.postMessage(msg,"*");
   if (window.bohWindow && !window.bohWindow.closed) window.bohWindow.postMessage(msg,"*");
