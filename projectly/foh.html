@@ -51,7 +51,6 @@
         #logoLayer.visible { opacity: 1; }
         #logoLayer img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        /* Content layer — fades in/out */
         #contentLayer {
             position: relative;
             z-index: 3;
@@ -123,28 +122,50 @@
     let currentLogo = null;
     let backgroundVisible = false;
     let logoVisible = false;
-    let fadeTime = 500;
-    let enableSongFade = false;
+    // Default fade settings — overridden by every incoming message
+    let globalFadeTime = 500;
+    let globalSongFade = true;
     let licenseTimer = null;
 
-    // ── Receive messages from the control window ──
     window.addEventListener('message', (event) => {
         const data = event.data;
         if (!data || !data.type) return;
 
         switch (data.type) {
             case 'init':
-                fadeTime = data.fadeTime || 500;
-                enableSongFade = data.enableSongFade || false;
+                // Store globals from init
+                globalFadeTime = (data.fadeTime !== undefined) ? data.fadeTime : globalFadeTime;
+                globalSongFade = (data.enableSongFade !== undefined) ? data.enableSongFade : globalSongFade;
+                // Apply background if sent on init
+                if (data.backgroundUrl) {
+                    applyBackground(data.backgroundUrl);
+                }
                 document.getElementById('statusMsg').textContent = 'FOH — Live';
                 break;
 
             case 'display':
-                displayContent(data.content, data.typography, data.fadeTime, data.enableSongFade);
+                // Each display message carries the latest fade + background settings
+                // so changes in the control window take effect immediately
+                if (data.fadeTime !== undefined) globalFadeTime = data.fadeTime;
+                if (data.enableSongFade !== undefined) globalSongFade = data.enableSongFade;
+
+                // Auto-apply background from the message if provided
+                if (data.backgroundUrl !== undefined) {
+                    if (data.backgroundUrl) {
+                        applyBackground(data.backgroundUrl);
+                    }
+                }
+
+                displayContent(
+                    data.content,
+                    data.typography,
+                    data.fadeTime,
+                    data.enableSongFade
+                );
                 break;
 
             case 'setBackground':
-                currentBackground = data.url;
+                applyBackground(data.url);
                 break;
 
             case 'setLogo':
@@ -153,7 +174,20 @@
         }
     });
 
-    // ── Keyboard controls ──
+    // Apply a background URL automatically (no toggle needed)
+    function applyBackground(url) {
+        if (!url) return;
+        currentBackground = url;
+        const bgLayer = document.getElementById('backgroundLayer');
+        const isVideo = /\.mp4/i.test(url);
+        bgLayer.innerHTML = isVideo
+            ? `<video autoplay loop muted playsinline><source src="${url}" type="video/mp4"></video>`
+            : `<img src="${url}" alt="Background">`;
+        bgLayer.classList.add('visible');
+        backgroundVisible = true;
+    }
+
+    // Keyboard controls (manual override)
     document.addEventListener('keydown', (e) => {
         switch(e.key.toLowerCase()) {
             case 't': toggleBackground(); break;
@@ -168,12 +202,7 @@
             bgLayer.classList.remove('visible');
             backgroundVisible = false;
         } else if (currentBackground) {
-            const isVideo = currentBackground.match(/\.mp4/i);
-            bgLayer.innerHTML = isVideo
-                ? `<video autoplay loop muted playsinline><source src="${currentBackground}" type="video/mp4"></video>`
-                : `<img src="${currentBackground}" alt="Background">`;
-            bgLayer.classList.add('visible');
-            backgroundVisible = true;
+            applyBackground(currentBackground);
         }
     }
 
@@ -189,27 +218,31 @@
         }
     }
 
-    function displayContent(content, typography, customFadeTime, customSongFade) {
+    function displayContent(content, typography, msgFadeTime, msgSongFade) {
         const contentLayer = document.getElementById('contentLayer');
         const licenseDisplay = document.getElementById('licenseDisplay');
         const statusMsg = document.getElementById('statusMsg');
 
-        // Use per-message fade settings if provided, otherwise use stored
-        const ft = (customFadeTime !== undefined) ? customFadeTime : fadeTime;
+        // Use per-message values if present, otherwise fall back to globals
+        const ft = (msgFadeTime !== undefined) ? msgFadeTime : globalFadeTime;
+        const useFade = (msgSongFade !== undefined) ? msgSongFade : globalSongFade;
 
-        // Hide status once we receive real content
+        // If fade is disabled (checkbox unchecked), use 0ms
+        const effectiveFade = useFade ? ft : 0;
+
         statusMsg.style.opacity = '0';
 
-        // Fade out existing content
-        contentLayer.style.transition = `opacity ${ft}ms ease-in-out`;
+        // Fade out
+        contentLayer.style.transition = effectiveFade > 0
+            ? `opacity ${effectiveFade}ms ease-in-out`
+            : 'none';
         contentLayer.classList.remove('visible');
 
-        setTimeout(() => {
+        const applyContent = () => {
             if (content.type === 'blank') {
                 contentLayer.innerHTML = '';
                 licenseDisplay.classList.remove('visible');
             } else if (content.type === 'lyrics') {
-                // Apply typography from control window
                 const t = typography || {};
                 const style = [
                     `font-family: ${t.fontFamily || "'Segoe UI', sans-serif"}`,
@@ -223,7 +256,6 @@
 
                 contentLayer.innerHTML = `<div class="lyrics-text" style="${style}">${escapeHtml(content.text)}</div>`;
 
-                // Show license briefly
                 if (content.license) {
                     clearTimeout(licenseTimer);
                     licenseDisplay.textContent = content.license;
@@ -234,9 +266,19 @@
                 contentLayer.innerHTML = `<img src="${content.url}" class="sermon-slide" alt="Sermon Slide">`;
             }
 
-            // Fade in
+            // Fade in (or snap in if fade disabled)
+            contentLayer.style.transition = effectiveFade > 0
+                ? `opacity ${effectiveFade}ms ease-in-out`
+                : 'none';
             contentLayer.classList.add('visible');
-        }, ft);
+        };
+
+        // If fade is 0, apply immediately; otherwise wait for fade-out to complete
+        if (effectiveFade > 0) {
+            setTimeout(applyContent, effectiveFade);
+        } else {
+            applyContent();
+        }
     }
 
     function escapeHtml(str) {
@@ -247,12 +289,10 @@
             .replace(/"/g, '&quot;');
     }
 
-    // Hide keyboard help after 8 seconds
     setTimeout(() => {
         document.getElementById('keyboardHelp').style.opacity = '0';
     }, 8000);
 
-    // Notify opener that FOH is ready
     if (window.opener) {
         window.opener.postMessage({ type: 'fohReady' }, '*');
     }
