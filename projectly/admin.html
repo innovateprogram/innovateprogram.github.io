@@ -1,977 +1,908 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Projectly Admin</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                background: #f5f5f5;
-                color: #333;
-            }
-            .admin-container {
-                max-width: 1400px;
-                margin: 0 auto;
-                padding: 20px;
-            }
-            .admin-header {
-                background: white;
-                padding: 30px;
-                border-radius: 12px;
-                margin-bottom: 20px;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .admin-header h1 {
-                color: #2563eb;
-                font-size: 32px;
-            }
-            .tabs {
-                display: flex;
-                gap: 10px;
-                margin-bottom: 20px;
-            }
-            .tab {
-                padding: 12px 24px;
-                background: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 500;
-                transition: all 0.2s;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            }
-            .tab:hover {
-                background: #eff6ff;
-            }
-            .tab.active {
-                background: #2563eb;
-                color: white;
-            }
-            .tab-content {
-                display: none;
-                background: white;
-                padding: 30px;
-                border-radius: 12px;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            }
-            .tab-content.active {
-                display: block;
-            }
-            .btn {
-                padding: 10px 20px;
-                border: none;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: 500;
-                transition: all 0.2s;
-                font-size: 14px;
-            }
-            .btn-primary {
-                background: #2563eb;
-                color: white;
-            }
-            .btn-primary:hover {
-                background: #1d4ed8;
-            }
-            .btn-secondary {
-                background: #f3f4f6;
-                color: #333;
-            }
-            .btn-secondary:hover {
-                background: #e5e7eb;
-            }
-            .btn-danger {
-                background: #ef4444;
-                color: white;
-            }
-            .btn-danger:hover {
-                background: #dc2626;
-            }
-            .form-group {
-                margin-bottom: 20px;
-            }
-            .form-group label {
-                display: block;
-                margin-bottom: 8px;
-                font-weight: 500;
-                font-size: 14px;
-            }
-            .form-group input,
-            .form-group select,
-            .form-group textarea {
-                width: 100%;
-                padding: 10px;
-                border: 1px solid #d1d5db;
-                border-radius: 6px;
-                font-size: 14px;
-            }
-            .form-group textarea {
-                min-height: 300px;
-                resize: vertical;
-                font-family: monospace;
-                line-height: 1.6;
-            }
-            .form-row {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-            }
-            .song-list {
-                margin-top: 30px;
-            }
-            .song-item {
-                background: #f9fafb;
-                padding: 20px;
-                margin-bottom: 15px;
-                border-radius: 8px;
-                border: 2px solid transparent;
-                transition: all 0.2s;
-            }
-            .song-item:hover {
-                border-color: #2563eb;
-                background: #eff6ff;
-            }
-            .song-item-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .song-title {
-                font-size: 18px;
-                font-weight: 600;
-                margin-bottom: 5px;
-            }
-            .song-meta {
-                font-size: 13px;
-                color: #666;
-            }
-            .song-actions {
-                display: flex;
-                gap: 10px;
-            }
-            .file-upload {
-                border: 2px dashed #d1d5db;
-                padding: 30px;
-                border-radius: 8px;
-                text-align: center;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            .file-upload:hover {
-                border-color: #2563eb;
-                background: #eff6ff;
-            }
-            .file-upload input {
-                display: none;
-            }
-            .upload-icon {
-                font-size: 48px;
-                margin-bottom: 15px;
-                color: #9ca3af;
-            }
-            .error-message {
-                background: #fef2f2;
-                border: 1px solid #fecaca;
-                color: #991b1b;
-                padding: 12px;
-                border-radius: 6px;
-                margin-bottom: 15px;
-                font-size: 14px;
-            }
-            .success-message {
-                background: #f0fdf4;
-                border: 1px solid #bbf7d0;
-                color: #166534;
-                padding: 12px;
-                border-radius: 6px;
-                margin-bottom: 15px;
-                font-size: 14px;
-            }
-            .info-box {
-                background: #f0f9ff;
-                border: 1px solid #bae6fd;
-                padding: 15px;
-                border-radius: 6px;
-                margin-bottom: 20px;
-                font-size: 13px;
-                color: #0c4a6e;
-            }
-            .preview-parts {
-                background: #f9fafb;
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-                padding: 15px;
-                margin-top: 15px;
-                display: none;
-            }
-            .preview-parts h4 {
-                font-size: 13px;
-                color: #666;
-                margin-bottom: 10px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            .preview-part-tag {
-                display: inline-block;
-                background: #dbeafe;
-                color: #1d4ed8;
-                padding: 4px 10px;
-                border-radius: 12px;
-                font-size: 12px;
-                margin: 3px;
-            }
-            .background-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 15px;
-                margin-top: 20px;
-            }
-            .background-item {
-                position: relative;
-                border-radius: 8px;
-                overflow: hidden;
-                border: 2px solid #e5e7eb;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            .background-item:hover {
-                border-color: #2563eb;
-                transform: translateY(-2px);
-            }
-            .background-item img {
-                width: 100%;
-                height: 150px;
-                object-fit: cover;
-            }
-            /* Typography settings */
-            .color-picker-row {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .color-picker-row input[type="color"] {
-                width: 50px;
-                height: 36px;
-                border: 1px solid #d1d5db;
-                border-radius: 6px;
-                cursor: pointer;
-                padding: 2px;
-            }
-            .range-row {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .range-row input[type="range"] {
-                flex: 1;
-            }
-            .range-row span {
-                min-width: 40px;
-                text-align: right;
-                font-size: 14px;
-                color: #666;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="admin-container">
-            <div class="admin-header">
-                <div>
-                    <h1>Projectly Admin</h1>
-                    <p style="color: #666; margin-top: 5px">Manage your presentation content</p>
-                </div>
-                <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Back to Control</button>
-            </div>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Projectly Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5; color: #333;
+        }
+        .admin-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .admin-header {
+            background: white; padding: 30px; border-radius: 12px; margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;
+        }
+        .admin-header h1 { color: #2563eb; font-size: 32px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab {
+            padding: 12px 24px; background: white; border: none; border-radius: 8px;
+            cursor: pointer; font-weight: 500; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .tab:hover { background: #eff6ff; }
+        .tab.active { background: #2563eb; color: white; }
+        .tab-content { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .tab-content.active { display: block; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; font-size: 14px; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { background: #f3f4f6; color: #333; }
+        .btn-secondary:hover { background: #e5e7eb; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;
+        }
+        .form-group textarea { min-height: 300px; resize: vertical; font-family: monospace; line-height: 1.6; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .song-list { margin-top: 30px; }
+        .song-item {
+            background: #f9fafb; padding: 20px; margin-bottom: 15px; border-radius: 8px;
+            border: 2px solid transparent; transition: all 0.2s;
+        }
+        .song-item:hover { border-color: #2563eb; background: #eff6ff; }
+        .song-item-header { display: flex; justify-content: space-between; align-items: center; }
+        .song-title { font-size: 18px; font-weight: 600; margin-bottom: 5px; }
+        .song-meta { font-size: 13px; color: #666; }
+        .song-actions { display: flex; gap: 10px; }
+        .file-upload {
+            border: 2px dashed #d1d5db; padding: 30px; border-radius: 8px;
+            text-align: center; cursor: pointer; transition: all 0.2s;
+        }
+        .file-upload:hover { border-color: #2563eb; background: #eff6ff; }
+        .file-upload input { display: none; }
+        .upload-icon { font-size: 48px; margin-bottom: 15px; color: #9ca3af; }
+        .error-message { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
+        .success-message { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
+        .info-box { background: #f0f9ff; border: 1px solid #bae6fd; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; color: #0c4a6e; }
+        .warning-box { background: #fffbeb; border: 1px solid #fcd34d; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; color: #92400e; }
+        .preview-parts { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
+        .preview-parts h4 { font-size: 13px; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .preview-part-tag { display: inline-block; background: #dbeafe; color: #1d4ed8; padding: 4px 10px; border-radius: 12px; font-size: 12px; margin: 3px; }
+        .background-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .background-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid #e5e7eb; cursor: pointer; transition: all 0.2s; }
+        .background-item:hover { border-color: #2563eb; transform: translateY(-2px); }
+        .background-item img { width: 100%; height: 150px; object-fit: cover; }
+        .color-picker-row { display: flex; align-items: center; gap: 10px; }
+        .color-picker-row input[type="color"] { width: 50px; height: 36px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; padding: 2px; }
+        .range-row { display: flex; align-items: center; gap: 10px; }
+        .range-row input[type="range"] { flex: 1; }
+        .range-row span { min-width: 40px; text-align: right; font-size: 14px; color: #666; }
 
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('songs', this)">Songs</button>
-                <button class="tab" onclick="switchTab('sermons', this)">Sermon Slides</button>
-                <button class="tab" onclick="switchTab('backgrounds', this)">Backgrounds & Logos</button>
-                <button class="tab" onclick="switchTab('typography', this)">Typography</button>
-                <button class="tab" onclick="switchTab('settings', this)">Settings</button>
-            </div>
+        /* Edit mode highlight */
+        .editing-banner {
+            background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px;
+            padding: 12px 16px; margin-bottom: 20px; font-size: 14px; color: #92400e;
+            display: none; align-items: center; gap: 10px;
+        }
+        .editing-banner.active { display: flex; }
 
-            <!-- Songs Tab -->
-            <div id="songsTab" class="tab-content active">
-                <h2 style="margin-bottom: 20px">Manage Songs</h2>
-                <div id="songMessage"></div>
+        .upload-progress { margin-top: 10px; }
+        .progress-bar { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+        .progress-fill { height: 100%; background: #2563eb; border-radius: 4px; transition: width 0.3s; width: 0%; }
+    </style>
+</head>
+<body>
+<div class="admin-container">
+    <div class="admin-header">
+        <div>
+            <h1>Projectly Admin</h1>
+            <p style="color:#666;margin-top:5px">Manage your presentation content</p>
+        </div>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Back to Control</button>
+    </div>
 
-                <div class="info-box">
-                    <strong>Paste your lyrics below.</strong> Each line of lyrics becomes its own slide. A
-                    <strong>blank line</strong> signals that the next line is a section name (not a slide). The very
-                    first line is always treated as a section name.<br /><br />
-                    <pre
-                        style="
-                            font-family: monospace;
-                            font-size: 12px;
-                            line-height: 1.8;
-                            background: none;
-                            border: none;
-                        ">
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('songs', this)">Songs</button>
+        <button class="tab" onclick="switchTab('sermons', this)">Sermon Slides</button>
+        <button class="tab" onclick="switchTab('backgrounds', this)">Backgrounds & Logos</button>
+        <button class="tab" onclick="switchTab('typography', this)">Typography</button>
+        <button class="tab" onclick="switchTab('settings', this)">Settings</button>
+    </div>
+
+    <!-- Songs Tab -->
+    <div id="songsTab" class="tab-content active">
+        <h2 style="margin-bottom:20px">Manage Songs</h2>
+        <div id="songMessage"></div>
+
+        <!-- Edit mode banner -->
+        <div class="editing-banner" id="editingBanner">
+            ✏️ <strong>Edit Mode:</strong> <span id="editingLabel">You are editing a song.</span>
+            <span id="editingVerifiedWarning" style="display:none;margin-left:8px;color:#b45309;">
+                This song is verified — editing will save a <strong>private copy</strong> under your account only (the original stays unchanged).
+            </span>
+            <button class="btn btn-secondary" style="margin-left:auto;padding:6px 12px;font-size:13px" onclick="cancelEdit()">Cancel Edit</button>
+        </div>
+
+        <div class="info-box">
+            <strong>Paste your lyrics below.</strong> Each line becomes one slide. A <strong>blank line</strong> signals the next line is a section name.<br><br>
+            <pre style="font-family:monospace;font-size:12px;line-height:1.8;background:none;border:none;">
 Verse 1          ← section name (no slide)
 Amazing grace    ← Slide 1
 How sweet        ← Slide 2
-                 ← blank line → next line is a new section name
-Chorus           ← section name (no slide)
-Praise the Lord  ← Slide 1
-Praise His name  ← Slide 2</pre
-                    >
-                </div>
+                 ← blank line → next non-blank = new section
+Chorus           ← section name
+Praise the Lord  ← Slide 1</pre>
+        </div>
 
-                <div class="form-group">
-                    <label>Song Title</label>
-                    <!-- autocomplete="off" + readonly trick prevents Google autofill -->
-                    <input type="text" id="songTitle" placeholder="Enter song title" autocomplete="new-password" />
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Author/Artist</label>
-                        <input
-                            type="text"
-                            id="songAuthor"
-                            placeholder="e.g., Hillsong Worship"
-                            autocomplete="new-password" />
-                    </div>
-                    <div class="form-group">
-                        <label>CCLI License / Other License (Optional)</label>
-                        <input
-                            type="text"
-                            id="songLicense"
-                            placeholder="e.g., CCLI Song #1234567"
-                            autocomplete="new-password" />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label
-                        >Lyrics
-                        <span style="color: #666; font-weight: 400"
-                            >(paste full song — sections detected automatically)</span
-                        ></label
-                    >
-                    <textarea
-                        id="lyricsInput"
-                        placeholder="Verse 1&#10;Amazing grace how sweet the sound&#10;That saved a wretch like me&#10;&#10;Chorus&#10;Praise the Lord&#10;Praise His name"
-                        oninput="previewParsedParts()"></textarea>
-                </div>
-
-                <div class="preview-parts" id="previewParts">
-                    <h4>Detected Sections</h4>
-                    <div id="previewTagsContainer"></div>
-                </div>
-
-                <br />
-                <button class="btn btn-primary" onclick="saveSong()">Save Song</button>
-
-                <div class="song-list" id="songList">
-                    <h3 style="margin-bottom: 15px; margin-top: 30px">My Songs</h3>
-                </div>
+        <div class="form-group">
+            <label>Song Title</label>
+            <input type="text" id="songTitle" placeholder="Enter song title" autocomplete="new-password"/>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Author/Artist</label>
+                <input type="text" id="songAuthor" placeholder="e.g., Hillsong Worship" autocomplete="new-password"/>
             </div>
-
-            <!-- Sermons Tab -->
-            <div id="sermonsTab" class="tab-content">
-                <h2 style="margin-bottom: 20px">Sermon Slides</h2>
-                <div id="sermonMessage"></div>
-                <div class="info-box">
-                    Upload PowerPoint (.pptx) or PDF files. Each slide/page will be separated automatically. Files are
-                    stored in your Cloudinary account.
-                </div>
-                <div class="form-group">
-                    <label>Sermon Title</label>
-                    <input
-                        type="text"
-                        id="sermonTitle"
-                        placeholder="e.g., Sunday Morning Message"
-                        autocomplete="new-password" />
-                </div>
-                <div class="file-upload" onclick="document.getElementById('sermonFile').click()">
-                    <div class="upload-icon">📄</div>
-                    <p><strong>Click to upload</strong> or drag and drop</p>
-                    <p style="color: #666; font-size: 13px; margin-top: 5px">PPTX or PDF (Max 50MB)</p>
-                    <input type="file" id="sermonFile" accept=".pptx,.pdf" onchange="handleSermonUpload(this)" />
-                </div>
-                <div id="sermonList" style="margin-top: 30px">
-                    <h3 style="margin-bottom: 15px">My Sermons</h3>
-                </div>
+            <div class="form-group">
+                <label>CCLI License / Other (Optional)</label>
+                <input type="text" id="songLicense" placeholder="e.g., CCLI Song #1234567" autocomplete="new-password"/>
             </div>
+        </div>
+        <div class="form-group">
+            <label>Lyrics <span style="color:#666;font-weight:400">(sections detected automatically)</span></label>
+            <textarea id="lyricsInput"
+                placeholder="Verse 1&#10;Amazing grace how sweet the sound&#10;That saved a wretch like me&#10;&#10;Chorus&#10;Praise the Lord&#10;Praise His name"
+                oninput="previewParsedParts()"></textarea>
+        </div>
+        <div class="preview-parts" id="previewParts">
+            <h4>Detected Sections</h4>
+            <div id="previewTagsContainer"></div>
+        </div>
+        <br>
+        <button class="btn btn-primary" id="saveSongBtn" onclick="saveSong()">Save Song</button>
 
-            <!-- Backgrounds Tab -->
-            <div id="backgroundsTab" class="tab-content">
-                <h2 style="margin-bottom: 20px">Backgrounds & Logos</h2>
-                <div id="backgroundMessage"></div>
-                <div class="tabs" style="margin-bottom: 20px">
-                    <button class="tab active" onclick="switchBackgroundTab('backgrounds', this)">Backgrounds</button>
-                    <button class="tab" onclick="switchBackgroundTab('logos', this)">Logos</button>
-                </div>
-                <div id="backgroundsSection">
-                    <div class="file-upload" onclick="document.getElementById('backgroundFile').click()">
-                        <div class="upload-icon">🖼️</div>
-                        <p><strong>Click to upload background</strong></p>
-                        <p style="color: #666; font-size: 13px; margin-top: 5px">JPG, PNG, or MP4 (Max 20MB)</p>
-                        <input
-                            type="file"
-                            id="backgroundFile"
-                            accept="image/*,video/mp4"
-                            onchange="handleBackgroundUpload(this, 'background')" />
-                    </div>
-                    <div class="background-grid" id="backgroundGrid"></div>
-                </div>
-                <div id="logosSection" style="display: none">
-                    <div class="file-upload" onclick="document.getElementById('logoFile').click()">
-                        <div class="upload-icon">🎨</div>
-                        <p><strong>Click to upload logo</strong></p>
-                        <p style="color: #666; font-size: 13px; margin-top: 5px">PNG (transparent recommended)</p>
-                        <input
-                            type="file"
-                            id="logoFile"
-                            accept="image/png,image/svg+xml"
-                            onchange="handleBackgroundUpload(this, 'logo')" />
-                    </div>
-                    <div class="background-grid" id="logoGrid"></div>
-                </div>
+        <div class="song-list" id="songList">
+            <h3 style="margin-bottom:15px;margin-top:30px">My Songs</h3>
+        </div>
+    </div>
+
+    <!-- Sermons Tab -->
+    <div id="sermonsTab" class="tab-content">
+        <h2 style="margin-bottom:20px">Sermon Slides</h2>
+        <div id="sermonMessage"></div>
+        <div class="info-box">
+            Upload images for each sermon slide. Files are stored in your Cloudinary account.
+            Make sure you have configured Cloudinary in the Settings tab first.
+        </div>
+        <div class="form-group">
+            <label>Sermon Title</label>
+            <input type="text" id="sermonTitle" placeholder="e.g., Sunday Morning Message" autocomplete="new-password"/>
+        </div>
+        <div class="file-upload" onclick="document.getElementById('sermonFile').click()">
+            <div class="upload-icon">📄</div>
+            <p><strong>Click to upload slide images</strong></p>
+            <p style="color:#666;font-size:13px;margin-top:5px">PNG, JPG (one image per slide)</p>
+            <input type="file" id="sermonFile" accept="image/*" multiple onchange="handleSermonUpload(this)"/>
+        </div>
+        <div id="sermonUploadProgress" class="upload-progress" style="display:none">
+            <div style="font-size:13px;color:#666;" id="sermonProgressLabel">Uploading…</div>
+            <div class="progress-bar"><div class="progress-fill" id="sermonProgressFill"></div></div>
+        </div>
+        <div id="sermonList" style="margin-top:30px">
+            <h3 style="margin-bottom:15px">My Sermons</h3>
+        </div>
+    </div>
+
+    <!-- Backgrounds Tab -->
+    <div id="backgroundsTab" class="tab-content">
+        <h2 style="margin-bottom:20px">Backgrounds & Logos</h2>
+        <div id="backgroundMessage"></div>
+        <div class="tabs" style="margin-bottom:20px">
+            <button class="tab active" onclick="switchBackgroundTab('backgrounds', this)">Backgrounds</button>
+            <button class="tab" onclick="switchBackgroundTab('logos', this)">Logos</button>
+        </div>
+        <div id="backgroundsSection">
+            <div class="file-upload" onclick="document.getElementById('backgroundFile').click()">
+                <div class="upload-icon">🖼️</div>
+                <p><strong>Click to upload background</strong></p>
+                <p style="color:#666;font-size:13px;margin-top:5px">JPG, PNG, or MP4 (Max 100MB)</p>
+                <input type="file" id="backgroundFile" accept="image/*,video/mp4" onchange="handleBackgroundUpload(this,'background')"/>
             </div>
-
-            <!-- Typography Tab -->
-            <div id="typographyTab" class="tab-content">
-                <h2 style="margin-bottom: 20px">Typography & Display Settings</h2>
-                <div id="typographyMessage"></div>
-                <div class="info-box">These settings apply only to your account's presentation screens (FOH/BOH).</div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Font Family</label>
-                        <select id="fontFamily">
-                            <option value="'Arial', sans-serif">Arial</option>
-                            <option value="'Georgia', serif">Georgia</option>
-                            <option value="'Times New Roman', serif">Times New Roman</option>
-                            <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
-                            <option value="'Verdana', sans-serif">Verdana</option>
-                            <option value="'Impact', sans-serif">Impact</option>
-                            <option value="'Palatino', serif">Palatino</option>
-                            <option value="'Gill Sans', sans-serif">Gill Sans</option>
-                            <option value="system-ui, sans-serif">System UI</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Font Weight</label>
-                        <select id="fontWeight">
-                            <option value="400">Regular (400)</option>
-                            <option value="500">Medium (500)</option>
-                            <option value="600">Semi Bold (600)</option>
-                            <option value="700" selected>Bold (700)</option>
-                            <option value="800">Extra Bold (800)</option>
-                            <option value="900">Black (900)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Font Size (px)</label>
-                    <div class="range-row">
-                        <input
-                            type="range"
-                            id="fontSize"
-                            min="24"
-                            max="120"
-                            value="64"
-                            oninput="document.getElementById('fontSizeVal').textContent = this.value + 'px'" />
-                        <span id="fontSizeVal">64px</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Text Color</label>
-                    <div class="color-picker-row">
-                        <input type="color" id="textColor" value="#ffffff" />
-                        <span style="font-size: 13px; color: #666">Default: white</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Text Shadow</label>
-                    <select id="textShadow">
-                        <option value="none">None</option>
-                        <option value="2px 2px 4px rgba(0,0,0,0.8)" selected>Soft Drop Shadow</option>
-                        <option value="0 0 20px rgba(0,0,0,1), 2px 2px 8px rgba(0,0,0,1)">Strong Drop Shadow</option>
-                        <option value="0 0 10px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.7)">Glow Shadow</option>
-                        <option value="-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000">
-                            Outline
-                        </option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Text Alignment</label>
-                    <select id="textAlign">
-                        <option value="center" selected>Center</option>
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Line Height</label>
-                    <div class="range-row">
-                        <input
-                            type="range"
-                            id="lineHeight"
-                            min="100"
-                            max="250"
-                            value="140"
-                            step="5"
-                            oninput="document.getElementById('lineHeightVal').textContent = (this.value/100).toFixed(2)" />
-                        <span id="lineHeightVal">1.40</span>
-                    </div>
-                </div>
-
-                <!-- Preview -->
-                <div style="margin-top: 10px; margin-bottom: 20px">
-                    <label style="font-weight: 500; font-size: 14px; display: block; margin-bottom: 8px">Preview</label>
-                    <div
-                        id="typographyPreview"
-                        style="
-                            background: #000;
-                            border-radius: 8px;
-                            padding: 40px;
-                            text-align: center;
-                            min-height: 150px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                        ">
-                        <span
-                            id="previewText"
-                            style="
-                                color: #fff;
-                                font-size: 64px;
-                                font-weight: 700;
-                                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-                            "
-                            >Amazing Grace</span
-                        >
-                    </div>
-                </div>
-
-                <button class="btn btn-primary" onclick="saveTypography()">Save Typography Settings</button>
+            <div id="bgUploadProgress" class="upload-progress" style="display:none">
+                <div style="font-size:13px;color:#666;" id="bgProgressLabel">Uploading…</div>
+                <div class="progress-bar"><div class="progress-fill" id="bgProgressFill"></div></div>
             </div>
+            <div class="background-grid" id="backgroundGrid"></div>
+        </div>
+        <div id="logosSection" style="display:none">
+            <div class="file-upload" onclick="document.getElementById('logoFile').click()">
+                <div class="upload-icon">🎨</div>
+                <p><strong>Click to upload logo</strong></p>
+                <p style="color:#666;font-size:13px;margin-top:5px">PNG (transparent recommended)</p>
+                <input type="file" id="logoFile" accept="image/png,image/svg+xml" onchange="handleBackgroundUpload(this,'logo')"/>
+            </div>
+            <div class="background-grid" id="logoGrid"></div>
+        </div>
+    </div>
 
-            <!-- Settings Tab -->
-            <div id="settingsTab" class="tab-content">
-                <h2 style="margin-bottom: 20px">Account Settings</h2>
-                <div id="settingsMessage"></div>
+    <!-- Typography Tab -->
+    <div id="typographyTab" class="tab-content">
+        <h2 style="margin-bottom:20px">Typography & Display Settings</h2>
+        <div id="typographyMessage"></div>
+        <div class="info-box">These settings apply only to your account's presentation screens (FOH/BOH).</div>
 
-                <h3 style="margin-bottom: 15px">Admin Password</h3>
-                <div class="info-box">
-                    Set a separate password for accessing the admin area. Leave blank to use your main account password.
-                </div>
-                <div class="form-group">
-                    <label>New Admin Password</label>
-                    <input
-                        type="password"
-                        id="adminPassword"
-                        placeholder="Enter admin password"
-                        autocomplete="new-password" />
-                </div>
-                <button class="btn btn-primary" onclick="saveAdminPassword()">Save Admin Password</button>
-
-                <hr style="margin: 40px 0; border: none; border-top: 1px solid #e5e7eb" />
-
-                <h3 style="margin-bottom: 15px">Cloudinary Configuration</h3>
-                <div class="info-box">
-                    Cloudinary is used to store backgrounds, logos, and sermon slides. Get your free API credentials at
-                    <a href="https://cloudinary.com" target="_blank" style="color: #2563eb">cloudinary.com</a>
-                </div>
-                <div class="form-group">
-                    <label>Cloud Name</label>
-                    <input type="text" id="cloudinaryName" placeholder="Your cloud name" autocomplete="new-password" />
-                </div>
-                <div class="form-group">
-                    <label>API Key</label>
-                    <input type="text" id="cloudinaryKey" placeholder="Your API key" autocomplete="new-password" />
-                </div>
-                <div class="form-group">
-                    <label>API Secret</label>
-                    <input
-                        type="password"
-                        id="cloudinarySecret"
-                        placeholder="Your API secret"
-                        autocomplete="new-password" />
-                </div>
-                <button class="btn btn-primary" onclick="saveCloudinaryConfig()">Save Cloudinary Config</button>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Font Family</label>
+                <select id="fontFamily">
+                    <option value="'Arial', sans-serif">Arial</option>
+                    <option value="'Georgia', serif">Georgia</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                    <option value="'Verdana', sans-serif">Verdana</option>
+                    <option value="'Impact', sans-serif">Impact</option>
+                    <option value="'Palatino', serif">Palatino</option>
+                    <option value="system-ui, sans-serif">System UI</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Font Weight</label>
+                <select id="fontWeight">
+                    <option value="400">Regular (400)</option>
+                    <option value="500">Medium (500)</option>
+                    <option value="600">Semi Bold (600)</option>
+                    <option value="700" selected>Bold (700)</option>
+                    <option value="800">Extra Bold (800)</option>
+                    <option value="900">Black (900)</option>
+                </select>
             </div>
         </div>
 
-        <!-- Firebase SDKs -->
-        <script type="module">
-            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-            import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-            import {
-                getFirestore,
-                doc,
-                setDoc,
-                getDoc,
-                collection,
-                query,
-                where,
-                getDocs,
-                addDoc,
-                updateDoc,
-                deleteDoc
-            } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        <div class="form-group">
+            <label>Font Size (px)</label>
+            <div class="range-row">
+                <input type="range" id="fontSize" min="24" max="120" value="64"
+                    oninput="document.getElementById('fontSizeVal').textContent = this.value + 'px'"/>
+                <span id="fontSizeVal">64px</span>
+            </div>
+        </div>
 
-            const firebaseConfig = {
-                apiKey: "AIzaSyCga_ur-qA08HV2otci3ivw3PkWm-Uh-OM",
-                authDomain: "notey-4455f.firebaseapp.com",
-                databaseURL: "https://notey-4455f-default-rtdb.firebaseio.com",
-                projectId: "notey-4455f",
-                storageBucket: "notey-4455f.firebasestorage.app",
-                messagingSenderId: "554664934050",
-                appId: "1:554664934050:web:5c1f5f673bb32301fa35fb",
-                measurementId: "G-YW5B4R6HJV"
-            };
+        <div class="form-group">
+            <label>Text Color</label>
+            <div class="color-picker-row">
+                <input type="color" id="textColor" value="#ffffff"/>
+                <span style="font-size:13px;color:#666">Default: white</span>
+            </div>
+        </div>
 
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            window.db = db;
-            window.currentUser = null;
+        <div class="form-group">
+            <label>Text Shadow</label>
+            <select id="textShadow">
+                <option value="none">None</option>
+                <option value="2px 2px 4px rgba(0,0,0,0.8)" selected>Soft Drop Shadow</option>
+                <option value="0 0 20px rgba(0,0,0,1), 2px 2px 8px rgba(0,0,0,1)">Strong Drop Shadow</option>
+                <option value="0 0 10px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.7)">Glow Shadow</option>
+                <option value="-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000">Outline</option>
+            </select>
+        </div>
 
-            // Prevent autofill by briefly making fields readonly then clearing them
-            window.addEventListener("load", () => {
-                [
-                    "songTitle",
-                    "songAuthor",
-                    "songLicense",
-                    "adminPassword",
-                    "cloudinaryName",
-                    "cloudinaryKey",
-                    "cloudinarySecret"
-                ].forEach((id) => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.setAttribute("readonly", true);
-                        setTimeout(() => el.removeAttribute("readonly"), 500);
-                    }
-                });
-            });
+        <div class="form-group">
+            <label>Text Alignment</label>
+            <select id="textAlign">
+                <option value="center" selected>Center</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+            </select>
+        </div>
 
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    window.location.href = "index.html";
-                    return;
-                }
-                window.currentUser = user;
-                loadUserData();
-            });
+        <div class="form-group">
+            <label>Line Height</label>
+            <div class="range-row">
+                <input type="range" id="lineHeight" min="100" max="250" value="140" step="5"
+                    oninput="document.getElementById('lineHeightVal').textContent = (this.value/100).toFixed(2)"/>
+                <span id="lineHeightVal">1.40</span>
+            </div>
+        </div>
 
-            const profanityList = ["shit", "fuck", "bitch", "bastard"];
-            window.containsProfanity = function (text) {
-                return profanityList.some((word) => new RegExp(`\\b${word}\\b`, "i").test(text));
-            };
+        <div style="margin-top:10px;margin-bottom:20px">
+            <label style="font-weight:500;font-size:14px;display:block;margin-bottom:8px">Preview</label>
+            <div id="typographyPreview" style="background:#000;border-radius:8px;padding:40px;text-align:center;min-height:150px;display:flex;align-items:center;justify-content:center;">
+                <span id="previewText" style="color:#fff;font-size:64px;font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,0.8);">Amazing Grace</span>
+            </div>
+        </div>
 
-            // --- LYRICS PARSER ---
-            // Rules:
-            //   - The FIRST non-blank line of the whole input is always a section label.
-            //   - A blank line signals that the NEXT non-blank line will be a new section label.
-            //   - Every other non-blank line is a slide (one line = one slide).
-            //   - The label line itself never becomes a slide.
+        <button class="btn btn-primary" onclick="saveTypography()">Save Typography Settings</button>
+    </div>
 
-            window.parseLyrics = function (rawText) {
-                const lines = rawText.split("\n");
-                const parts = [];
-                let currentLabel = null;
-                let currentSlides = [];
-                let expectLabel = true; // first non-blank line is always a label
+    <!-- Settings Tab -->
+    <div id="settingsTab" class="tab-content">
+        <h2 style="margin-bottom:20px">Account Settings</h2>
+        <div id="settingsMessage"></div>
 
-                function flushPart() {
-                    if (currentLabel !== null && currentSlides.length > 0) {
-                        parts.push({ label: currentLabel, slides: [...currentSlides] });
-                    }
-                }
+        <h3 style="margin-bottom:15px">Admin Password</h3>
+        <div class="info-box">Set a separate password for accessing the admin area.</div>
+        <div class="form-group">
+            <label>New Admin Password</label>
+            <input type="password" id="adminPassword" placeholder="Enter admin password" autocomplete="new-password"/>
+        </div>
+        <button class="btn btn-primary" onclick="saveAdminPassword()">Save Admin Password</button>
 
-                for (const line of lines) {
-                    const t = line.trim();
+        <hr style="margin:40px 0;border:none;border-top:1px solid #e5e7eb"/>
 
-                    if (t === "") {
-                        // blank line — next non-blank will be a new section label
-                        expectLabel = true;
-                        continue;
-                    }
+        <h3 style="margin-bottom:15px">Cloudinary Configuration</h3>
+        <div class="info-box">
+            Cloudinary is used to store backgrounds, logos, and sermon slides. Get your free credentials at
+            <a href="https://cloudinary.com" target="_blank" style="color:#2563eb">cloudinary.com</a>.<br><br>
+            <strong>Important:</strong> You must create an <strong>unsigned upload preset</strong> in your Cloudinary dashboard
+            (Settings → Upload → Upload presets → Add preset → Unsigned). Enter the preset name below.
+        </div>
+        <div class="form-group">
+            <label>Cloud Name</label>
+            <input type="text" id="cloudinaryName" placeholder="e.g., my-cloud-name" autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+            <label>Upload Preset (unsigned)</label>
+            <input type="text" id="cloudinaryPreset" placeholder="e.g., projectly_preset" autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+            <label>API Key <span style="color:#666;font-weight:400">(stored locally for reference only)</span></label>
+            <input type="text" id="cloudinaryKey" placeholder="Your API key" autocomplete="new-password"/>
+        </div>
+        <button class="btn btn-primary" onclick="saveCloudinaryConfig()">Save Cloudinary Config</button>
+        <div style="margin-top:10px">
+            <button class="btn btn-secondary" onclick="testCloudinaryConnection()">Test Connection</button>
+        </div>
+    </div>
+</div>
 
-                    if (expectLabel) {
-                        // This line is a section header
-                        flushPart();
-                        currentLabel = t;
-                        currentSlides = [];
-                        expectLabel = false;
-                    } else {
-                        // This line is a lyric line → one slide
-                        currentSlides.push(t);
-                    }
-                }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import {
+        getFirestore, doc, setDoc, getDoc, collection, query, where,
+        getDocs, addDoc, updateDoc, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    const firebaseConfig = {
+        apiKey: "AIzaSyCga_ur-qA08HV2otci3ivw3PkWm-Uh-OM",
+        authDomain: "notey-4455f.firebaseapp.com",
+        databaseURL: "https://notey-4455f-default-rtdb.firebaseio.com",
+        projectId: "notey-4455f",
+        storageBucket: "notey-4455f.firebasestorage.app",
+        messagingSenderId: "554664934050",
+        appId: "1:554664934050:web:5c1f5f673bb32301fa35fb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.db = db;
+    window.currentUser = null;
+
+    // State for edit mode
+    window.editState = {
+        isEditing: false,
+        songId: null,
+        isVerified: false
+    };
+
+    // Prevent autofill
+    window.addEventListener("load", () => {
+        ["songTitle","songAuthor","songLicense","adminPassword","cloudinaryName","cloudinaryPreset","cloudinaryKey"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.setAttribute("readonly", true); setTimeout(() => el.removeAttribute("readonly"), 500); }
+        });
+    });
+
+    onAuthStateChanged(auth, user => {
+        if (!user) { window.location.href = "index.html"; return; }
+        window.currentUser = user;
+        loadUserData();
+    });
+
+    const profanityList = ["shit","fuck","bitch","bastard"];
+    window.containsProfanity = text => profanityList.some(w => new RegExp(`\\b${w}\\b`, "i").test(text));
+
+    // ── LYRICS PARSER ──
+    window.parseLyrics = function(rawText) {
+        const lines = rawText.split("\n");
+        const parts = [];
+        let currentLabel = null;
+        let currentSlides = [];
+        let expectLabel = true;
+
+        function flushPart() {
+            if (currentLabel !== null && currentSlides.length > 0) {
+                parts.push({ label: currentLabel, slides: [...currentSlides] });
+            }
+        }
+
+        for (const line of lines) {
+            const t = line.trim();
+            if (t === "") { expectLabel = true; continue; }
+            if (expectLabel) {
                 flushPart();
-                return parts;
+                currentLabel = t; currentSlides = []; expectLabel = false;
+            } else {
+                currentSlides.push(t);
+            }
+        }
+        flushPart();
+        return parts;
+    };
+
+    window.previewParsedParts = function() {
+        const raw = document.getElementById("lyricsInput").value;
+        const parts = parseLyrics(raw);
+        const previewDiv = document.getElementById("previewParts");
+        const tagsDiv = document.getElementById("previewTagsContainer");
+        if (parts.length === 0) { previewDiv.style.display = "none"; return; }
+        previewDiv.style.display = "block";
+        tagsDiv.innerHTML = parts.map(p =>
+            `<span class="preview-part-tag">${p.label} <span style="opacity:0.7">(${p.slides.length} slide${p.slides.length!==1?'s':''})</span></span>`
+        ).join("");
+    };
+
+    // ── SAVE SONG (handles both new and edit) ──
+    window.saveSong = async function() {
+        const title = document.getElementById("songTitle").value.trim();
+        const author = document.getElementById("songAuthor").value.trim();
+        const license = document.getElementById("songLicense").value.trim();
+        const raw = document.getElementById("lyricsInput").value;
+        const messageDiv = document.getElementById("songMessage");
+        messageDiv.innerHTML = "";
+
+        if (!title) { messageDiv.innerHTML = '<div class="error-message">Please enter a song title</div>'; return; }
+        const parts = parseLyrics(raw);
+        if (parts.length === 0) { messageDiv.innerHTML = '<div class="error-message">Please add lyrics</div>'; return; }
+        for (const part of parts) {
+            if (containsProfanity(part.label) || part.slides.some(s => containsProfanity(s))) {
+                messageDiv.innerHTML = '<div class="error-message">Song contains profanity and cannot be saved</div>';
+                return;
+            }
+        }
+
+        try {
+            const songData = {
+                title, author: author || "Unknown", license: license || null, parts,
+                createdBy: window.currentUser.uid, updatedAt: new Date().toISOString()
             };
 
-            window.previewParsedParts = function () {
-                const raw = document.getElementById("lyricsInput").value;
-                const parts = parseLyrics(raw);
-                const previewDiv = document.getElementById("previewParts");
-                const tagsDiv = document.getElementById("previewTagsContainer");
+            const es = window.editState;
 
-                if (parts.length === 0) {
-                    previewDiv.style.display = "none";
-                    return;
-                }
-
-                previewDiv.style.display = "block";
-                tagsDiv.innerHTML = parts
-                    .map(
-                        (p) =>
-                            `<span class="preview-part-tag">${p.label} <span style="opacity:0.7">(${p.slides.length} slide${p.slides.length !== 1 ? "s" : ""})</span></span>`
-                    )
-                    .join("");
-            };
-
-            window.saveSong = async function () {
-                const title = document.getElementById("songTitle").value.trim();
-                const author = document.getElementById("songAuthor").value.trim();
-                const license = document.getElementById("songLicense").value.trim();
-                const raw = document.getElementById("lyricsInput").value;
-                const messageDiv = document.getElementById("songMessage");
-                messageDiv.innerHTML = "";
-
-                if (!title) {
-                    messageDiv.innerHTML = '<div class="error-message">Please enter a song title</div>';
-                    return;
-                }
-
-                const parts = parseLyrics(raw);
-                if (parts.length === 0) {
-                    messageDiv.innerHTML = '<div class="error-message">Please add lyrics</div>';
-                    return;
-                }
-
-                for (const part of parts) {
-                    if (containsProfanity(part.label) || part.slides.some((s) => containsProfanity(s))) {
-                        messageDiv.innerHTML =
-                            '<div class="error-message">Song contains profanity and cannot be uploaded</div>';
-                        return;
-                    }
-                }
-
-                try {
-                    const songData = {
-                        title,
-                        author: author || "Unknown",
-                        license: license || null,
-                        parts,
-                        projectlyVerified: false, // Can be set to true in Firebase manually
-                        createdBy: window.currentUser.uid,
-                        createdAt: new Date().toISOString()
-                    };
+            if (es.isEditing && es.songId) {
+                if (es.isVerified) {
+                    // Verified song: save as a NEW private copy under this user
+                    songData.projectlyVerified = false;
+                    songData.createdAt = new Date().toISOString();
+                    songData.originalSongId = es.songId; // reference to original
                     await addDoc(collection(db, "songs"), songData);
-                    messageDiv.innerHTML = '<div class="success-message">Song saved successfully!</div>';
-                    document.getElementById("songTitle").value = "";
-                    document.getElementById("songAuthor").value = "";
-                    document.getElementById("songLicense").value = "";
-                    document.getElementById("lyricsInput").value = "";
-                    document.getElementById("previewParts").style.display = "none";
-                    loadSongs();
-                } catch (error) {
-                    messageDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
+                    messageDiv.innerHTML = '<div class="success-message">Saved as your private copy (original verified song unchanged).</div>';
+                } else {
+                    // Own unverified song: update it directly
+                    await updateDoc(doc(db, "songs", es.songId), {
+                        title, author: author || "Unknown", license: license || null,
+                        parts, updatedAt: new Date().toISOString()
+                    });
+                    messageDiv.innerHTML = '<div class="success-message">Song updated successfully!</div>';
                 }
-            };
+            } else {
+                // New song
+                songData.projectlyVerified = false;
+                songData.createdAt = new Date().toISOString();
+                await addDoc(collection(db, "songs"), songData);
+                messageDiv.innerHTML = '<div class="success-message">Song saved successfully!</div>';
+            }
 
-            window.loadUserData = async function () {
-                loadSongs();
-                loadSettings();
-                loadTypography();
-            };
+            clearSongForm();
+            loadSongs();
+        } catch(error) {
+            messageDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
+        }
+    };
 
-            window.loadSongs = async function () {
-                const songList = document.getElementById("songList");
-                const q = query(collection(db, "songs"), where("createdBy", "==", window.currentUser.uid));
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) {
-                    songList.innerHTML =
-                        '<h3 style="margin-bottom:15px;margin-top:30px;">My Songs</h3><p style="color:#666;">No songs yet</p>';
-                    return;
-                }
-                let html = '<h3 style="margin-bottom:15px;margin-top:30px;">My Songs</h3>';
-                querySnapshot.forEach((docSnap) => {
-                    const song = docSnap.data();
-                    html += `
+    function clearSongForm() {
+        document.getElementById("songTitle").value = "";
+        document.getElementById("songAuthor").value = "";
+        document.getElementById("songLicense").value = "";
+        document.getElementById("lyricsInput").value = "";
+        document.getElementById("previewParts").style.display = "none";
+        cancelEdit();
+    }
+
+    window.cancelEdit = function() {
+        window.editState = { isEditing: false, songId: null, isVerified: false };
+        document.getElementById("editingBanner").classList.remove("active");
+        document.getElementById("saveSongBtn").textContent = "Save Song";
+    };
+
+    // ── EDIT SONG ──
+    window.editSong = async function(songId) {
+        try {
+            const songDoc = await getDoc(doc(db, "songs", songId));
+            if (!songDoc.exists()) { alert("Song not found."); return; }
+            const song = songDoc.data();
+
+            // Fill form
+            document.getElementById("songTitle").value = song.title;
+            document.getElementById("songAuthor").value = song.author || "";
+            document.getElementById("songLicense").value = song.license || "";
+
+            // Reconstruct raw lyrics from parts
+            const rawLines = [];
+            song.parts.forEach(part => {
+                rawLines.push(part.label);
+                part.slides.forEach(slide => rawLines.push(slide));
+                rawLines.push(""); // blank line between sections
+            });
+            document.getElementById("lyricsInput").value = rawLines.join("\n").trim();
+            previewParsedParts();
+
+            // Set edit state
+            window.editState = { isEditing: true, songId, isVerified: !!song.projectlyVerified };
+
+            const banner = document.getElementById("editingBanner");
+            const label = document.getElementById("editingLabel");
+            const verifiedWarning = document.getElementById("editingVerifiedWarning");
+            banner.classList.add("active");
+            label.textContent = `Editing: "${song.title}"`;
+            verifiedWarning.style.display = song.projectlyVerified ? "inline" : "none";
+
+            document.getElementById("saveSongBtn").textContent = song.projectlyVerified ? "Save as My Copy" : "Update Song";
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } catch(e) {
+            alert("Error loading song: " + e.message);
+        }
+    };
+
+    window.loadUserData = async function() {
+        loadSongs();
+        loadSettings();
+        loadTypography();
+    };
+
+    window.loadSongs = async function() {
+        const songList = document.getElementById("songList");
+        const q = query(collection(db, "songs"), where("createdBy", "==", window.currentUser.uid));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            songList.innerHTML = '<h3 style="margin-bottom:15px;margin-top:30px;">My Songs</h3><p style="color:#666;">No songs yet. Add one above!</p>';
+            return;
+        }
+        let html = '<h3 style="margin-bottom:15px;margin-top:30px;">My Songs</h3>';
+        querySnapshot.forEach(docSnap => {
+            const song = docSnap.data();
+            const isOriginalCopy = song.originalSongId ? ' <span style="color:#f59e0b;font-size:11px;">(private copy)</span>' : '';
+            html += `
             <div class="song-item">
                 <div class="song-item-header">
                     <div>
-                        <div class="song-title">${song.title}</div>
+                        <div class="song-title">${song.title}${isOriginalCopy}</div>
                         <div class="song-meta">${song.author} • ${song.parts.length} parts
-                            ${song.projectlyVerified ? ' • <span style="color:#2563eb;">✓ Verified</span>' : ""}
+                            ${song.projectlyVerified ? '<span style="color:#2563eb;">✓ Verified</span>' : ''}
                         </div>
                     </div>
                     <div class="song-actions">
+                        <button class="btn btn-warning" onclick="editSong('${docSnap.id}')">Edit</button>
                         <button class="btn btn-danger" onclick="deleteSong('${docSnap.id}')">Delete</button>
                     </div>
                 </div>
             </div>`;
-                });
-                songList.innerHTML = html;
-            };
+        });
+        songList.innerHTML = html;
+    };
 
-            window.loadSettings = async function () {
-                const userDoc = await getDoc(doc(db, "users", window.currentUser.uid));
-                if (userDoc.exists()) {
-                    const d = userDoc.data();
-                    if (d.cloudinaryConfig) {
-                        document.getElementById("cloudinaryName").value = d.cloudinaryConfig.cloudName || "";
-                        document.getElementById("cloudinaryKey").value = d.cloudinaryConfig.apiKey || "";
-                        document.getElementById("cloudinarySecret").value = d.cloudinaryConfig.apiSecret || "";
-                    }
+    window.loadSettings = async function() {
+        const userDoc = await getDoc(doc(db, "users", window.currentUser.uid));
+        if (userDoc.exists()) {
+            const d = userDoc.data();
+            if (d.cloudinaryConfig) {
+                document.getElementById("cloudinaryName").value = d.cloudinaryConfig.cloudName || "";
+                document.getElementById("cloudinaryPreset").value = d.cloudinaryConfig.uploadPreset || "";
+                document.getElementById("cloudinaryKey").value = d.cloudinaryConfig.apiKey || "";
+            }
+        }
+    };
+
+    window.loadTypography = async function() {
+        const userDoc = await getDoc(doc(db, "users", window.currentUser.uid));
+        if (userDoc.exists()) {
+            const d = userDoc.data();
+            if (d.typography) {
+                const t = d.typography;
+                if (t.fontFamily) document.getElementById("fontFamily").value = t.fontFamily;
+                if (t.fontWeight) document.getElementById("fontWeight").value = t.fontWeight;
+                if (t.fontSize) { document.getElementById("fontSize").value = t.fontSize; document.getElementById("fontSizeVal").textContent = t.fontSize+"px"; }
+                if (t.textColor) document.getElementById("textColor").value = t.textColor;
+                if (t.textShadow) document.getElementById("textShadow").value = t.textShadow;
+                if (t.textAlign) document.getElementById("textAlign").value = t.textAlign;
+                if (t.lineHeight) { document.getElementById("lineHeight").value = t.lineHeight; document.getElementById("lineHeightVal").textContent = (t.lineHeight/100).toFixed(2); }
+                updateTypographyPreview();
+            }
+        }
+        ["fontFamily","fontWeight","fontSize","textColor","textShadow","textAlign","lineHeight"].forEach(id => {
+            document.getElementById(id).addEventListener("input", updateTypographyPreview);
+            document.getElementById(id).addEventListener("change", updateTypographyPreview);
+        });
+    };
+
+    window.updateTypographyPreview = function() {
+        const el = document.getElementById("previewText");
+        el.style.fontFamily = document.getElementById("fontFamily").value;
+        el.style.fontWeight = document.getElementById("fontWeight").value;
+        el.style.fontSize = document.getElementById("fontSize").value + "px";
+        el.style.color = document.getElementById("textColor").value;
+        el.style.textShadow = document.getElementById("textShadow").value;
+        el.style.textAlign = document.getElementById("textAlign").value;
+        el.style.lineHeight = (document.getElementById("lineHeight").value / 100).toFixed(2);
+    };
+
+    window.saveTypography = async function() {
+        const msgDiv = document.getElementById("typographyMessage");
+        const typography = {
+            fontFamily: document.getElementById("fontFamily").value,
+            fontWeight: document.getElementById("fontWeight").value,
+            fontSize: parseInt(document.getElementById("fontSize").value),
+            textColor: document.getElementById("textColor").value,
+            textShadow: document.getElementById("textShadow").value,
+            textAlign: document.getElementById("textAlign").value,
+            lineHeight: parseInt(document.getElementById("lineHeight").value)
+        };
+        try {
+            await updateDoc(doc(db, "users", window.currentUser.uid), { typography });
+            msgDiv.innerHTML = '<div class="success-message">Typography settings saved!</div>';
+            setTimeout(() => msgDiv.innerHTML = "", 3000);
+        } catch(e) { msgDiv.innerHTML = `<div class="error-message">${e.message}</div>`; }
+    };
+
+    window.saveAdminPassword = async function() {
+        const password = document.getElementById("adminPassword").value;
+        const messageDiv = document.getElementById("settingsMessage");
+        try {
+            await updateDoc(doc(db, "users", window.currentUser.uid), { adminPassword: password });
+            messageDiv.innerHTML = '<div class="success-message">Admin password saved!</div>';
+            setTimeout(() => messageDiv.innerHTML = "", 3000);
+        } catch(error) { messageDiv.innerHTML = `<div class="error-message">${error.message}</div>`; }
+    };
+
+    window.saveCloudinaryConfig = async function() {
+        const cloudName = document.getElementById("cloudinaryName").value.trim();
+        const uploadPreset = document.getElementById("cloudinaryPreset").value.trim();
+        const apiKey = document.getElementById("cloudinaryKey").value.trim();
+        const messageDiv = document.getElementById("settingsMessage");
+        if (!cloudName || !uploadPreset) {
+            messageDiv.innerHTML = '<div class="error-message">Cloud Name and Upload Preset are required.</div>';
+            return;
+        }
+        try {
+            await updateDoc(doc(db, "users", window.currentUser.uid), {
+                cloudinaryConfig: { cloudName, uploadPreset, apiKey }
+            });
+            messageDiv.innerHTML = '<div class="success-message">Cloudinary configuration saved!</div>';
+            setTimeout(() => messageDiv.innerHTML = "", 3000);
+        } catch(error) { messageDiv.innerHTML = `<div class="error-message">${error.message}</div>`; }
+    };
+
+    window.testCloudinaryConnection = async function() {
+        const messageDiv = document.getElementById("settingsMessage");
+        const userDoc = await getDoc(doc(db, "users", window.currentUser.uid));
+        if (!userDoc.exists() || !userDoc.data().cloudinaryConfig) {
+            messageDiv.innerHTML = '<div class="error-message">Save your config first.</div>'; return;
+        }
+        const { cloudName, uploadPreset } = userDoc.data().cloudinaryConfig;
+        if (!cloudName || !uploadPreset) {
+            messageDiv.innerHTML = '<div class="error-message">Cloud name and preset are required.</div>'; return;
+        }
+        messageDiv.innerHTML = '<div class="info-box">Testing connection…</div>';
+        try {
+            // Create a tiny 1x1 transparent PNG for the test
+            const testBlob = await fetch("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==").then(r => r.blob());
+            const fd = new FormData();
+            fd.append("file", testBlob, "test.png");
+            fd.append("upload_preset", uploadPreset);
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body: fd });
+            const data = await res.json();
+            if (data.secure_url) {
+                messageDiv.innerHTML = '<div class="success-message">✓ Cloudinary connection works! Ready to upload.</div>';
+            } else {
+                messageDiv.innerHTML = `<div class="error-message">Cloudinary error: ${data.error?.message || JSON.stringify(data)}</div>`;
+            }
+        } catch(e) {
+            messageDiv.innerHTML = `<div class="error-message">Connection failed: ${e.message}</div>`;
+        }
+    };
+
+    // ── UPLOAD TO CLOUDINARY (unsigned) ──
+    async function getCloudinaryConfig() {
+        const userDoc = await getDoc(doc(db, "users", window.currentUser.uid));
+        if (!userDoc.exists() || !userDoc.data().cloudinaryConfig) return null;
+        const c = userDoc.data().cloudinaryConfig;
+        if (!c.cloudName || !c.uploadPreset) return null;
+        return c;
+    }
+
+    async function uploadToCloudinary(file, folder, progressFillId, progressLabelId) {
+        const config = await getCloudinaryConfig();
+        if (!config) throw new Error("Cloudinary not configured. Go to Settings and add your Cloud Name and Upload Preset.");
+
+        const progressDiv = progressFillId ? document.getElementById(progressFillId) : null;
+        const labelDiv = progressLabelId ? document.getElementById(progressLabelId) : null;
+
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("upload_preset", config.uploadPreset);
+        fd.append("folder", `projectly/${folder}`);
+
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            const resourceType = file.type.startsWith("video") ? "video" : "image";
+            xhr.open("POST", `https://api.cloudinary.com/v1_1/${config.cloudName}/${resourceType}/upload`);
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable && progressDiv) {
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    progressDiv.style.width = pct + "%";
+                    if (labelDiv) labelDiv.textContent = `Uploading… ${pct}%`;
                 }
             };
 
-            window.loadTypography = async function () {
-                const userDoc = await getDoc(doc(db, "users", window.currentUser.uid));
-                if (userDoc.exists()) {
-                    const d = userDoc.data();
-                    if (d.typography) {
-                        const t = d.typography;
-                        if (t.fontFamily) document.getElementById("fontFamily").value = t.fontFamily;
-                        if (t.fontWeight) document.getElementById("fontWeight").value = t.fontWeight;
-                        if (t.fontSize) {
-                            document.getElementById("fontSize").value = t.fontSize;
-                            document.getElementById("fontSizeVal").textContent = t.fontSize + "px";
-                        }
-                        if (t.textColor) document.getElementById("textColor").value = t.textColor;
-                        if (t.textShadow) document.getElementById("textShadow").value = t.textShadow;
-                        if (t.textAlign) document.getElementById("textAlign").value = t.textAlign;
-                        if (t.lineHeight) {
-                            document.getElementById("lineHeight").value = t.lineHeight;
-                            document.getElementById("lineHeightVal").textContent = (t.lineHeight / 100).toFixed(2);
-                        }
-                        updateTypographyPreview();
-                    }
-                }
-                // Live preview updates
-                ["fontFamily", "fontWeight", "fontSize", "textColor", "textShadow", "textAlign", "lineHeight"].forEach(
-                    (id) => {
-                        document.getElementById(id).addEventListener("input", updateTypographyPreview);
-                        document.getElementById(id).addEventListener("change", updateTypographyPreview);
-                    }
-                );
-            };
-
-            window.updateTypographyPreview = function () {
-                const el = document.getElementById("previewText");
-                el.style.fontFamily = document.getElementById("fontFamily").value;
-                el.style.fontWeight = document.getElementById("fontWeight").value;
-                el.style.fontSize = document.getElementById("fontSize").value + "px";
-                el.style.color = document.getElementById("textColor").value;
-                el.style.textShadow = document.getElementById("textShadow").value;
-                el.style.textAlign = document.getElementById("textAlign").value;
-                el.style.lineHeight = (document.getElementById("lineHeight").value / 100).toFixed(2);
-            };
-
-            window.saveTypography = async function () {
-                const msgDiv = document.getElementById("typographyMessage");
-                const typography = {
-                    fontFamily: document.getElementById("fontFamily").value,
-                    fontWeight: document.getElementById("fontWeight").value,
-                    fontSize: parseInt(document.getElementById("fontSize").value),
-                    textColor: document.getElementById("textColor").value,
-                    textShadow: document.getElementById("textShadow").value,
-                    textAlign: document.getElementById("textAlign").value,
-                    lineHeight: parseInt(document.getElementById("lineHeight").value)
-                };
-                try {
-                    await updateDoc(doc(db, "users", window.currentUser.uid), { typography });
-                    msgDiv.innerHTML = '<div class="success-message">Typography settings saved!</div>';
-                    setTimeout(() => (msgDiv.innerHTML = ""), 3000);
-                } catch (e) {
-                    msgDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.secure_url) resolve(data);
+                    else reject(new Error(data.error?.message || "Upload failed"));
+                } else {
+                    try {
+                        const err = JSON.parse(xhr.responseText);
+                        reject(new Error(err.error?.message || `HTTP ${xhr.status}`));
+                    } catch { reject(new Error(`HTTP ${xhr.status}`)); }
                 }
             };
 
-            window.saveAdminPassword = async function () {
-                const password = document.getElementById("adminPassword").value;
-                const messageDiv = document.getElementById("settingsMessage");
-                try {
-                    await updateDoc(doc(db, "users", window.currentUser.uid), { adminPassword: password });
-                    messageDiv.innerHTML = '<div class="success-message">Admin password saved!</div>';
-                    setTimeout(() => (messageDiv.innerHTML = ""), 3000);
-                } catch (error) {
-                    messageDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
-                }
-            };
+            xhr.onerror = () => reject(new Error("Network error during upload"));
+            xhr.send(fd);
+        });
+    }
 
-            window.saveCloudinaryConfig = async function () {
-                const cloudName = document.getElementById("cloudinaryName").value;
-                const apiKey = document.getElementById("cloudinaryKey").value;
-                const apiSecret = document.getElementById("cloudinarySecret").value;
-                const messageDiv = document.getElementById("settingsMessage");
-                try {
-                    await updateDoc(doc(db, "users", window.currentUser.uid), {
-                        cloudinaryConfig: { cloudName, apiKey, apiSecret }
+    window.handleBackgroundUpload = async function(input, type) {
+        const file = input.files[0];
+        if (!file) return;
+        const messageDiv = document.getElementById("backgroundMessage");
+        const progressDiv = document.getElementById("bgUploadProgress");
+        const fill = document.getElementById("bgProgressFill");
+        const label = document.getElementById("bgProgressLabel");
+
+        messageDiv.innerHTML = "";
+        progressDiv.style.display = "block";
+        fill.style.width = "0%";
+        label.textContent = "Starting upload…";
+
+        try {
+            const result = await uploadToCloudinary(file, type === "logo" ? "logos" : "backgrounds", "bgProgressFill", "bgProgressLabel");
+            progressDiv.style.display = "none";
+
+            // Save URL to user's Firestore doc
+            const userRef = doc(db, "users", window.currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            const existing = userDoc.exists() ? (userDoc.data()[type === "logo" ? "logos" : "backgrounds"] || []) : [];
+            existing.push(result.secure_url);
+            await updateDoc(userRef, { [type === "logo" ? "logos" : "backgrounds"]: existing });
+
+            messageDiv.innerHTML = '<div class="success-message">Upload successful!</div>';
+            loadBackgrounds();
+        } catch(e) {
+            progressDiv.style.display = "none";
+            messageDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
+        }
+        input.value = "";
+    };
+
+    window.handleSermonUpload = async function(input) {
+        const files = Array.from(input.files);
+        if (!files.length) return;
+        const title = document.getElementById("sermonTitle").value.trim();
+        const messageDiv = document.getElementById("sermonMessage");
+        const progressDiv = document.getElementById("sermonUploadProgress");
+        const fill = document.getElementById("sermonProgressFill");
+        const label = document.getElementById("sermonProgressLabel");
+
+        if (!title) { messageDiv.innerHTML = '<div class="error-message">Please enter a sermon title.</div>'; return; }
+
+        messageDiv.innerHTML = "";
+        progressDiv.style.display = "block";
+        const slideUrls = [];
+
+        for (let i = 0; i < files.length; i++) {
+            label.textContent = `Uploading slide ${i+1} of ${files.length}…`;
+            fill.style.width = ((i / files.length) * 100) + "%";
+            try {
+                const result = await uploadToCloudinary(files[i], "sermons", null, null);
+                slideUrls.push(result.secure_url);
+            } catch(e) {
+                progressDiv.style.display = "none";
+                messageDiv.innerHTML = `<div class="error-message">Upload failed on slide ${i+1}: ${e.message}</div>`;
+                return;
+            }
+        }
+
+        fill.style.width = "100%";
+        label.textContent = "Saving…";
+
+        try {
+            await addDoc(collection(db, "sermons"), {
+                title, slides: slideUrls,
+                createdBy: window.currentUser.uid,
+                createdAt: new Date().toISOString()
+            });
+            progressDiv.style.display = "none";
+            messageDiv.innerHTML = '<div class="success-message">Sermon saved successfully!</div>';
+            document.getElementById("sermonTitle").value = "";
+        } catch(e) {
+            progressDiv.style.display = "none";
+            messageDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
+        }
+        input.value = "";
+    };
+
+    async function loadBackgrounds() {
+        const userDoc = await getDoc(doc(db, "users", window.currentUser.uid));
+        if (!userDoc.exists()) return;
+        const d = userDoc.data();
+        const bgGrid = document.getElementById("backgroundGrid");
+        const logoGrid = document.getElementById("logoGrid");
+
+        bgGrid.innerHTML = (d.backgrounds || []).map(url => `
+            <div class="background-item">
+                <img src="${url}" alt="Background" loading="lazy">
+                <div style="padding:8px;font-size:12px;color:#666;word-break:break-all;overflow:hidden;max-height:36px">${url.split('/').pop()}</div>
+            </div>`).join("") || '<p style="color:#666;grid-column:1/-1;">No backgrounds yet.</p>';
+
+        logoGrid.innerHTML = (d.logos || []).map(url => `
+            <div class="background-item">
+                <img src="${url}" alt="Logo" loading="lazy">
+            </div>`).join("") || '<p style="color:#666;grid-column:1/-1;">No logos yet.</p>';
+    }
+
+    window.deleteSong = async function(songId) {
+        if (!confirm("Are you sure you want to delete this song?")) return;
+        try {
+            await deleteDoc(doc(db, "songs", songId));
+            loadSongs();
+        } catch(error) { alert("Error deleting song: " + error.message); }
+    };
+</script>
+
+<script>
+    function switchTab(tabName, btn) {
+        document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+        document.querySelector(".admin-container > .tabs").querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+        document.getElementById(tabName + "Tab").classList.add("active");
+        btn.classList.add("active");
+        // Load backgrounds when switching to that tab
+        if (tabName === "backgrounds" && window.currentUser) {
+            // trigger load
+            if (window.db && window.currentUser) {
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(({ getDoc, doc }) => {
+                    getDoc(doc(window.db, "users", window.currentUser.uid)).then(snap => {
+                        if (!snap.exists()) return;
+                        const d = snap.data();
+                        document.getElementById("backgroundGrid").innerHTML = (d.backgrounds||[]).map(url =>
+                            `<div class="background-item"><img src="${url}" alt="Background" loading="lazy"></div>`
+                        ).join("") || '<p style="color:#666;grid-column:1/-1;">No backgrounds yet.</p>';
+                        document.getElementById("logoGrid").innerHTML = (d.logos||[]).map(url =>
+                            `<div class="background-item"><img src="${url}" alt="Logo" loading="lazy"></div>`
+                        ).join("") || '<p style="color:#666;grid-column:1/-1;">No logos yet.</p>';
                     });
-                    messageDiv.innerHTML = '<div class="success-message">Cloudinary configuration saved!</div>';
-                    setTimeout(() => (messageDiv.innerHTML = ""), 3000);
-                } catch (error) {
-                    messageDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
-                }
-            };
-
-            window.deleteSong = async function (songId) {
-                if (!confirm("Are you sure you want to delete this song?")) return;
-                try {
-                    await deleteDoc(doc(db, "songs", songId));
-                    loadSongs();
-                } catch (error) {
-                    alert("Error deleting song: " + error.message);
-                }
-            };
-
-            window.handleSermonUpload = function (input) {
-                document.getElementById("sermonMessage").innerHTML =
-                    '<div class="info-box">Sermon upload requires Cloudinary configuration. Please set up Cloudinary in Settings first.</div>';
-            };
-
-            window.handleBackgroundUpload = function (input, type) {
-                document.getElementById("backgroundMessage").innerHTML =
-                    '<div class="info-box">Background/Logo upload requires Cloudinary configuration. Please set up Cloudinary in Settings first.</div>';
-            };
-        </script>
-
-        <script>
-            function switchTab(tabName, btn) {
-                document.querySelectorAll(".tab-content").forEach((t) => t.classList.remove("active"));
-                // Only target the top-level tabs row
-                document
-                    .querySelector(".admin-container > .tabs")
-                    .querySelectorAll(".tab")
-                    .forEach((b) => b.classList.remove("active"));
-                document.getElementById(tabName + "Tab").classList.add("active");
-                btn.classList.add("active");
+                });
             }
+        }
+    }
 
-            function switchBackgroundTab(tabName, btn) {
-                document.getElementById("backgroundsSection").style.display =
-                    tabName === "backgrounds" ? "block" : "none";
-                document.getElementById("logosSection").style.display = tabName === "logos" ? "block" : "none";
-                btn.parentElement.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
-                btn.classList.add("active");
-            }
-        </script>
-    </body>
+    function switchBackgroundTab(tabName, btn) {
+        document.getElementById("backgroundsSection").style.display = tabName==="backgrounds" ? "block" : "none";
+        document.getElementById("logosSection").style.display = tabName==="logos" ? "block" : "none";
+        btn.parentElement.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        btn.classList.add("active");
+    }
+</script>
+</body>
 </html>
