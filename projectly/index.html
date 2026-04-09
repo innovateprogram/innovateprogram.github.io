@@ -36,15 +36,20 @@
         .item-name { font-weight: 500; margin-bottom: 3px; }
         .item-count { font-size: 12px; color: #666; }
 
+        /* Playlist item with remove button */
+        .playlist-item { display: flex; align-items: center; justify-content: space-between; }
+        .playlist-item-info { flex: 1; cursor: pointer; }
+
         /* Segment item with remove button */
         .segment-item { display: flex; align-items: center; justify-content: space-between; }
         .segment-item-info { flex: 1; cursor: pointer; }
-        .segment-remove-btn {
+
+        .item-remove-btn {
             background: none; border: none; color: #9ca3af; cursor: pointer;
             font-size: 16px; padding: 2px 6px; border-radius: 4px; line-height: 1;
             transition: all 0.2s; flex-shrink: 0;
         }
-        .segment-remove-btn:hover { background: #fee2e2; color: #ef4444; }
+        .item-remove-btn:hover { background: #fee2e2; color: #ef4444; }
 
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .top-bar {
@@ -86,10 +91,11 @@
 
         .slides-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
         .slide-card {
-            background: #000; border-radius: 6px; aspect-ratio: 16/9;
+            border-radius: 6px; aspect-ratio: 16/9;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; border: 3px solid transparent; transition: all 0.15s;
             position: relative; overflow: hidden; outline: none;
+            background-color: #000; background-size: cover; background-position: center;
         }
         .slide-card:hover { border-color: #3b82f6; transform: scale(1.02); }
         .slide-card.active { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.35); }
@@ -111,7 +117,7 @@
         }
         .fade-controls { display: flex; align-items: center; gap: 15px; }
         .fade-controls label { font-size: 14px; font-weight: 500; }
-        .fade-controls input[type="number"] { width: 80px; padding: 5px 10px; border: 1px solid #d1d5db; border-radius: 4px; }
+        .fade-controls input[type="number"] { width: 80px; padding: 5px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; }
         .checkbox-control { display: flex; align-items: center; gap: 8px; }
         .current-slide-info { font-size: 13px; color: #6b7280; }
 
@@ -171,7 +177,6 @@
         .kbd-hint { font-size: 11px; color: #9ca3af; display: flex; gap: 6px; align-items: center; }
         .kbd { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 3px; padding: 1px 5px; font-family: monospace; font-size: 11px; }
 
-        /* Blank slide button */
         .blank-btn { background: #374151; color: #d1d5db; }
         .blank-btn:hover { background: #4b5563; }
     </style>
@@ -279,10 +284,12 @@
 
         <div class="bottom-controls">
             <div class="fade-controls">
-                <label>Fade (ms):</label>
-                <input type="number" id="fadeTime" value="500" min="0" max="5000" step="100"/>
+                <label for="fadeTime">Fade (ms):</label>
+                <!-- FIX: removed readonly/disabled, added explicit type and style -->
+                <input type="number" id="fadeTime" value="500" min="0" max="5000" step="100" style="width:80px;padding:5px 10px;border:1px solid #d1d5db;border-radius:4px;font-size:14px;"/>
                 <div class="checkbox-control">
-                    <input type="checkbox" id="enableSongFade"/>
+                    <!-- FIX: song fade now checked by default -->
+                    <input type="checkbox" id="enableSongFade" checked/>
                     <label for="enableSongFade">Song Fade</label>
                 </div>
             </div>
@@ -370,7 +377,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCga_ur-qA08HV2otci3ivw3PkWm-Uh-OM",
@@ -398,7 +405,9 @@
         parts: [],
         flatIndex: 0,
         sentIndex: -1,
-        typography: {}
+        typography: {},
+        // FIX: store the active background URL so it can be sent to FOH
+        backgroundUrl: null
     };
 
     // ── Auth state ──
@@ -456,13 +465,23 @@
     // ── Data loading ──
     window.loadUserData = async function() {
         const userId = window.currentUser.uid;
-        // Load typography for this session
         try {
             const userDoc = await getDoc(doc(db, "users", userId));
-            if (userDoc.exists() && userDoc.data().typography) {
-                window.presentationState.typography = userDoc.data().typography;
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                if (data.typography) {
+                    window.presentationState.typography = data.typography;
+                }
+                // FIX: Load the first background (if any) to use automatically
+                if (data.backgrounds && data.backgrounds.length > 0) {
+                    window.presentationState.backgroundUrl = data.backgrounds[0];
+                }
+                // Use activeBackground if user has set one
+                if (data.activeBackground) {
+                    window.presentationState.backgroundUrl = data.activeBackground;
+                }
             }
-        } catch(e) { console.warn("Could not load typography", e); }
+        } catch(e) { console.warn("Could not load user data", e); }
 
         const playlistsRef = ref(rtdb, `users/${userId}/playlists`);
         onValue(playlistsRef, snapshot => {
@@ -475,14 +494,48 @@
         const list = document.getElementById("playlistsList");
         list.innerHTML = "";
         const arr = Object.entries(playlists).map(([id,data]) => ({id,...data}));
-        if (arr.length === 0) { list.innerHTML = '<div style="padding:10px;color:#9ca3af;font-size:13px;">No playlists yet</div>'; return; }
+        if (arr.length === 0) {
+            list.innerHTML = '<div style="padding:10px;color:#9ca3af;font-size:13px;">No playlists yet</div>';
+            return;
+        }
         arr.forEach(playlist => {
             const div = document.createElement("div");
             div.className = "playlist-item";
-            div.onclick = () => selectPlaylist(playlist.id, playlist, div);
-            div.innerHTML = `<div class="item-name">${playlist.name}</div><div class="item-count">${(playlist.segments||[]).length} segments</div>`;
+
+            const infoDiv = document.createElement("div");
+            infoDiv.className = "playlist-item-info";
+            infoDiv.innerHTML = `<div class="item-name">${playlist.name}</div><div class="item-count">${(playlist.segments||[]).length} segments</div>`;
+            infoDiv.onclick = () => selectPlaylist(playlist.id, playlist, div);
+
+            // FIX: Add remove button for playlists
+            const removeBtn = document.createElement("button");
+            removeBtn.className = "item-remove-btn";
+            removeBtn.title = "Delete playlist";
+            removeBtn.textContent = "×";
+            removeBtn.onclick = (e) => { e.stopPropagation(); removePlaylist(playlist.id, playlist.name); };
+
+            div.appendChild(infoDiv);
+            div.appendChild(removeBtn);
             list.appendChild(div);
         });
+    };
+
+    // FIX: Remove playlist function
+    window.removePlaylist = async function(playlistId, playlistName) {
+        if (!confirm(`Delete playlist "${playlistName}"? This cannot be undone.`)) return;
+        const userId = window.currentUser.uid;
+        await remove(ref(rtdb, `users/${userId}/playlists/${playlistId}`));
+        // If the deleted playlist was active, clear everything
+        if (window.currentPlaylist && window.currentPlaylist.id === playlistId) {
+            window.currentPlaylist = null;
+            document.getElementById("segmentsList").innerHTML = '<div style="padding:10px;color:#9ca3af;font-size:13px;">No segments yet</div>';
+            document.getElementById("contentArea").innerHTML = `
+                <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#1a1a2e">
+                    <div class="slides-panel-empty"><h3>Select a playlist</h3><p style="color:#6b7280">Choose a playlist from the sidebar</p></div>
+                </div>`;
+            window.presentationState.parts = [];
+            document.getElementById("currentSlideInfo").textContent = "";
+        }
     };
 
     window.selectPlaylist = function(playlistId, playlistData, el) {
@@ -495,7 +548,10 @@
     window.renderSegments = function(segments) {
         const list = document.getElementById("segmentsList");
         list.innerHTML = "";
-        if (segments.length === 0) { list.innerHTML = '<div style="padding:10px;color:#9ca3af;font-size:13px;">No segments yet</div>'; return; }
+        if (segments.length === 0) {
+            list.innerHTML = '<div style="padding:10px;color:#9ca3af;font-size:13px;">No segments yet</div>';
+            return;
+        }
         segments.forEach((seg, index) => {
             const div = document.createElement("div");
             div.className = "segment-item";
@@ -507,7 +563,7 @@
             infoDiv.onclick = () => selectSegment(seg, index, div);
 
             const removeBtn = document.createElement("button");
-            removeBtn.className = "segment-remove-btn";
+            removeBtn.className = "item-remove-btn";
             removeBtn.title = "Remove segment";
             removeBtn.textContent = "×";
             removeBtn.onclick = (e) => { e.stopPropagation(); removeSegment(index); };
@@ -518,7 +574,6 @@
         });
     };
 
-    // ── REMOVE SEGMENT ──
     window.removeSegment = async function(index) {
         if (!window.currentPlaylist) return;
         if (!confirm(`Remove "${window.currentPlaylist.segments[index].name || 'this segment'}" from the playlist?`)) return;
@@ -532,7 +587,6 @@
         window.currentPlaylist.segments = currentSegments;
         renderSegments(currentSegments);
 
-        // Clear content area if the removed segment was active
         const activeEl = document.querySelector(`.segment-item.active`);
         if (!activeEl) {
             document.getElementById("contentArea").innerHTML = `
@@ -608,6 +662,9 @@
         panel.innerHTML = "";
         const ps = window.presentationState;
         const textStyle = buildTextStyle(typography, true);
+        // FIX: apply background thumbnail to each slide card
+        const bgUrl = ps.backgroundUrl;
+        const bgStyle = bgUrl ? `background-image: url('${bgUrl}'); background-size: cover; background-position: center;` : '';
 
         song.parts.forEach((part, pi) => {
             const section = document.createElement("div");
@@ -628,6 +685,7 @@
                 card.className = "slide-card";
                 card.dataset.fi = fi;
                 card.tabIndex = -1;
+                if (bgUrl) card.style.backgroundImage = `url('${bgUrl}')`;
                 card.innerHTML = `<div class="slide-text" style="${textStyle}">${item.text}</div><div class="slide-index">${item.slideIndex+1}</div>`;
                 card.onclick = () => { focusSlide(fi, false); sendSlide(fi); };
                 grid.appendChild(card);
@@ -686,7 +744,8 @@
 
         const item = ps.parts[fi];
         const nextItem = fi + 1 < ps.parts.length ? ps.parts[fi + 1] : null;
-        const fadeTime = parseInt(document.getElementById("fadeTime").value) || 500;
+        // FIX: Read fade values fresh each time from the inputs
+        const fadeTime = parseInt(document.getElementById("fadeTime").value) || 0;
         const enableSongFade = document.getElementById("enableSongFade").checked;
 
         const content = {
@@ -697,7 +756,6 @@
 
         const nextContent = nextItem ? { type: "lyrics", text: nextItem.text } : null;
 
-        // Typography settings for FOH
         const typography = ps.typography || {};
 
         const msgToFOH = {
@@ -705,7 +763,9 @@
             content,
             typography,
             fadeTime,
-            enableSongFade
+            enableSongFade,
+            // FIX: always include the background URL so FOH renders it
+            backgroundUrl: ps.backgroundUrl || null
         };
 
         const msgToBOH = {
@@ -732,7 +792,6 @@
         if (window.fohWindow && !window.fohWindow.closed) window.fohWindow.postMessage(msg, "*");
         if (window.bohWindow && !window.bohWindow.closed) window.bohWindow.postMessage(msg, "*");
 
-        // Remove sent highlight
         document.querySelectorAll(".slide-card").forEach(c => c.classList.remove("sent"));
     };
 
@@ -886,10 +945,15 @@
         document.getElementById("blankBtn").style.display="block";
         closeModal("goLiveModal");
 
-        // Send initial fade settings to screens
-        const fadeTime = parseInt(document.getElementById("fadeTime").value) || 500;
+        // FIX: Send init with fade + background to screens
+        const fadeTime = parseInt(document.getElementById("fadeTime").value) || 0;
         const enableSongFade = document.getElementById("enableSongFade").checked;
-        const initMsg = { type: "init", fadeTime, enableSongFade };
+        const initMsg = {
+            type: "init",
+            fadeTime,
+            enableSongFade,
+            backgroundUrl: window.presentationState.backgroundUrl || null
+        };
         if (window.fohWindow && !window.fohWindow.closed) window.fohWindow.postMessage(initMsg, "*");
         if (window.bohWindow && !window.bohWindow.closed) window.bohWindow.postMessage(initMsg, "*");
     };
@@ -901,13 +965,11 @@
         ind.querySelector("span:last-child").textContent="Offline";
         document.getElementById("stopBtn").style.display="none";
         document.getElementById("blankBtn").style.display="none";
-        // Send blank to screens
         const msg = { type: "display", content: { type: "blank" }, next: null };
         if (window.fohWindow && !window.fohWindow.closed) window.fohWindow.postMessage(msg, "*");
         if (window.bohWindow && !window.bohWindow.closed) window.bohWindow.postMessage(msg, "*");
     };
 
-    // Listen for messages from FOH/BOH (ready signals)
     window.addEventListener("message", (e) => {
         if (e.data.type === "fohReady") {
             console.log("FOH is ready");
