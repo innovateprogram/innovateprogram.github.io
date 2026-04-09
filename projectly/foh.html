@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projectly - FOH Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #displayContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #backgroundLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #backgroundLayer.visible {
+            opacity: 1;
+        }
+
+        #backgroundLayer img,
+        #backgroundLayer video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #logoLayer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            max-width: 80%;
+            max-height: 80%;
+        }
+
+        #logoLayer.visible {
+            opacity: 1;
+        }
+
+        #logoLayer img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        #contentLayer {
+            position: relative;
+            z-index: 3;
+            width: 90%;
+            max-width: 1400px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #contentLayer.visible {
+            opacity: 1;
+        }
+
+        #contentLayer.fade-enabled {
+            transition: opacity 1s ease-in-out;
+        }
+
+        .lyrics-display {
+            font-size: 4rem;
+            line-height: 1.5;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
+            font-weight: 600;
+            padding: 40px;
+        }
+
+        .sermon-slide {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .license-display {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .license-display.visible {
+            opacity: 1;
+        }
+
+        .blank-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        #keyboardHelp {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="displayContainer">
+        <!-- Background Layer -->
+        <div id="backgroundLayer"></div>
+
+        <!-- Logo Layer -->
+        <div id="logoLayer"></div>
+
+        <!-- Content Layer -->
+        <div id="contentLayer">
+            <div class="blank-screen"></div>
+        </div>
+
+        <!-- License Display -->
+        <div id="licenseDisplay" class="license-display"></div>
+
+        <!-- Keyboard Help -->
+        <div id="keyboardHelp">
+            Press T for background • Press L for logo
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCga_ur-qA08HV2otci3ivw3PkWm-Uh-OM",
+            authDomain: "notey-4455f.firebaseapp.com",
+            databaseURL: "https://notey-4455f-default-rtdb.firebaseio.com",
+            projectId: "notey-4455f",
+            storageBucket: "notey-4455f.firebasestorage.app",
+            messagingSenderId: "554664934050",
+            appId: "1:554664934050:web:5c1f5f673bb32301fa35fb",
+            measurementId: "G-YW5B4R6HJV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const rtdb = getDatabase(app);
+
+        let currentBackground = null;
+        let currentLogo = null;
+        let backgroundVisible = false;
+        let logoVisible = false;
+        let fadeTime = 500;
+        let enableSongFade = false;
+        let currentLicense = null;
+
+        // Listen for display updates from main window
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'display') {
+                displayContent(event.data.content);
+            } else if (event.data.type === 'setBackground') {
+                currentBackground = event.data.url;
+            } else if (event.data.type === 'setLogo') {
+                currentLogo = event.data.url;
+            } else if (event.data.type === 'setFadeTime') {
+                fadeTime = event.data.fadeTime;
+            } else if (event.data.type === 'setEnableSongFade') {
+                enableSongFade = event.data.enabled;
+            } else if (event.data.type === 'setLicense') {
+                currentLicense = event.data.license;
+            }
+        });
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 't') {
+                toggleBackground();
+            } else if (e.key.toLowerCase() === 'l') {
+                toggleLogo();
+            }
+        });
+
+        function toggleBackground() {
+            const bgLayer = document.getElementById('backgroundLayer');
+            
+            if (backgroundVisible) {
+                bgLayer.classList.remove('visible');
+                backgroundVisible = false;
+            } else if (currentBackground) {
+                const isVideo = currentBackground.endsWith('.mp4');
+                
+                if (isVideo) {
+                    bgLayer.innerHTML = `<video autoplay loop muted><source src="${currentBackground}" type="video/mp4"></video>`;
+                } else {
+                    bgLayer.innerHTML = `<img src="${currentBackground}" alt="Background">`;
+                }
+                
+                bgLayer.classList.add('visible');
+                backgroundVisible = true;
+            }
+        }
+
+        function toggleLogo() {
+            const logoLayer = document.getElementById('logoLayer');
+            
+            if (logoVisible) {
+                logoLayer.classList.remove('visible');
+                logoVisible = false;
+            } else if (currentLogo) {
+                logoLayer.innerHTML = `<img src="${currentLogo}" alt="Logo">`;
+                logoLayer.classList.add('visible');
+                logoVisible = true;
+            }
+        }
+
+        function displayContent(content) {
+            const contentLayer = document.getElementById('contentLayer');
+            const licenseDisplay = document.getElementById('licenseDisplay');
+            
+            // Apply fade settings
+            if (enableSongFade && content.type === 'lyrics') {
+                contentLayer.style.transition = `opacity ${fadeTime}ms ease-in-out`;
+                contentLayer.classList.add('fade-enabled');
+            } else {
+                contentLayer.style.transition = `opacity ${fadeTime}ms ease-in-out`;
+                contentLayer.classList.remove('fade-enabled');
+            }
+
+            // Fade out
+            contentLayer.classList.remove('visible');
+
+            setTimeout(() => {
+                if (content.type === 'lyrics') {
+                    contentLayer.innerHTML = `<div class="lyrics-display">${content.text}</div>`;
+                    
+                    // Show license if present
+                    if (content.license) {
+                        licenseDisplay.textContent = content.license;
+                        licenseDisplay.classList.add('visible');
+                        
+                        // Hide license after 5 seconds
+                        setTimeout(() => {
+                            licenseDisplay.classList.remove('visible');
+                        }, 5000);
+                    }
+                } else if (content.type === 'sermon') {
+                    contentLayer.innerHTML = `<img src="${content.url}" class="sermon-slide" alt="Sermon Slide">`;
+                } else if (content.type === 'blank') {
+                    contentLayer.innerHTML = '<div class="blank-screen"></div>';
+                }
+
+                // Fade in
+                contentLayer.classList.add('visible');
+            }, fadeTime);
+        }
+
+        // Notify opener that FOH is ready
+        if (window.opener) {
+            window.opener.postMessage({ type: 'fohReady' }, '*');
+        }
+
+        // Hide keyboard help after 10 seconds
+        setTimeout(() => {
+            document.getElementById('keyboardHelp').style.opacity = '0';
+        }, 10000);
+    </script>
+</body>
+</html>
