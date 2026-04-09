@@ -34,6 +34,9 @@
         .btn-danger:hover { background: #dc2626; }
         .btn-warning { background: #f59e0b; color: white; }
         .btn-warning:hover { background: #d97706; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; }
         .form-group input, .form-group select, .form-group textarea {
@@ -66,16 +69,29 @@
         .preview-parts h4 { font-size: 13px; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .preview-part-tag { display: inline-block; background: #dbeafe; color: #1d4ed8; padding: 4px 10px; border-radius: 12px; font-size: 12px; margin: 3px; }
         .background-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
-        .background-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid #e5e7eb; cursor: pointer; transition: all 0.2s; }
+        .background-item {
+            position: relative; border-radius: 8px; overflow: hidden;
+            border: 3px solid #e5e7eb; cursor: pointer; transition: all 0.2s;
+        }
         .background-item:hover { border-color: #2563eb; transform: translateY(-2px); }
-        .background-item img { width: 100%; height: 150px; object-fit: cover; }
+        /* FIX: active background gets a green border */
+        .background-item.active-bg { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.3); }
+        .background-item img { width: 100%; height: 150px; object-fit: cover; display: block; }
+        .background-item-actions {
+            padding: 8px; display: flex; gap: 6px; justify-content: center;
+            background: white;
+        }
+        .active-bg-badge {
+            position: absolute; top: 6px; left: 6px;
+            background: #10b981; color: white; font-size: 10px; font-weight: 700;
+            padding: 2px 8px; border-radius: 10px; letter-spacing: 0.5px;
+        }
         .color-picker-row { display: flex; align-items: center; gap: 10px; }
         .color-picker-row input[type="color"] { width: 50px; height: 36px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; padding: 2px; }
         .range-row { display: flex; align-items: center; gap: 10px; }
         .range-row input[type="range"] { flex: 1; }
         .range-row span { min-width: 40px; text-align: right; font-size: 14px; color: #666; }
 
-        /* Edit mode highlight */
         .editing-banner {
             background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px;
             padding: 12px 16px; margin-bottom: 20px; font-size: 14px; color: #92400e;
@@ -111,7 +127,6 @@
         <h2 style="margin-bottom:20px">Manage Songs</h2>
         <div id="songMessage"></div>
 
-        <!-- Edit mode banner -->
         <div class="editing-banner" id="editingBanner">
             ✏️ <strong>Edit Mode:</strong> <span id="editingLabel">You are editing a song.</span>
             <span id="editingVerifiedWarning" style="display:none;margin-left:8px;color:#b45309;">
@@ -194,6 +209,11 @@ Praise the Lord  ← Slide 1</pre>
     <div id="backgroundsTab" class="tab-content">
         <h2 style="margin-bottom:20px">Backgrounds & Logos</h2>
         <div id="backgroundMessage"></div>
+        <!-- FIX: info about active background -->
+        <div class="info-box">
+            Upload backgrounds here, then click <strong>Set Active</strong> on one to use it automatically on all slides in the Control screen.
+            The active background is shown with a green border and badge.
+        </div>
         <div class="tabs" style="margin-bottom:20px">
             <button class="tab active" onclick="switchBackgroundTab('backgrounds', this)">Backgrounds</button>
             <button class="tab" onclick="switchBackgroundTab('logos', this)">Logos</button>
@@ -376,14 +396,12 @@ Praise the Lord  ← Slide 1</pre>
     window.db = db;
     window.currentUser = null;
 
-    // State for edit mode
     window.editState = {
         isEditing: false,
         songId: null,
         isVerified: false
     };
 
-    // Prevent autofill
     window.addEventListener("load", () => {
         ["songTitle","songAuthor","songLicense","adminPassword","cloudinaryName","cloudinaryPreset","cloudinaryKey"].forEach(id => {
             const el = document.getElementById(id);
@@ -400,7 +418,6 @@ Praise the Lord  ← Slide 1</pre>
     const profanityList = ["shit","fuck","bitch","bastard"];
     window.containsProfanity = text => profanityList.some(w => new RegExp(`\\b${w}\\b`, "i").test(text));
 
-    // ── LYRICS PARSER ──
     window.parseLyrics = function(rawText) {
         const lines = rawText.split("\n");
         const parts = [];
@@ -440,7 +457,6 @@ Praise the Lord  ← Slide 1</pre>
         ).join("");
     };
 
-    // ── SAVE SONG (handles both new and edit) ──
     window.saveSong = async function() {
         const title = document.getElementById("songTitle").value.trim();
         const author = document.getElementById("songAuthor").value.trim();
@@ -469,14 +485,12 @@ Praise the Lord  ← Slide 1</pre>
 
             if (es.isEditing && es.songId) {
                 if (es.isVerified) {
-                    // Verified song: save as a NEW private copy under this user
                     songData.projectlyVerified = false;
                     songData.createdAt = new Date().toISOString();
-                    songData.originalSongId = es.songId; // reference to original
+                    songData.originalSongId = es.songId;
                     await addDoc(collection(db, "songs"), songData);
                     messageDiv.innerHTML = '<div class="success-message">Saved as your private copy (original verified song unchanged).</div>';
                 } else {
-                    // Own unverified song: update it directly
                     await updateDoc(doc(db, "songs", es.songId), {
                         title, author: author || "Unknown", license: license || null,
                         parts, updatedAt: new Date().toISOString()
@@ -484,7 +498,6 @@ Praise the Lord  ← Slide 1</pre>
                     messageDiv.innerHTML = '<div class="success-message">Song updated successfully!</div>';
                 }
             } else {
-                // New song
                 songData.projectlyVerified = false;
                 songData.createdAt = new Date().toISOString();
                 await addDoc(collection(db, "songs"), songData);
@@ -513,29 +526,25 @@ Praise the Lord  ← Slide 1</pre>
         document.getElementById("saveSongBtn").textContent = "Save Song";
     };
 
-    // ── EDIT SONG ──
     window.editSong = async function(songId) {
         try {
             const songDoc = await getDoc(doc(db, "songs", songId));
             if (!songDoc.exists()) { alert("Song not found."); return; }
             const song = songDoc.data();
 
-            // Fill form
             document.getElementById("songTitle").value = song.title;
             document.getElementById("songAuthor").value = song.author || "";
             document.getElementById("songLicense").value = song.license || "";
 
-            // Reconstruct raw lyrics from parts
             const rawLines = [];
             song.parts.forEach(part => {
                 rawLines.push(part.label);
                 part.slides.forEach(slide => rawLines.push(slide));
-                rawLines.push(""); // blank line between sections
+                rawLines.push("");
             });
             document.getElementById("lyricsInput").value = rawLines.join("\n").trim();
             previewParsedParts();
 
-            // Set edit state
             window.editState = { isEditing: true, songId, isVerified: !!song.projectlyVerified };
 
             const banner = document.getElementById("editingBanner");
@@ -547,7 +556,6 @@ Praise the Lord  ← Slide 1</pre>
 
             document.getElementById("saveSongBtn").textContent = song.projectlyVerified ? "Save as My Copy" : "Update Song";
 
-            // Scroll to top
             window.scrollTo({ top: 0, behavior: "smooth" });
         } catch(e) {
             alert("Error loading song: " + e.message);
@@ -694,7 +702,6 @@ Praise the Lord  ← Slide 1</pre>
         }
         messageDiv.innerHTML = '<div class="info-box">Testing connection…</div>';
         try {
-            // Create a tiny 1x1 transparent PNG for the test
             const testBlob = await fetch("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==").then(r => r.blob());
             const fd = new FormData();
             fd.append("file", testBlob, "test.png");
@@ -711,7 +718,6 @@ Praise the Lord  ← Slide 1</pre>
         }
     };
 
-    // ── UPLOAD TO CLOUDINARY (unsigned) ──
     async function getCloudinaryConfig() {
         const userDoc = await getDoc(doc(db, "users", window.currentUser.uid));
         if (!userDoc.exists() || !userDoc.data().cloudinaryConfig) return null;
@@ -780,7 +786,6 @@ Praise the Lord  ← Slide 1</pre>
             const result = await uploadToCloudinary(file, type === "logo" ? "logos" : "backgrounds", "bgProgressFill", "bgProgressLabel");
             progressDiv.style.display = "none";
 
-            // Save URL to user's Firestore doc
             const userRef = doc(db, "users", window.currentUser.uid);
             const userDoc = await getDoc(userRef);
             const existing = userDoc.exists() ? (userDoc.data()[type === "logo" ? "logos" : "backgrounds"] || []) : [];
@@ -843,18 +848,58 @@ Praise the Lord  ← Slide 1</pre>
         input.value = "";
     };
 
+    // FIX: Set active background — saves to user's Firestore doc so index.html picks it up
+    window.setActiveBackground = async function(url) {
+        const messageDiv = document.getElementById("backgroundMessage");
+        try {
+            await updateDoc(doc(db, "users", window.currentUser.uid), { activeBackground: url });
+            messageDiv.innerHTML = '<div class="success-message">Active background updated! It will apply next time you open a segment.</div>';
+            setTimeout(() => messageDiv.innerHTML = "", 4000);
+            loadBackgrounds();
+        } catch(e) {
+            messageDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
+        }
+    };
+
+    window.removeActiveBackground = async function() {
+        const messageDiv = document.getElementById("backgroundMessage");
+        try {
+            await updateDoc(doc(db, "users", window.currentUser.uid), { activeBackground: null });
+            messageDiv.innerHTML = '<div class="success-message">Background cleared — slides will use a plain black background.</div>';
+            setTimeout(() => messageDiv.innerHTML = "", 4000);
+            loadBackgrounds();
+        } catch(e) {
+            messageDiv.innerHTML = `<div class="error-message">${e.message}</div>`;
+        }
+    };
+
     async function loadBackgrounds() {
         const userDoc = await getDoc(doc(db, "users", window.currentUser.uid));
         if (!userDoc.exists()) return;
         const d = userDoc.data();
+        const activeUrl = d.activeBackground || null;
         const bgGrid = document.getElementById("backgroundGrid");
         const logoGrid = document.getElementById("logoGrid");
 
-        bgGrid.innerHTML = (d.backgrounds || []).map(url => `
-            <div class="background-item">
-                <img src="${url}" alt="Background" loading="lazy">
-                <div style="padding:8px;font-size:12px;color:#666;word-break:break-all;overflow:hidden;max-height:36px">${url.split('/').pop()}</div>
-            </div>`).join("") || '<p style="color:#666;grid-column:1/-1;">No backgrounds yet.</p>';
+        const bgs = d.backgrounds || [];
+        if (bgs.length === 0) {
+            bgGrid.innerHTML = '<p style="color:#666;grid-column:1/-1;">No backgrounds yet.</p>';
+        } else {
+            bgGrid.innerHTML = bgs.map(url => {
+                const isActive = url === activeUrl;
+                return `
+                <div class="background-item ${isActive ? 'active-bg' : ''}">
+                    ${isActive ? '<div class="active-bg-badge">ACTIVE</div>' : ''}
+                    <img src="${url}" alt="Background" loading="lazy">
+                    <div class="background-item-actions">
+                        ${isActive
+                            ? `<button class="btn btn-secondary btn-sm" onclick="removeActiveBackground()">Clear</button>`
+                            : `<button class="btn btn-success btn-sm" onclick="setActiveBackground('${url.replace(/'/g,"\\'")}')">Set Active</button>`
+                        }
+                    </div>
+                </div>`;
+            }).join("");
+        }
 
         logoGrid.innerHTML = (d.logos || []).map(url => `
             <div class="background-item">
@@ -877,23 +922,34 @@ Praise the Lord  ← Slide 1</pre>
         document.querySelector(".admin-container > .tabs").querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
         document.getElementById(tabName + "Tab").classList.add("active");
         btn.classList.add("active");
-        // Load backgrounds when switching to that tab
         if (tabName === "backgrounds" && window.currentUser) {
-            // trigger load
-            if (window.db && window.currentUser) {
-                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(({ getDoc, doc }) => {
-                    getDoc(doc(window.db, "users", window.currentUser.uid)).then(snap => {
-                        if (!snap.exists()) return;
-                        const d = snap.data();
-                        document.getElementById("backgroundGrid").innerHTML = (d.backgrounds||[]).map(url =>
-                            `<div class="background-item"><img src="${url}" alt="Background" loading="lazy"></div>`
-                        ).join("") || '<p style="color:#666;grid-column:1/-1;">No backgrounds yet.</p>';
-                        document.getElementById("logoGrid").innerHTML = (d.logos||[]).map(url =>
-                            `<div class="background-item"><img src="${url}" alt="Logo" loading="lazy"></div>`
-                        ).join("") || '<p style="color:#666;grid-column:1/-1;">No logos yet.</p>';
-                    });
+            import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(({ getDoc, doc }) => {
+                getDoc(doc(window.db, "users", window.currentUser.uid)).then(snap => {
+                    if (!snap.exists()) return;
+                    const d = snap.data();
+                    const activeUrl = d.activeBackground || null;
+                    const bgs = d.backgrounds || [];
+
+                    document.getElementById("backgroundGrid").innerHTML = bgs.length ? bgs.map(url => {
+                        const isActive = url === activeUrl;
+                        return `
+                        <div class="background-item ${isActive ? 'active-bg' : ''}">
+                            ${isActive ? '<div class="active-bg-badge">ACTIVE</div>' : ''}
+                            <img src="${url}" alt="Background" loading="lazy">
+                            <div class="background-item-actions">
+                                ${isActive
+                                    ? `<button class="btn btn-secondary btn-sm" onclick="removeActiveBackground()">Clear</button>`
+                                    : `<button class="btn btn-success btn-sm" onclick="setActiveBackground('${url.replace(/'/g,"\\'")}')">Set Active</button>`
+                                }
+                            </div>
+                        </div>`;
+                    }).join("") : '<p style="color:#666;grid-column:1/-1;">No backgrounds yet.</p>';
+
+                    document.getElementById("logoGrid").innerHTML = (d.logos||[]).map(url =>
+                        `<div class="background-item"><img src="${url}" alt="Logo" loading="lazy"></div>`
+                    ).join("") || '<p style="color:#666;grid-column:1/-1;">No logos yet.</p>';
                 });
-            }
+            });
         }
     }
 
