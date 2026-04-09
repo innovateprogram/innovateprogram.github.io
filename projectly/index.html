@@ -67,6 +67,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
 .slide-card.sent{border-color:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.3)}
 .slide-text{color:#fff;font-size:10px;padding:6px;text-align:center;line-height:1.4;pointer-events:none;white-space:pre-line;text-shadow:1px 1px 3px rgba(0,0,0,.9)}
 .slide-index{position:absolute;bottom:3px;right:5px;font-size:9px;color:rgba(255,255,255,.3)}
+/* Media slide cards */
+.media-card-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);font-size:9px;color:rgba(255,255,255,.7);text-align:center;padding:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bottom-controls{background:#1a1f2e;border-top:1px solid #2d3748;padding:10px 18px;display:flex;justify-content:space-between;align-items:center}
 .fade-controls{display:flex;align-items:center;gap:12px}
 .fade-controls label{font-size:13px;font-weight:500;color:#94a3b8}
@@ -100,29 +102,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
 </head>
 <body>
 
-<!-- LOADING SCREEN (shown while checking auth + fetching config) -->
 <div id="loadingScreen" class="loading-screen">
   <div class="loading-spinner"></div>
   <div style="color:#64748b;font-size:13px" id="loadingMsg">Signing in…</div>
 </div>
 
-<!-- LOGIN SCREEN -->
 <div id="loginScreen" class="login-screen" style="display:none">
   <div class="login-box">
     <h1>Projectly</h1>
     <p>Church Presentation Software</p>
     <div id="loginError" class="error-message" style="display:none"></div>
     <div id="loginSuccess" class="success-message" style="display:none"></div>
-
     <div id="loginForm">
       <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email"/></div>
       <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')loginUser()"/></div>
       <button class="btn btn-primary" style="width:100%" onclick="loginUser()">Login</button>
-      <p style="text-align:center;margin-top:14px;font-size:13px;color:#64748b">
-        No account? <a href="#" onclick="showRegister();return false;" style="color:#60a5fa">Register</a>
-      </p>
+      <p style="text-align:center;margin-top:14px;font-size:13px;color:#64748b">No account? <a href="#" onclick="showRegister();return false;" style="color:#60a5fa">Register</a></p>
     </div>
-
     <div id="registerForm" style="display:none">
       <div class="setup-wizard">
         <h3>🚀 Getting Started</h3>
@@ -133,11 +129,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
       <div class="form-group"><label>Email</label><input type="email" id="registerEmail" placeholder="your@email.com" autocomplete="email"/></div>
       <div class="form-group"><label>Password (min 6 chars)</label><input type="password" id="registerPassword" placeholder="Choose a password" autocomplete="new-password"/></div>
       <button class="btn btn-primary" style="width:100%" onclick="registerUser()">Create Account</button>
-      <p style="text-align:center;margin-top:14px;font-size:13px;color:#64748b">
-        Have an account? <a href="#" onclick="showLogin();return false;" style="color:#60a5fa">Login</a>
-      </p>
+      <p style="text-align:center;margin-top:14px;font-size:13px;color:#64748b">Have an account? <a href="#" onclick="showLoginForm();return false;" style="color:#60a5fa">Login</a></p>
     </div>
-
     <div id="firebaseConfigForm" style="display:none">
       <div class="info-box">
         ✅ Logged in! Enter your Firebase config once — it will be saved to your account and auto-loaded on any device.<br><br>
@@ -157,7 +150,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
   </div>
 </div>
 
-<!-- MAIN APP -->
 <div id="mainApp" style="display:none;width:100%">
   <div class="sidebar">
     <div class="sidebar-header">
@@ -233,7 +225,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
       <div id="songResults"><p style="color:#64748b;font-size:13px">Start typing to search…</p></div>
     </div>
     <div id="sermonSegmentForm" style="display:none">
-      <div class="form-group"><label>Select Media</label><select id="sermonSelect"><option value="">Choose Your Media</option></select></div>
+      <div class="form-group">
+        <label>Select Media</label>
+        <select id="sermonSelect"><option value="">Loading…</option></select>
+      </div>
+      <div id="sermonSelectMsg" style="font-size:12px;color:#64748b;margin-top:-10px;margin-bottom:10px"></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('addSegmentModal')">Cancel</button>
@@ -265,7 +261,6 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, on
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// ── SHARED FIREBASE (accounts + config sync) ──
 const sharedConfig = {
   apiKey: "AIzaSyCga_ur-qA08HV2otci3ivw3PkWm-Uh-OM",
   authDomain: "notey-4455f.firebaseapp.com",
@@ -287,7 +282,17 @@ window.fohWindow = null;
 window.bohWindow = null;
 window.isLive = false;
 window.selectedSong = null;
-window.presentationState = { song: null, parts: [], flatIndex: 0, sentIndex: -1, typography: {}, backgroundUrl: null };
+
+// presentationState now tracks both song and sermon modes
+window.presentationState = {
+  mode: null,           // 'song' | 'sermon'
+  // Song
+  song: null, parts: [], flatIndex: 0, sentIndex: -1,
+  // Sermon / Media
+  sermon: null, sermonSlides: [], sermonIndex: 0,
+  // Shared
+  typography: {}, backgroundUrl: null
+};
 
 function setLoading(msg) {
   document.getElementById("loadingScreen").style.display = "flex";
@@ -318,7 +323,6 @@ function showFirebaseForm() {
   document.getElementById("firebaseConfigForm").style.display = "block";
 }
 
-// ── Save Firebase config to BOTH localStorage AND shared Firestore ──
 async function persistUserFirebaseConfig(cfg) {
   localStorage.setItem("projectly_user_firebase", JSON.stringify(cfg));
   if (window.currentUser) {
@@ -328,12 +332,9 @@ async function persistUserFirebaseConfig(cfg) {
   }
 }
 
-// ── Try to get config: localStorage first, then shared Firestore ──
 async function resolveUserFirebaseConfig() {
   const local = localStorage.getItem("projectly_user_firebase");
-  if (local) {
-    try { return JSON.parse(local); } catch(e) {}
-  }
+  if (local) { try { return JSON.parse(local); } catch(e) {} }
   if (!window.currentUser) return null;
   try {
     const snap = await getDoc(doc(sharedDb, "user_configs", window.currentUser.uid));
@@ -369,17 +370,13 @@ function initUserFirebase(cfg) {
   }
 }
 
-// ── Auth state ──
 onAuthStateChanged(sharedAuth, async user => {
   if (user) {
     window.currentUser = user;
     setLoading("Fetching your config…");
     const cfg = await resolveUserFirebaseConfig();
-    if (cfg) {
-      initUserFirebase(cfg);
-    } else {
-      showFirebaseForm();
-    }
+    if (cfg) initUserFirebase(cfg);
+    else showFirebaseForm();
   } else {
     window.currentUser = null;
     showLogin();
@@ -387,19 +384,18 @@ onAuthStateChanged(sharedAuth, async user => {
 });
 
 window.saveUserFirebaseConfig = async function() {
-  const errDiv = document.getElementById("configError");
-  errDiv.style.display = "none";
+  const errDiv = document.getElementById("configError"); errDiv.style.display = "none";
   const cfg = {
-    apiKey:            document.getElementById("fb_apiKey").value.trim(),
-    authDomain:        document.getElementById("fb_authDomain").value.trim(),
-    projectId:         document.getElementById("fb_projectId").value.trim(),
-    storageBucket:     document.getElementById("fb_storageBucket").value.trim(),
+    apiKey: document.getElementById("fb_apiKey").value.trim(),
+    authDomain: document.getElementById("fb_authDomain").value.trim(),
+    projectId: document.getElementById("fb_projectId").value.trim(),
+    storageBucket: document.getElementById("fb_storageBucket").value.trim(),
     messagingSenderId: document.getElementById("fb_messagingSenderId").value.trim(),
-    appId:             document.getElementById("fb_appId").value.trim(),
-    databaseURL:       document.getElementById("fb_databaseURL").value.trim()
+    appId: document.getElementById("fb_appId").value.trim(),
+    databaseURL: document.getElementById("fb_databaseURL").value.trim()
   };
-  if (!cfg.apiKey)    { errDiv.textContent = "API Key is required.";    errDiv.style.display = "block"; return; }
-  if (!cfg.projectId) { errDiv.textContent = "Project ID is required."; errDiv.style.display = "block"; return; }
+  if (!cfg.apiKey) { errDiv.textContent="API Key is required."; errDiv.style.display="block"; return; }
+  if (!cfg.projectId) { errDiv.textContent="Project ID is required."; errDiv.style.display="block"; return; }
   Object.keys(cfg).forEach(k => { if (!cfg[k]) delete cfg[k]; });
   setLoading("Saving config…");
   await persistUserFirebaseConfig(cfg);
@@ -409,24 +405,20 @@ window.saveUserFirebaseConfig = async function() {
 window.registerUser = async function() {
   const email = document.getElementById("registerEmail").value;
   const password = document.getElementById("registerPassword").value;
-  const err = document.getElementById("loginError");
-  const ok = document.getElementById("loginSuccess");
-  err.style.display = "none"; ok.style.display = "none";
-  if (!email || !password) { err.textContent = "Fill in all fields"; err.style.display = "block"; return; }
-  try {
-    await createUserWithEmailAndPassword(sharedAuth, email, password);
-    ok.textContent = "Account created!"; ok.style.display = "block";
-  } catch(e) { err.textContent = e.message; err.style.display = "block"; }
+  const err = document.getElementById("loginError"); const ok = document.getElementById("loginSuccess");
+  err.style.display="none"; ok.style.display="none";
+  if (!email || !password) { err.textContent="Fill in all fields"; err.style.display="block"; return; }
+  try { await createUserWithEmailAndPassword(sharedAuth, email, password); ok.textContent="Account created!"; ok.style.display="block"; }
+  catch(e) { err.textContent=e.message; err.style.display="block"; }
 };
 
 window.loginUser = async function() {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
-  const err = document.getElementById("loginError");
-  err.style.display = "none";
+  const err = document.getElementById("loginError"); err.style.display="none";
   setLoading("Signing in…");
   try { await signInWithEmailAndPassword(sharedAuth, email, password); }
-  catch(e) { err.style.display = "block"; err.textContent = e.message; showLogin(); }
+  catch(e) { err.style.display="block"; err.textContent=e.message; showLogin(); }
 };
 
 window.logout = async function() {
@@ -438,6 +430,7 @@ window.logout = async function() {
 window.showRegister = () => { document.getElementById("loginForm").style.display="none"; document.getElementById("registerForm").style.display="block"; };
 window.showLoginForm = () => { document.getElementById("registerForm").style.display="none"; document.getElementById("loginForm").style.display="block"; };
 
+// ── LOAD USER DATA ──
 window.loadUserData = async function() {
   const db = window.userDb; const userId = window.currentUser.uid;
   try {
@@ -454,16 +447,15 @@ window.loadUserData = async function() {
 };
 
 window.renderPlaylists = function(playlists) {
-  const list = document.getElementById("playlistsList");
-  list.innerHTML = "";
+  const list = document.getElementById("playlistsList"); list.innerHTML = "";
   const arr = Object.entries(playlists).map(([id,data]) => ({id,...data}));
-  if (!arr.length) { list.innerHTML = '<div style="padding:8px;color:#475569;font-size:12px">No playlists yet</div>'; return; }
+  if (!arr.length) { list.innerHTML='<div style="padding:8px;color:#475569;font-size:12px">No playlists yet</div>'; return; }
   arr.forEach(pl => {
-    const div = document.createElement("div"); div.className = "playlist-item";
-    const info = document.createElement("div"); info.className = "playlist-item-info";
-    info.innerHTML = `<div class="item-name">${pl.name}</div><div class="item-count">${(pl.segments||[]).length} segments</div>`;
+    const div = document.createElement("div"); div.className="playlist-item";
+    const info = document.createElement("div"); info.className="playlist-item-info";
+    info.innerHTML=`<div class="item-name">${pl.name}</div><div class="item-count">${(pl.segments||[]).length} segments</div>`;
     info.onclick = () => selectPlaylist(pl.id, pl, div);
-    const rm = document.createElement("button"); rm.className = "item-remove-btn"; rm.textContent = "×"; rm.title = "Delete playlist";
+    const rm = document.createElement("button"); rm.className="item-remove-btn"; rm.textContent="×"; rm.title="Delete playlist";
     rm.onclick = e => { e.stopPropagation(); removePlaylist(pl.id, pl.name); };
     div.appendChild(info); div.appendChild(rm); list.appendChild(div);
   });
@@ -475,7 +467,7 @@ window.removePlaylist = async function(id, name) {
   if (window.currentPlaylist?.id === id) {
     window.currentPlaylist = null;
     document.getElementById("segmentsList").innerHTML = "";
-    document.getElementById("contentArea").innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#0a0d14"><div class="slides-panel-empty"><h3>Select a playlist</h3></div></div>';
+    document.getElementById("contentArea").innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#0a0d14"><div class="slides-panel-empty"><h3>Select a playlist</h3></div></div>';
   }
 };
 
@@ -488,13 +480,14 @@ window.selectPlaylist = function(id, data, el) {
 
 window.renderSegments = function(segments) {
   const list = document.getElementById("segmentsList"); list.innerHTML = "";
-  if (!segments.length) { list.innerHTML = '<div style="padding:8px;color:#475569;font-size:12px">No segments yet</div>'; return; }
+  if (!segments.length) { list.innerHTML='<div style="padding:8px;color:#475569;font-size:12px">No segments yet</div>'; return; }
   segments.forEach((seg, i) => {
-    const div = document.createElement("div"); div.className = "segment-item"; div.dataset.index = i;
-    const info = document.createElement("div"); info.className = "segment-item-info";
-    info.innerHTML = `<div class="item-name">${seg.name||seg.type}</div><div class="item-count">${seg.type}</div>`;
+    const div = document.createElement("div"); div.className="segment-item"; div.dataset.index=i;
+    const info = document.createElement("div"); info.className="segment-item-info";
+    const typeLabel = seg.type === "sermon" ? "📽 Media" : "🎵 Song";
+    info.innerHTML=`<div class="item-name">${seg.name||seg.type}</div><div class="item-count">${typeLabel}</div>`;
     info.onclick = () => selectSegment(seg, i, div);
-    const rm = document.createElement("button"); rm.className = "item-remove-btn"; rm.textContent = "×";
+    const rm = document.createElement("button"); rm.className="item-remove-btn"; rm.textContent="×";
     rm.onclick = e => { e.stopPropagation(); removeSegment(i); };
     div.appendChild(info); div.appendChild(rm); list.appendChild(div);
   });
@@ -516,6 +509,7 @@ window.selectSegment = function(seg, index, el) {
   displaySegmentContent(seg);
 };
 
+// ── DISPLAY SEGMENT CONTENT ──
 window.displaySegmentContent = async function(seg) {
   if (seg.type === "song") {
     try {
@@ -523,20 +517,27 @@ window.displaySegmentContent = async function(seg) {
       if (snap.exists()) renderSongInterface(snap.data(), window.presentationState.typography);
       else showContentError("Song not found.");
     } catch(e) { showContentError("Error: " + e.message); }
-  } else {
-    document.getElementById("contentArea").innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#0a0d14"><div class="slides-panel-empty"><h3>Sermon Slides — coming soon</h3></div></div>`;
+  } else if (seg.type === "sermon") {
+    if (!seg.sermonId) { showContentError("Media item has no ID — try re-adding the segment."); return; }
+    try {
+      const snap = await getDoc(doc(window.userDb, "sermons", seg.sermonId));
+      if (snap.exists()) renderSermonInterface(snap.data());
+      else showContentError("Media item not found in database.");
+    } catch(e) { showContentError("Error loading media: " + e.message); }
   }
 };
 
 function showContentError(msg) {
-  document.getElementById("contentArea").innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#0a0d14"><div class="slides-panel-empty"><h3 style="color:#f87171">Error</h3><p style="color:#374151">${msg}</p></div></div>`;
+  document.getElementById("contentArea").innerHTML=`<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#0a0d14"><div class="slides-panel-empty"><h3 style="color:#f87171">Error</h3><p style="color:#374151">${msg}</p></div></div>`;
 }
 
+// ── SONG INTERFACE ──
 window.renderSongInterface = function(song, typography) {
   const ps = window.presentationState;
-  ps.song = song; ps.flatIndex = 0; ps.sentIndex = -1; ps.parts = [];
-  song.parts.forEach((part, pi) => part.slides.forEach((slide, si) => ps.parts.push({ partIndex: pi, slideIndex: si, text: slide, partLabel: part.label })));
-  document.getElementById("contentArea").innerHTML = `<div class="slides-panel" id="slidesPanel" tabindex="0"></div>`;
+  ps.mode = "song"; ps.song = song; ps.flatIndex = 0; ps.sentIndex = -1; ps.parts = [];
+  ps.sermon = null; ps.sermonSlides = []; ps.sermonIndex = 0;
+  song.parts.forEach((part, pi) => part.slides.forEach((slide, si) => ps.parts.push({ partIndex:pi, slideIndex:si, text:slide, partLabel:part.label })));
+  document.getElementById("contentArea").innerHTML=`<div class="slides-panel" id="slidesPanel" tabindex="0"></div>`;
   renderSlideGrid(song, typography);
   focusSlide(0, false);
   const panel = document.getElementById("slidesPanel");
@@ -549,15 +550,15 @@ window.renderSlideGrid = function(song, typography) {
   const ps = window.presentationState; const bgUrl = ps.backgroundUrl;
   const textStyle = buildTextStyle(typography, true);
   song.parts.forEach((part, pi) => {
-    const section = document.createElement("div"); section.className = "part-section"; section.dataset.partIndex = pi;
-    const label = document.createElement("div"); label.className = "part-section-label"; label.textContent = part.label;
+    const section = document.createElement("div"); section.className="part-section"; section.dataset.partIndex=pi;
+    const label = document.createElement("div"); label.className="part-section-label"; label.textContent=part.label;
     section.appendChild(label);
-    const grid = document.createElement("div"); grid.className = "slides-grid";
+    const grid = document.createElement("div"); grid.className="slides-grid";
     ps.parts.forEach((item, fi) => {
       if (item.partIndex !== pi) return;
-      const card = document.createElement("div"); card.className = "slide-card"; card.dataset.fi = fi; card.tabIndex = -1;
-      if (bgUrl) card.style.backgroundImage = `url('${bgUrl}')`;
-      card.innerHTML = `<div class="slide-text" style="${textStyle}">${item.text}</div><div class="slide-index">${item.slideIndex+1}</div>`;
+      const card = document.createElement("div"); card.className="slide-card"; card.dataset.fi=fi; card.tabIndex=-1;
+      if (bgUrl) card.style.backgroundImage=`url('${bgUrl}')`;
+      card.innerHTML=`<div class="slide-text" style="${textStyle}">${item.text}</div><div class="slide-index">${item.slideIndex+1}</div>`;
       card.onclick = () => { focusSlide(fi, false); sendSlide(fi); };
       grid.appendChild(card);
     });
@@ -578,10 +579,10 @@ window.focusSlide = function(fi, scroll=true) {
   const card = document.querySelector(`.slide-card[data-fi="${fi}"]`);
   if (card) { card.classList.add("active"); if (scroll) card.scrollIntoView({block:"nearest",behavior:"smooth"}); }
   const item = ps.parts[fi];
-  document.querySelectorAll(".part-section-label").forEach(l => l.style.color = "#475569");
+  document.querySelectorAll(".part-section-label").forEach(l => l.style.color="#475569");
   const sl = document.querySelector(`.part-section[data-part-index="${item.partIndex}"] .part-section-label`);
-  if (sl) sl.style.color = "#60a5fa";
-  document.getElementById("currentSlideInfo").textContent = `${item.partLabel} — ${item.slideIndex+1}/${ps.song.parts[item.partIndex].slides.length}  (${fi+1}/${ps.parts.length} total)`;
+  if (sl) sl.style.color="#60a5fa";
+  document.getElementById("currentSlideInfo").textContent=`${item.partLabel} — ${item.slideIndex+1}/${ps.song.parts[item.partIndex].slides.length}  (${fi+1}/${ps.parts.length} total)`;
 };
 
 window.sendSlide = function(fi) {
@@ -600,6 +601,128 @@ window.sendSlide = function(fi) {
   if (window.bohWindow && !window.bohWindow.closed) window.bohWindow.postMessage(bohMsg,"*");
 };
 
+// ── SERMON / MEDIA INTERFACE ──
+window.renderSermonInterface = function(sermon) {
+  const ps = window.presentationState;
+  ps.mode = "sermon"; ps.sermon = sermon; ps.sermonIndex = 0;
+  ps.song = null; ps.parts = []; ps.sentIndex = -1;
+
+  const slides = sermon.slides || [];
+  const types = sermon.slideTypes || slides.map(() => "image");
+  const names = sermon.slideNames || slides.map(() => "");
+  ps.sermonSlides = slides.map((url, i) => ({ url, type: types[i]||"image", name: names[i]||"" }));
+
+  if (!ps.sermonSlides.length) {
+    showContentError("This media item has no slides. Add slides in Admin → Media.");
+    return;
+  }
+
+  document.getElementById("contentArea").innerHTML=`<div class="slides-panel" id="slidesPanel" tabindex="0"></div>`;
+  const panel = document.getElementById("slidesPanel");
+
+  // Section header
+  const section = document.createElement("div"); section.className="part-section";
+  const labelEl = document.createElement("div"); labelEl.className="part-section-label"; labelEl.textContent=sermon.title;
+  section.appendChild(labelEl);
+
+  const grid = document.createElement("div"); grid.className="slides-grid";
+
+  ps.sermonSlides.forEach((slide, i) => {
+    const card = document.createElement("div"); card.className="slide-card"; card.dataset.si=i;
+
+    if (slide.type === "image") {
+      card.style.backgroundImage=`url('${slide.url}')`;
+      card.style.backgroundSize="cover";
+      card.style.backgroundPosition="center";
+      card.innerHTML=`<div class="slide-index">${i+1}</div>`;
+    } else if (slide.type === "video") {
+      card.style.background="#0c1f3a";
+      card.innerHTML=`<div style="font-size:32px;text-align:center">🎬</div><div class="slide-index">${i+1}</div>${slide.name?`<div class="media-card-label">${slide.name}</div>`:''}`;
+    } else if (slide.type === "pdf") {
+      card.style.background="#1f0a0a";
+      card.innerHTML=`<div style="font-size:32px;text-align:center;color:#f87171">📄</div><div style="font-size:9px;color:#f87171;text-align:center;padding:2px 4px">PDF</div><div class="slide-index">${i+1}</div>${slide.name?`<div class="media-card-label" style="color:#f87171">${slide.name}</div>`:''}`;
+    } else if (slide.type === "pptx") {
+      card.style.background="#0a1a0f";
+      card.innerHTML=`<div style="font-size:32px;text-align:center;color:#4ade80">📊</div><div style="font-size:9px;color:#4ade80;text-align:center;padding:2px 4px">PPTX</div><div class="slide-index">${i+1}</div>${slide.name?`<div class="media-card-label" style="color:#4ade80">${slide.name}</div>`:''}`;
+    } else {
+      card.style.background="#0c1f3a";
+      card.innerHTML=`<div style="font-size:32px;text-align:center">🎬</div><div class="slide-index">${i+1}</div>`;
+    }
+
+    card.onclick = () => { focusSermonSlide(i, false); sendSermonSlide(i); };
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid); panel.appendChild(section);
+  focusSermonSlide(0, false);
+  panel.focus();
+  panel.onkeydown = handleSlideKeyDown;
+};
+
+window.focusSermonSlide = function(i, scroll=true) {
+  const ps = window.presentationState;
+  if (i < 0 || i >= ps.sermonSlides.length) return;
+  ps.sermonIndex = i;
+  document.querySelectorAll(".slide-card").forEach(c => c.classList.remove("active"));
+  const card = document.querySelector(`.slide-card[data-si="${i}"]`);
+  if (card) { card.classList.add("active"); if (scroll) card.scrollIntoView({block:"nearest",behavior:"smooth"}); }
+  const slide = ps.sermonSlides[i];
+  document.getElementById("currentSlideInfo").textContent=`${ps.sermon.title} · Slide ${i+1} of ${ps.sermonSlides.length}${slide.name?" — "+slide.name:""}`;
+};
+
+window.sendSermonSlide = function(i) {
+  const ps = window.presentationState;
+  if (i < 0 || i >= ps.sermonSlides.length) return;
+  ps.sermonIndex = i;
+  document.querySelectorAll(".slide-card").forEach(c => c.classList.remove("sent"));
+  const card = document.querySelector(`.slide-card[data-si="${i}"]`);
+  if (card) card.classList.add("sent");
+  if (!window.isLive) return;
+  const slide = ps.sermonSlides[i];
+  const nextSlide = i+1 < ps.sermonSlides.length ? ps.sermonSlides[i+1] : null;
+  const fadeTime = parseInt(document.getElementById("fadeTime").value)||0;
+  const fohMsg = {
+    type: "display",
+    content: { type: "media", url: slide.url, mediaType: slide.type },
+    fadeTime,
+    backgroundUrl: ps.backgroundUrl||null
+  };
+  const bohMsg = {
+    type: "display",
+    content: { type: "media", url: slide.url, mediaType: slide.type, name: slide.name },
+    next: nextSlide ? { type: "media", url: nextSlide.url, mediaType: nextSlide.type, name: nextSlide.name } : null,
+    currentIndex: i+1,
+    totalSlides: ps.sermonSlides.length,
+    songTitle: ps.sermon.title
+  };
+  if (window.fohWindow && !window.fohWindow.closed) window.fohWindow.postMessage(fohMsg,"*");
+  if (window.bohWindow && !window.bohWindow.closed) window.bohWindow.postMessage(bohMsg,"*");
+};
+
+// ── UNIFIED KEY HANDLER ──
+window.handleSlideKeyDown = function(e) {
+  const ps = window.presentationState;
+  if (ps.mode === "song") {
+    if (!ps.parts.length) return;
+    if (e.key==="ArrowRight"||e.key==="ArrowDown") { e.preventDefault(); focusSlide(ps.flatIndex+1,true); }
+    else if (e.key==="ArrowLeft"||e.key==="ArrowUp") { e.preventDefault(); focusSlide(ps.flatIndex-1,true); }
+    else if (e.key===" "||e.key==="Enter") { e.preventDefault(); sendSlide(ps.flatIndex); }
+  } else if (ps.mode === "sermon") {
+    if (!ps.sermonSlides.length) return;
+    if (e.key==="ArrowRight"||e.key==="ArrowDown") { e.preventDefault(); focusSermonSlide(ps.sermonIndex+1,true); }
+    else if (e.key==="ArrowLeft"||e.key==="ArrowUp") { e.preventDefault(); focusSermonSlide(ps.sermonIndex-1,true); }
+    else if (e.key===" "||e.key==="Enter") { e.preventDefault(); sendSermonSlide(ps.sermonIndex); }
+  }
+};
+
+document.addEventListener("keydown", e => {
+  if (["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName)) return;
+  const ps = window.presentationState;
+  const hasContent = (ps.mode==="song" && ps.parts.length) || (ps.mode==="sermon" && ps.sermonSlides.length);
+  if (!hasContent) return;
+  if (["ArrowRight","ArrowLeft","ArrowUp","ArrowDown"," "].includes(e.key)) { e.preventDefault(); handleSlideKeyDown(e); }
+});
+
 window.sendBlank = function() {
   if (!window.isLive) return;
   const msg = { type:"display", content:{type:"blank"}, next:null };
@@ -608,37 +731,25 @@ window.sendBlank = function() {
   document.querySelectorAll(".slide-card").forEach(c => c.classList.remove("sent"));
 };
 
-window.handleSlideKeyDown = function(e) {
-  const ps = window.presentationState; if (!ps.parts.length) return;
-  if (e.key==="ArrowRight"||e.key==="ArrowDown") { e.preventDefault(); focusSlide(ps.flatIndex+1,true); }
-  else if (e.key==="ArrowLeft"||e.key==="ArrowUp") { e.preventDefault(); focusSlide(ps.flatIndex-1,true); }
-  else if (e.key===" "||e.key==="Enter") { e.preventDefault(); sendSlide(ps.flatIndex); }
-};
-
-document.addEventListener("keydown", e => {
-  if (["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName)) return;
-  if (!window.presentationState.parts.length) return;
-  if (["ArrowRight","ArrowLeft","ArrowUp","ArrowDown"," "].includes(e.key)) { e.preventDefault(); handleSlideKeyDown(e); }
-});
-
+// ── SONG SEARCH ──
 window.searchSongs = async function() {
   const term = document.getElementById("songSearch").value.trim().toLowerCase();
   const resultsDiv = document.getElementById("songResults");
-  if (!term) { resultsDiv.innerHTML = '<p style="color:#64748b;font-size:13px">Start typing to search…</p>'; return; }
-  resultsDiv.innerHTML = '<p style="color:#64748b;font-size:13px">Searching…</p>';
+  if (!term) { resultsDiv.innerHTML='<p style="color:#64748b;font-size:13px">Start typing to search…</p>'; return; }
+  resultsDiv.innerHTML='<p style="color:#64748b;font-size:13px">Searching…</p>';
   try {
     const snap = await getDocs(collection(window.userDb, "songs"));
     const scored = [];
     snap.forEach(d => {
-      const s = d.data(); const title = (s.title||"").toLowerCase(); const author = (s.author||"").toLowerCase();
-      let score = 0;
-      if (title===term) score=100; else if (title.startsWith(term)) score=80; else if (title.includes(term)) score=60; else if (author.includes(term)) score=30; else return;
+      const s = d.data(); const title=(s.title||"").toLowerCase(); const author=(s.author||"").toLowerCase();
+      let score=0;
+      if(title===term) score=100; else if(title.startsWith(term)) score=80; else if(title.includes(term)) score=60; else if(author.includes(term)) score=30; else return;
       scored.push({ id:d.id, score, ...s });
     });
-    scored.sort((a,b) => b.score-a.score);
-    if (!scored.length) { resultsDiv.innerHTML = '<p style="color:#64748b;font-size:13px">No songs found</p>'; return; }
-    resultsDiv.innerHTML = scored.map(s => `<div class="song-result" onclick="selectSong('${s.id}','${(s.title||'').replace(/'/g,"\\'")}',this)"><div class="song-result-title">${s.title}</div><div class="song-result-meta">${s.author||'Unknown'} • ${s.parts?s.parts.length:0} parts</div></div>`).join("");
-  } catch(e) { resultsDiv.innerHTML = `<p style="color:#f87171;font-size:13px">Error: ${e.message}</p>`; }
+    scored.sort((a,b)=>b.score-a.score);
+    if(!scored.length){ resultsDiv.innerHTML='<p style="color:#64748b;font-size:13px">No songs found</p>'; return; }
+    resultsDiv.innerHTML=scored.map(s=>`<div class="song-result" onclick="selectSong('${s.id}','${(s.title||'').replace(/'/g,"\\'")}',this)"><div class="song-result-title">${s.title}</div><div class="song-result-meta">${s.author||'Unknown'} • ${s.parts?s.parts.length:0} parts</div></div>`).join("");
+  } catch(e){ resultsDiv.innerHTML=`<p style="color:#f87171;font-size:13px">Error: ${e.message}</p>`; }
 };
 
 window.selectSong = function(id, title, el) {
@@ -647,19 +758,56 @@ window.selectSong = function(id, title, el) {
   el.classList.add("selected");
 };
 
+// ── LOAD SERMONS INTO DROPDOWN ──
+window.loadSermonsIntoSelect = async function() {
+  const select = document.getElementById("sermonSelect");
+  const msg = document.getElementById("sermonSelectMsg");
+  select.innerHTML='<option value="">Loading…</option>';
+  msg.textContent="";
+  try {
+    const snap = await getDocs(collection(window.userDb, "sermons"));
+    if (snap.empty) {
+      select.innerHTML='<option value="">No media yet — add some in Admin → Media</option>';
+      msg.textContent="Go to Admin → Media to add sermon slides, images, PDFs, or videos.";
+      return;
+    }
+    select.innerHTML='<option value="">Choose your media…</option>';
+    snap.forEach(d => {
+      const opt = document.createElement("option");
+      opt.value = d.id;
+      const s = d.data();
+      const count = s.slides ? s.slides.length : 0;
+      opt.textContent = `${s.title} (${count} slide${count!==1?'s':''})`;
+      select.appendChild(opt);
+    });
+  } catch(e) {
+    select.innerHTML='<option value="">Error loading media</option>';
+    msg.textContent="Error: " + e.message;
+  }
+};
+
+// ── MODALS ──
 window.showAddPlaylistModal = () => document.getElementById("addPlaylistModal").classList.add("active");
+
 window.showAddSegmentModal = () => {
   if (!window.currentPlaylist) { alert("Select a playlist first"); return; }
   document.getElementById("addSegmentModal").classList.add("active");
-  document.getElementById("songSearch").value = "";
-  document.getElementById("songResults").innerHTML = '<p style="color:#64748b;font-size:13px">Start typing to search…</p>';
+  document.getElementById("songSearch").value="";
+  document.getElementById("songResults").innerHTML='<p style="color:#64748b;font-size:13px">Start typing to search…</p>';
   window.selectedSong = null;
+  // Reset to song type
+  document.getElementById("segmentType").value="song";
+  document.getElementById("songSegmentForm").style.display="block";
+  document.getElementById("sermonSegmentForm").style.display="none";
 };
+
 window.onSegmentTypeChange = () => {
   const t = document.getElementById("segmentType").value;
   document.getElementById("songSegmentForm").style.display = t==="song"?"block":"none";
   document.getElementById("sermonSegmentForm").style.display = t==="sermon"?"block":"none";
+  if (t === "sermon") loadSermonsIntoSelect();
 };
+
 window.closeModal = id => document.getElementById(id).classList.remove("active");
 
 window.addPlaylist = async function() {
@@ -667,39 +815,51 @@ window.addPlaylist = async function() {
   if (!name) { alert("Enter a name"); return; }
   const id = Date.now().toString();
   await set(ref(window.userRtdb, `users/${window.currentUser.uid}/playlists/${id}`), { name, segments:[], createdAt:new Date().toISOString() });
-  document.getElementById("playlistName").value = ""; closeModal("addPlaylistModal");
+  document.getElementById("playlistName").value=""; closeModal("addPlaylistModal");
 };
 
 window.addSegment = async function() {
   if (!window.currentPlaylist) { alert("Select a playlist first"); return; }
   const type = document.getElementById("segmentType").value;
   let seg = { type };
+
   if (type === "song") {
-    if (!window.selectedSong) { alert("Select a song"); return; }
-    seg.songId = window.selectedSong.id; seg.name = window.selectedSong.title;
+    if (!window.selectedSong) { alert("Select a song first"); return; }
+    seg.songId = window.selectedSong.id;
+    seg.name = window.selectedSong.title;
+  } else if (type === "sermon") {
+    const select = document.getElementById("sermonSelect");
+    const sermonId = select.value;
+    if (!sermonId) { alert("Select a media item"); return; }
+    seg.sermonId = sermonId;
+    seg.name = select.options[select.selectedIndex].text.replace(/\s*\(\d+ slides?\)$/, "").trim();
   }
+
   const segs = [...(window.currentPlaylist.segments||[]), seg];
   await set(ref(window.userRtdb, `users/${window.currentUser.uid}/playlists/${window.currentPlaylist.id}/segments`), segs);
-  window.currentPlaylist.segments = segs; renderSegments(segs); closeModal("addSegmentModal");
+  window.currentPlaylist.segments = segs;
+  renderSegments(segs);
+  closeModal("addSegmentModal");
   window.selectedSong = null;
   const newEl = document.querySelector(`.segment-item[data-index="${segs.length-1}"]`);
   if (newEl) selectSegment(seg, segs.length-1, newEl);
 };
 
+// ── GO LIVE ──
 window.goLive = () => document.getElementById("goLiveModal").classList.add("active");
 window.openFOH = () => {
   if (!window.fohWindow || window.fohWindow.closed) {
     window.fohWindow = window.open("foh.html","FOH","width=1920,height=1080");
-    document.getElementById("fohStatus").textContent = "Opened";
-    document.getElementById("fohStatus").style.color = "#22c55e";
+    document.getElementById("fohStatus").textContent="Opened";
+    document.getElementById("fohStatus").style.color="#22c55e";
     checkSetupComplete();
   }
 };
 window.openBOH = () => {
   if (!window.bohWindow || window.bohWindow.closed) {
     window.bohWindow = window.open("boh.html","BOH","width=1280,height=720");
-    document.getElementById("bohStatus").textContent = "Opened";
-    document.getElementById("bohStatus").style.color = "#22c55e";
+    document.getElementById("bohStatus").textContent="Opened";
+    document.getElementById("bohStatus").style.color="#22c55e";
     checkSetupComplete();
   }
 };
@@ -707,9 +867,9 @@ window.checkSetupComplete = () => { document.getElementById("completeSetupBtn").
 window.completeSetup = () => {
   window.isLive = true;
   const ind = document.getElementById("liveIndicator");
-  ind.classList.add("active"); ind.querySelector("span:last-child").textContent = "Live";
-  document.getElementById("stopBtn").style.display = "block";
-  document.getElementById("blankBtn").style.display = "block";
+  ind.classList.add("active"); ind.querySelector("span:last-child").textContent="Live";
+  document.getElementById("stopBtn").style.display="block";
+  document.getElementById("blankBtn").style.display="block";
   closeModal("goLiveModal");
   const initMsg = { type:"init", fadeTime:parseInt(document.getElementById("fadeTime").value)||0, enableSongFade:document.getElementById("enableSongFade").checked, backgroundUrl:window.presentationState.backgroundUrl||null };
   if (window.fohWindow && !window.fohWindow.closed) window.fohWindow.postMessage(initMsg,"*");
@@ -718,8 +878,8 @@ window.completeSetup = () => {
 window.stopPresentation = () => {
   window.isLive = false;
   const ind = document.getElementById("liveIndicator");
-  ind.classList.remove("active"); ind.querySelector("span:last-child").textContent = "Offline";
-  document.getElementById("stopBtn").style.display = "none"; document.getElementById("blankBtn").style.display = "none";
+  ind.classList.remove("active"); ind.querySelector("span:last-child").textContent="Offline";
+  document.getElementById("stopBtn").style.display="none"; document.getElementById("blankBtn").style.display="none";
   const msg = { type:"display", content:{type:"blank"}, next:null };
   if (window.fohWindow && !window.fohWindow.closed) window.fohWindow.postMessage(msg,"*");
   if (window.bohWindow && !window.bohWindow.closed) window.bohWindow.postMessage(msg,"*");
