@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DEADZONE — V3</title>
+<title>DEADZONE — 3D Shooter</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; }
@@ -59,6 +59,30 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 #pause-sub { color: rgba(255,255,255,0.35); letter-spacing: 4px; font-size: 12px; margin-bottom: 36px; }
 #game-over-title { font-size: 60px; letter-spacing: 8px; color: #ff4444; margin-bottom: 12px; }
 #final-score { font-size: 22px; color: rgba(255,255,255,0.65); margin: 0 0 32px; letter-spacing: 4px; }
+/* Floating pickup labels */
+.pickup-label {
+  position: absolute;
+  pointer-events: none;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+}
+.pickup-label-name {
+  color: #ffcc44;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(255,180,0,0.8);
+  display: block;
+}
+.pickup-label-hint {
+  color: rgba(255,255,255,0.45);
+  font-size: 9px;
+  letter-spacing: 2px;
+  display: block;
+  margin-top: 2px;
+}
+#pickup-labels { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:20; }
 </style>
 </head>
 <body>
@@ -76,15 +100,16 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
   <div id="weapon-slots"></div>
   <div id="wave-announce"></div>
 </div>
+<div id="pickup-labels"></div>
 <div id="start-screen" class="screen active">
   <div class="game-title">DEADZONE</div>
   <div class="subtitle">Survival Shooter</div>
   <button class="btn btn-primary" id="start-btn">CLICK TO PLAY</button>
   <div class="controls-hint">
     WASD — Move &nbsp;|&nbsp; Mouse — Aim &nbsp;|&nbsp; Click — Shoot<br>
-    R — Reload &nbsp;|&nbsp; Shift — Sprint &nbsp;|&nbsp; Space — Jump<br>
-    E — Pick Up Weapon &nbsp;|&nbsp; 1 / 2 / 3 — Switch Weapon<br>
-    ESC — Pause &nbsp;|&nbsp; Jump on top of crates for height advantage
+    R — Reload &nbsp;|&nbsp; Shift — Sprint &nbsp;|&nbsp; Space — Jump (Higher!)<br>
+    E — Pick Up Weapon &nbsp;|&nbsp; Q — Drop Weapon<br>
+    1 / 2 / 3 — Switch Weapon &nbsp;|&nbsp; ESC — Pause
   </div>
 </div>
 <div id="pause-screen" class="screen">
@@ -162,6 +187,12 @@ const WDEFS={
 
 // GUN MODEL
 const gunGroup=new THREE.Group(); camera.add(gunGroup);
+
+// Reload animation state
+let reloadAnimT=0, reloadAnimating=false;
+const GUN_BASE_POS={x:0,y:0,z:0};
+const GUN_BASE_ROT={x:0,y:0,z:0};
+
 function buildGun(def){
   gunGroup.clear();
   const dk=new THREE.MeshStandardMaterial({color:def.color,roughness:0.3,metalness:0.9});
@@ -176,22 +207,26 @@ function buildGun(def){
   else if(n==='Sniper'){mk(0.06,0.1,0.6,0.25,-0.2,-0.55,dk);mc(0.018,0.022,0.8,0.25,-0.17,-0.95,Math.PI/2,dk);mk(0.05,0.14,0.07,0.25,-0.29,-0.54,lk);mk(0.06,0.09,0.28,0.25,-0.21,-0.28,tn);const sc=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.22,8),lk);sc.position.set(0.25,-0.135,-0.55);sc.rotation.x=Math.PI/2;gunGroup.add(sc);}
   else{mk(0.06,0.1,0.4,0.25,-0.2,-0.5,dk);mc(0.015,0.018,0.5,0.25,-0.17,-0.75,Math.PI/2,dk);mk(0.045,0.15,0.06,0.25,-0.28,-0.48,lk);mk(0.055,0.08,0.15,0.25,-0.21,-0.3,tn);mk(0.03,0.02,0.3,0.25,-0.145,-0.55,lk);mk(0.01,0.03,0.01,0.25,-0.13,-0.7,dk);}
   const fp=new THREE.Object3D();fp.position.set(0.25,-0.17,-1.05);fp.name='muzzleFlash';gunGroup.add(fp);
+
+  // Reset reload animation
+  reloadAnimT=0; reloadAnimating=false;
+  gunGroup.position.set(0,0,0);
+  gunGroup.rotation.set(0,0,0);
 }
 const flashM=new THREE.Mesh(new THREE.PlaneGeometry(0.2,0.2),new THREE.MeshBasicMaterial({color:0xffaa00,transparent:true,opacity:0,side:THREE.DoubleSide}));
 flashM.position.set(0.25,-0.17,-1.0);camera.add(flashM);
 
 // PLAYER STATE
-// gameState: 'start' | 'playing' | 'paused' | 'gameover'
 let gameState='start';
 let playerHp=100,score=0,wave=1;
 let isReloading=false,reloadTime=0;
 let gunRecoil=0,gunBobT=0,shootCooldown=0;
 let waveLeft=0,waveSpawned=0,waveTimer=0,waveTotal=0,waveComplete=false;
 
-// Physics
-const P_RADIUS=0.4, P_EYE=1.7, P_HEAD=0.15; // eye above feet, head above eye
+// Physics — increased jump height
+const P_RADIUS=0.4, P_EYE=1.7, P_HEAD=0.15;
 let velY=0, onGround=true;
-const GRAVITY=-0.022, JUMP_V=0.28;
+const GRAVITY=-0.022, JUMP_V=0.44; // was 0.28 — much higher now
 
 // Inventory
 const inventory=[null,null,null];
@@ -202,42 +237,27 @@ const aw=()=>inventory[activeSlot];
 const keys={};
 let yaw=0,pitch=0,locked=false;
 
-// ── PHYSICS: movePlayer with proper top-of-box landing ──
+// ── PHYSICS: movePlayer ──
 function movePlayer(dx,dz){
-  // Current feet position
   let fx=camera.position.x, fy=camera.position.y-P_EYE, fz=camera.position.z;
-  const PH=P_EYE+P_HEAD; // total player height
+  const PH=P_EYE+P_HEAD;
   const PR=P_RADIUS;
-
-  // Apply gravity
   velY+=GRAVITY;
   let nfy=fy+velY;
   let nfx=fx+dx, nfz=fz+dz;
   onGround=false;
-
-  // Ground
   if(nfy<=0){nfy=0;velY=0;onGround=true;}
-
-  // Obstacles — resolve Y first, then XZ
   for(const o of allObstacles){
     const hw=o.w/2+PR, hd=o.d/2+PR;
-    // Horizontal overlap with proposed position
     const inX=Math.abs(nfx-o.x)<hw;
     const inZ=Math.abs(nfz-o.z)<hd;
     if(!inX||!inZ)continue;
     const obsTop=o.h, obsBot=0;
     const pTop=nfy+PH, pBot=nfy;
-    if(pTop<=obsBot||pBot>=obsTop)continue; // no vertical overlap
-
-    // Was player above the box top last frame? (landing on top)
+    if(pTop<=obsBot||pBot>=obsTop)continue;
     const prevFy=fy;
-    if(prevFy>=obsTop-0.05&&velY<=0){
-      nfy=obsTop; velY=0; onGround=true; continue;
-    }
-    // Ceiling
+    if(prevFy>=obsTop-0.05&&velY<=0){nfy=obsTop;velY=0;onGround=true;continue;}
     if(prevFy+PH<=obsBot+0.1&&velY>0){velY=0;}
-
-    // Horizontal pushout
     const wasInX=Math.abs(fx-o.x)<hw;
     const wasInZ=Math.abs(fz-o.z)<hd;
     if(!wasInX){nfx=o.x+(nfx>o.x?hw:-hw);}
@@ -247,8 +267,6 @@ function movePlayer(dx,dz){
       if(px<pz)nfx=o.x+(nfx>o.x?hw:-hw); else nfz=o.z+(nfz>o.z?hd:-hd);
     }
   }
-
-  // Arena boundary
   nfx=Math.max(-ARENA,Math.min(ARENA,nfx));
   nfz=Math.max(-ARENA,Math.min(ARENA,nfz));
   camera.position.set(nfx,nfy+P_EYE,nfz);
@@ -270,45 +288,27 @@ function buildEnemy(type){
   const hm=new THREE.MeshStandardMaterial({color:new THREE.Color(type.color).multiplyScalar(0.65),roughness:0.5,emissive:type.color,emissiveIntensity:0.25});
   const em=new THREE.MeshBasicMaterial({color:0xff4400});
   const ab=(g,w,h,d,x,y,z,m)=>{const ms=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m||bm);ms.position.set(x,y,z);ms.castShadow=true;g.add(ms);return ms;};
-
-  // Torso group — moves for body bob
   const torso=new THREE.Group(); torso.position.y=0.85*s; root.add(torso);
   ab(torso,0.6*s,0.75*s,0.38*s,0,0,0);
-
-  // Head
   const headG=new THREE.Group(); headG.position.y=0.52*s; torso.add(headG);
   const hd=new THREE.Mesh(new THREE.SphereGeometry(0.25*s,8,8),hm); hd.castShadow=true; headG.add(hd);
   [-0.1,0.1].forEach(ex=>{const e=new THREE.Mesh(new THREE.SphereGeometry(0.06*s,6,6),em);e.position.set(ex*s,0.05*s,0.22*s);headG.add(e);});
-
-  // Arms — pivot groups at shoulder
-  const mkArm=side=>{
-    const piv=new THREE.Group(); piv.position.set(side*0.43*s,0.28*s,0); torso.add(piv);
-    ab(piv,0.17*s,0.60*s,0.17*s,0,-0.30*s,0); return piv;
-  };
-  const lA=mkArm(-1), rA=mkArm(1);
-
-  // Legs — pivot groups at hip bottom of torso
-  const mkLeg=side=>{
-    const piv=new THREE.Group(); piv.position.set(side*0.19*s,-0.38*s,0); torso.add(piv);
-    ab(piv,0.20*s,0.55*s,0.20*s,0,-0.28*s,0); return piv;
-  };
-  const lL=mkLeg(-1), rL=mkLeg(1);
-
-  // Health bar
+  const mkArm=side=>{const piv=new THREE.Group();piv.position.set(side*0.43*s,0.28*s,0);torso.add(piv);ab(piv,0.17*s,0.60*s,0.17*s,0,-0.30*s,0);return piv;};
+  const lA=mkArm(-1),rA=mkArm(1);
+  const mkLeg=side=>{const piv=new THREE.Group();piv.position.set(side*0.19*s,-0.38*s,0);torso.add(piv);ab(piv,0.20*s,0.55*s,0.20*s,0,-0.28*s,0);return piv;};
+  const lL=mkLeg(-1),rL=mkLeg(1);
   const hbBg=new THREE.Mesh(new THREE.PlaneGeometry(0.8*s,0.08*s),new THREE.MeshBasicMaterial({color:0x330000,side:THREE.DoubleSide}));
-  hbBg.position.set(0,2.15*s,0); root.add(hbBg);
+  hbBg.position.set(0,2.15*s,0);root.add(hbBg);
   const hb=new THREE.Mesh(new THREE.PlaneGeometry(0.8*s,0.08*s),new THREE.MeshBasicMaterial({color:0x00ff44,side:THREE.DoubleSide}).clone());
-  hb.position.set(0,2.15*s,0.01); hb.name='healthBar'; root.add(hb);
-
-  // Store refs
-  root._torso=torso; root._headG=headG; root._lA=lA; root._rA=rA; root._lL=lL; root._rL=rL; root._hbBg=hbBg;
+  hb.position.set(0,2.15*s,0.01);hb.name='healthBar';root.add(hb);
+  root._torso=torso;root._headG=headG;root._lA=lA;root._rA=rA;root._lL=lL;root._rL=rL;root._hbBg=hbBg;
   return root;
 }
 
 function spawnEnemy(w){
   const ti=Math.min(Math.floor(Math.random()*Math.min(w,ETYPES.length)),ETYPES.length-1);
   const type=ETYPES[ti];
-  const angle=Math.random()*Math.PI*2, dist=35+Math.random()*15;
+  const angle=Math.random()*Math.PI*2,dist=35+Math.random()*15;
   const mesh=buildEnemy(type);
   mesh.position.set(Math.cos(angle)*dist,0,Math.sin(angle)*dist);
   scene.add(mesh);
@@ -317,10 +317,10 @@ function spawnEnemy(w){
 }
 
 function killEnemy(en){
-  en.isAlive=false; score+=en.scoreValue; waveLeft--;
+  en.isAlive=false;score+=en.scoreValue;waveLeft--;
   spawnParticles(en.mesh.position.clone().add(new THREE.Vector3(0,1,0)),14,0xcc0000,0.35,0.4);
-  en.mesh.userData.dying=true; en.mesh.userData.dyingT=0;
-  feedMsg('- '+en.type.name+' eliminated',false); updateHUD();
+  en.mesh.userData.dying=true;en.mesh.userData.dyingT=0;
+  feedMsg('- '+en.type.name+' eliminated',false);updateHUD();
   setTimeout(()=>{scene.remove(en.mesh);const i=enemies.indexOf(en);if(i>=0)enemies.splice(i,1);},900);
 }
 
@@ -331,8 +331,8 @@ function spawnParticles(pos,count,color,speed,life){
     const p=new THREE.Mesh(new THREE.SphereGeometry(0.025+Math.random()*0.02,4,4),new THREE.MeshBasicMaterial({color,transparent:true}));
     p.position.copy(pos);
     p.userData.vel=new THREE.Vector3((Math.random()-.5)*speed,Math.random()*speed*0.9+0.05,(Math.random()-.5)*speed);
-    p.userData.life=life+Math.random()*life*0.5; p.userData.age=0;
-    scene.add(p); particles.push(p);
+    p.userData.life=life+Math.random()*life*0.5;p.userData.age=0;
+    scene.add(p);particles.push(p);
   }
 }
 function muzzPart(){
@@ -353,9 +353,9 @@ function spawnTrail(from,to){
   t.userData.life=0.10;scene.add(t);trails.push(t);
 }
 
-// PICKUPS
+// PICKUPS — now stores dropped weapon data too
 const pickups=[];
-function spawnPickup(dk,x,z){
+function spawnPickup(dk,x,z,customAmmo,customReserve){
   const def=WDEFS[dk];const g=new THREE.Group();
   const m=new THREE.MeshStandardMaterial({color:def.color,roughness:.4,metalness:.8,emissive:0xffaa00,emissiveIntensity:.35});
   const bd=new THREE.Mesh(new THREE.BoxGeometry(.4,.08,.18),m);bd.castShadow=true;g.add(bd);
@@ -363,11 +363,44 @@ function spawnPickup(dk,x,z){
   const rng=new THREE.Mesh(new THREE.TorusGeometry(.28,.02,8,32),new THREE.MeshBasicMaterial({color:0xffaa00,transparent:true,opacity:.7}));
   rng.rotation.x=Math.PI/2;rng.position.y=-.12;g.add(rng);
   g.position.set(x,.55,z);scene.add(g);
-  pickups.push({mesh:g,dk,ring:rng,bo:Math.random()*Math.PI*2});
+
+  // Create floating DOM label
+  const lbl=document.createElement('div');
+  lbl.className='pickup-label';
+  lbl.innerHTML=`<span class="pickup-label-name">${def.name}</span><span class="pickup-label-hint">[E] pick up</span>`;
+  lbl.style.opacity='0';
+  document.getElementById('pickup-labels').appendChild(lbl);
+
+  pickups.push({
+    mesh:g, dk, ring:rng, bo:Math.random()*Math.PI*2,
+    label:lbl,
+    ammo: customAmmo !== undefined ? customAmmo : def.ammo,
+    reserve: customReserve !== undefined ? customReserve : def.reserve
+  });
 }
+
 function initPickups(){
   const dk=Object.keys(WDEFS);
   [[15,15],[-15,15],[15,-15],[-15,-15],[0,25],[25,0],[-25,0],[30,-30],[-30,-30]].forEach((p,i)=>spawnPickup(dk[i%dk.length],p[0],p[1]));
+}
+
+function removePickup(idx){
+  const it=pickups[idx];
+  scene.remove(it.mesh);
+  if(it.label&&it.label.parentNode)it.label.parentNode.removeChild(it.label);
+  pickups.splice(idx,1);
+}
+
+// Project world position to screen
+const _projVec=new THREE.Vector3();
+function worldToScreen(pos){
+  _projVec.copy(pos);
+  _projVec.project(camera);
+  return {
+    x: (_projVec.x * 0.5 + 0.5) * window.innerWidth,
+    y: (-_projVec.y * 0.5 + 0.5) * window.innerHeight,
+    behind: _projVec.z > 1
+  };
 }
 
 // HUD
@@ -440,12 +473,35 @@ function shoot(){
 
 function startReload(){
   const w=aw();if(!w||isReloading||w.ammo===w.def.ammo||w.reserve<=0)return;
-  isReloading=true;reloadTime=0;document.getElementById('reload-bar').style.opacity='1';
+  isReloading=true;reloadTime=0;reloadAnimT=0;reloadAnimating=true;
+  document.getElementById('reload-bar').style.opacity='1';
 }
 function finishReload(){
   const w=aw();if(!w)return;const tk=Math.min(w.def.ammo-w.ammo,w.reserve);w.ammo+=tk;w.reserve-=tk;
-  isReloading=false;document.getElementById('reload-bar').style.opacity='0';document.getElementById('reload-fill').style.width='0%';updateHUD();
+  isReloading=false;reloadAnimating=false;
+  gunGroup.position.set(0,0,0);gunGroup.rotation.set(0,0,0);
+  document.getElementById('reload-bar').style.opacity='0';document.getElementById('reload-fill').style.width='0%';updateHUD();
 }
+
+// ── DROP WEAPON ──
+function dropWeapon(){
+  const w=aw();if(!w)return;
+  // Throw it a little in front of the player
+  const dir=camera.getWorldDirection(new THREE.Vector3());
+  const dropX=camera.position.x+dir.x*1.5;
+  const dropZ=camera.position.z+dir.z*1.5;
+  // Find the drop key from WDEFS
+  const dk=Object.keys(WDEFS).find(k=>WDEFS[k]===w.def);
+  if(dk) spawnPickup(dk, dropX, dropZ, w.ammo, w.reserve);
+  inventory[activeSlot]=null;
+  // Switch to next available slot
+  let found=false;
+  for(let i=0;i<3;i++){const s=(activeSlot+1+i)%3;if(inventory[s]){activeSlot=s;buildGun(inventory[s].def);found=true;break;}}
+  if(!found){activeSlot=0;gunGroup.clear();}
+  feedMsg('- Dropped '+w.def.name,false);
+  updateHUD();renderSlots();
+}
+
 function takeDamage(amt){
   playerHp=Math.max(0,playerHp-amt);setHP();
   const ov=document.getElementById('damage-overlay');ov.style.opacity='1';setTimeout(()=>{ov.style.opacity='0';},200);
@@ -461,18 +517,20 @@ function endGame(){
   document.getElementById('final-score').textContent='SCORE: '+score.toLocaleString()+' | WAVE: '+wave;
 }
 function startGame(){
-  gameState='playing';playerHp=100;score=0;wave=0;isReloading=false;
+  gameState='playing';playerHp=100;score=0;wave=0;isReloading=false;reloadAnimating=false;
   enemies.forEach(e=>scene.remove(e.mesh));enemies.length=0;
   particles.forEach(p=>scene.remove(p));particles.length=0;
   trails.forEach(t=>scene.remove(t));trails.length=0;
-  pickups.forEach(p=>scene.remove(p.mesh));pickups.length=0;
+  // Clean up pickup labels
+  pickups.forEach(p=>{scene.remove(p.mesh);if(p.label&&p.label.parentNode)p.label.parentNode.removeChild(p.label);});
+  pickups.length=0;
+  document.getElementById('pickup-labels').innerHTML='';
   inventory[0]={def:WDEFS.rifle,ammo:WDEFS.rifle.ammo,reserve:WDEFS.rifle.reserve};inventory[1]=null;inventory[2]=null;activeSlot=0;
   buildGun(WDEFS.rifle);camera.position.set(0,P_EYE,0);velY=0;onGround=true;yaw=0;pitch=0;
   setHP();initPickups();renderSlots();updateHUD();startWave(1);showScreen(null);
   canvas.requestPointerLock();
 }
 
-// SCREEN MANAGER
 function showScreen(id){
   ['start-screen','pause-screen','game-over-screen'].forEach(s=>{
     document.getElementById(s).classList.toggle('active',s===id);
@@ -480,16 +538,12 @@ function showScreen(id){
 }
 function pauseGame(){
   if(gameState!=='playing')return;
-  gameState='paused';
-  document.exitPointerLock();
-  showScreen('pause-screen');
+  gameState='paused';document.exitPointerLock();showScreen('pause-screen');
 }
 function resumeGame(){
   if(gameState!=='paused')return;
-  gameState='playing';
-  showScreen(null);
-  Object.keys(keys).forEach(k=>{keys[k]=false;});
-  keys['mouse0']=false;
+  gameState='playing';showScreen(null);
+  Object.keys(keys).forEach(k=>{keys[k]=false;});keys['mouse0']=false;
   canvas.requestPointerLock();
 }
 
@@ -503,6 +557,7 @@ document.addEventListener('keydown',e=>{
   }
   if(gameState!=='playing')return;
   if(e.code==='KeyR')startReload();
+  if(e.code==='KeyQ')dropWeapon();
   if(e.code==='Digit1')switchSlot(0);
   if(e.code==='Digit2')switchSlot(1);
   if(e.code==='Digit3')switchSlot(2);
@@ -527,16 +582,21 @@ document.addEventListener('mousedown',e=>{if(e.button===0){keys['mouse0']=true;i
 document.addEventListener('mouseup',e=>{if(e.button===0)keys['mouse0']=false;});
 
 function switchSlot(i){
-  if(!inventory[i])return;activeSlot=i;buildGun(inventory[i].def);isReloading=false;
+  if(!inventory[i])return;activeSlot=i;buildGun(inventory[i].def);isReloading=false;reloadAnimating=false;
   document.getElementById('reload-bar').style.opacity='0';updateHUD();renderSlots();
 }
 function tryPickup(){
-  let near=null,nearD=3.5;
-  for(const it of pickups){const d=camera.position.distanceTo(it.mesh.position);if(d<nearD){nearD=d;near=it;}}
-  if(!near)return;
-  const def=WDEFS[near.dk];let slot=inventory.findIndex(s=>s===null);if(slot===-1)slot=activeSlot;
-  inventory[slot]={def,ammo:def.ammo,reserve:def.reserve};activeSlot=slot;
-  buildGun(def);scene.remove(near.mesh);pickups.splice(pickups.indexOf(near),1);
+  let nearIdx=-1,nearD=3.5;
+  for(let i=0;i<pickups.length;i++){const d=camera.position.distanceTo(pickups[i].mesh.position);if(d<nearD){nearD=d;nearIdx=i;}}
+  if(nearIdx===-1)return;
+  const near=pickups[nearIdx];
+  const def=WDEFS[near.dk];
+  let slot=inventory.findIndex(s=>s===null);
+  if(slot===-1)slot=activeSlot;
+  inventory[slot]={def,ammo:near.ammo,reserve:near.reserve};
+  activeSlot=slot;
+  buildGun(def);
+  removePickup(nearIdx);
   feedMsg('+ Picked up '+def.name,true);updateHUD();renderSlots();
 }
 
@@ -546,7 +606,6 @@ function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),0.05);
 
-  // Always render so the frozen scene is visible behind pause screen
   if(gameState!=='playing'){renderer.render(scene,camera);return;}
 
   // Movement
@@ -566,17 +625,52 @@ function animate(){
   camera.rotation.x=pitch-(gunRecoil>0?gunRecoil:0);
   if(gunRecoil>0){gunRecoil-=dt*3.5;if(gunRecoil<0)gunRecoil=0;}
 
-  // Gun bob
+  // ── RELOAD ANIMATION ──
+  if(reloadAnimating){
+    const w=aw();
+    const totalT=w?w.def.reloadTime:2.0;
+    const prog=reloadTime/totalT; // 0..1
+    // Phase 1 (0..0.35): tilt gun down-right, slide back
+    // Phase 2 (0.35..0.65): hold
+    // Phase 3 (0.65..1.0): snap back to position
+    let rx=0,ry=0,rz=0,px=0,py=0;
+    if(prog<0.35){
+      const t=prog/0.35;
+      const ease=t*t*(3-2*t);
+      rx=ease*0.55;   // tilt barrel down
+      rz=-ease*0.35;  // roll gun outward (magazine side)
+      ry=ease*0.18;   // yaw slightly
+      py=-ease*0.06;  // drop gun down
+      px=ease*0.02;   // pull slightly in
+    }else if(prog<0.65){
+      // hold tilted — slight shake for tactile feel
+      const jitter=Math.sin(reloadTime*28)*0.008;
+      rx=0.55+jitter;rz=-0.35;ry=0.18;py=-0.06;px=0.02;
+    }else{
+      const t=(prog-0.65)/0.35;
+      const ease=1-(1-t)*(1-t); // ease-out
+      rx=0.55*(1-ease);rz=-0.35*(1-ease);ry=0.18*(1-ease);py=-0.06*(1-ease);px=0.02*(1-ease);
+    }
+    gunGroup.rotation.x=rx;
+    gunGroup.rotation.y=ry;
+    gunGroup.rotation.z=rz;
+    gunGroup.position.y=py;
+    gunGroup.position.x=px;
+  }
+
+  // Gun bob (only when not reloading)
   const moving=move.lengthSq()>0;
   const bs=aw()?aw().def.bobScale:1;
-  if(moving){gunBobT+=dt*8*sprint;gunGroup.position.y=-0.01+Math.sin(gunBobT)*0.009*bs;gunGroup.position.x=Math.cos(gunBobT*.5)*.005*bs;}
-  else{gunBobT*=.9;gunGroup.position.y*=.82;gunGroup.position.x*=.82;}
+  if(!reloadAnimating){
+    if(moving){gunBobT+=dt*8*sprint;gunGroup.position.y=-0.01+Math.sin(gunBobT)*0.009*bs;gunGroup.position.x=Math.cos(gunBobT*.5)*.005*bs;}
+    else{gunBobT*=.9;gunGroup.position.y*=.82;gunGroup.position.x*=.82;}
+  }
 
   // Auto fire
   shootCooldown-=dt;
-  const w=aw();if(keys['mouse0']&&locked&&w&&w.def.fullAuto&&shootCooldown<=0)shoot();
+  const w=aw();if(keys['mouse0']&&locked&&w&&w.def.fullAuto&&shootCooldown<=0&&!isReloading)shoot();
 
-  // Reload
+  // Reload timer
   if(isReloading){
     reloadTime+=dt;
     document.getElementById('reload-fill').style.width=(reloadTime/(w?w.def.reloadTime:2)*100)+'%';
@@ -594,13 +688,30 @@ function animate(){
     if(t.userData.life<=0){scene.remove(t);trails.splice(i,1);}
   }
 
-  // Pickups
+  // Pickups — bob, rotate, update floating labels
   const now=Date.now();let nearName='';
-  for(const it of pickups){
+  for(let i=0;i<pickups.length;i++){
+    const it=pickups[i];
     it.mesh.rotation.y+=dt*1.4;
     it.mesh.position.y=0.55+Math.sin(now*.002+it.bo)*.13;
     it.ring.material.opacity=0.45+0.3*Math.sin(now*.003);
-    if(camera.position.distanceTo(it.mesh.position)<3)nearName=WDEFS[it.dk].name;
+    const dist=camera.position.distanceTo(it.mesh.position);
+    if(dist<3)nearName=WDEFS[it.dk].name;
+
+    // Update floating 3D label
+    const labelPos=it.mesh.position.clone();
+    labelPos.y+=1.1+Math.sin(now*.002+it.bo)*0.05;
+    const screen=worldToScreen(labelPos);
+    if(!screen.behind && dist < 12){
+      it.label.style.left=screen.x+'px';
+      it.label.style.top=screen.y+'px';
+      // Fade in/out based on distance — visible 2..12, bright at 2..5
+      const alpha=Math.min(1, Math.max(0, (12-dist)/6));
+      it.label.style.opacity=String(alpha);
+      it.label.style.display='block';
+    } else {
+      it.label.style.opacity='0';
+    }
   }
   const pp=document.getElementById('pickup-prompt');
   pp.textContent=nearName?'[E] Pick up '+nearName:'';pp.style.opacity=nearName?'1':'0';
@@ -624,13 +735,9 @@ function animate(){
     en.animTime+=dt;
     const isMoving=dist>1.8;
     if(isMoving){
-      const ws=en.speed*55;
-      const sw=Math.sin(en.animTime*ws)*0.60;
-      const bb=Math.abs(Math.sin(en.animTime*ws))*0.04*en.type.size;
-      if(en.mesh._lL)en.mesh._lL.rotation.x= sw;
-      if(en.mesh._rL)en.mesh._rL.rotation.x=-sw;
-      if(en.mesh._lA)en.mesh._lA.rotation.x=-sw*0.45;
-      if(en.mesh._rA)en.mesh._rA.rotation.x= sw*0.45;
+      const ws=en.speed*55;const sw=Math.sin(en.animTime*ws)*0.60;const bb=Math.abs(Math.sin(en.animTime*ws))*0.04*en.type.size;
+      if(en.mesh._lL)en.mesh._lL.rotation.x=sw;if(en.mesh._rL)en.mesh._rL.rotation.x=-sw;
+      if(en.mesh._lA)en.mesh._lA.rotation.x=-sw*0.45;if(en.mesh._rA)en.mesh._rA.rotation.x=sw*0.45;
       if(en.mesh._torso)en.mesh._torso.position.y=(0.85+bb)*en.type.size;
       if(en.mesh._headG)en.mesh._headG.rotation.z=Math.sin(en.animTime*ws*.5)*.05;
       en.mesh.position.add(toP.normalize().multiplyScalar(en.speed));
