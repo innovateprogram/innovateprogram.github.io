@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>test 2</title>
+<title>Science Multiple Choice Quiz</title>
 <style>
   body{
     font-family: Arial, sans-serif;
@@ -143,63 +143,59 @@
 
 <script>
 const questions = [
-  // Earth Systems (1-10)
-  {q:"What process changes liquid water into water vapour?", o:["Condensation","Evaporation","Precipitation","Transpiration"], a:"Evaporation"},
-  {q:"What process turns water vapour into liquid water?", o:["Condensation","Evaporation","Melting","Sublimation"], a:"Condensation"},
-  {q:"What is water falling from clouds called?", o:["Runoff","Precipitation","Evaporation","Collection"], a:"Precipitation"},
-  {q:"Which is one of the four global Earth systems?", o:["Atmosphere","Magnetosphere","Biosphere","Asteroid belt"], a:"Atmosphere"},
-  {q:"Which Earth system includes living things?", o:["Geosphere","Hydrosphere","Biosphere","Cryosphere"], a:"Biosphere"},
-  {q:"Which Earth system is made up of water?", o:["Hydrosphere","Atmosphere","Lithosphere","Biosphere"], a:"Hydrosphere"},
-  {q:"What gas do plants take in during photosynthesis?", o:["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"], a:"Carbon dioxide"},
-  {q:"What gas do plants release during photosynthesis?", o:["Carbon dioxide","Oxygen","Methane","Nitrogen"], a:"Oxygen"},
-  {q:"What is the main purpose of respiration?", o:["Make water","Release energy","Create sunlight","Store oxygen"], a:"Release energy"},
-  {q:"What is an ecosystem?", o:["A single animal","Living things and their environment","Only plants in one area","A type of rock"], a:"Living things and their environment"},
+  {q:"What process changes liquid water into water vapour?", o:["Condensation","Evaporation","Precipitation","Transpiration"], a:["Evaporation"]},
+  {q:"What process turns water vapour into liquid water?", o:["Condensation","Evaporation","Melting","Sublimation"], a:["Condensation"]},
+  {q:"What is water falling from clouds called?", o:["Runoff","Precipitation","Evaporation","Collection"], a:["Precipitation"]},
+  {q:"Which is one of the four global Earth systems?", o:["Atmosphere","Magnetosphere","Biosphere","Asteroid belt"], a:["Atmosphere"]},
+  {q:"Which Earth system includes living things?", o:["Geosphere","Hydrosphere","Biosphere","Cryosphere"], a:["Biosphere"]},
+  {q:"Which Earth system is made up of water?", o:["Hydrosphere","Atmosphere","Lithosphere","Biosphere"], a:["Hydrosphere"]},
+  {q:"What gas do plants take in during photosynthesis?", o:["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"], a:["Carbon dioxide","CO2"]},
+  {q:"What gas do plants release during photosynthesis?", o:["Carbon dioxide","Oxygen","Methane","Nitrogen"], a:["Oxygen"]},
+  {q:"What is the main purpose of respiration?", o:["Make water","Release energy","Create sunlight","Store oxygen"], a:["Release energy","Make energy available"]},
+  {q:"What is an ecosystem?", o:["A single animal","Living things and their environment","Only plants in one area","A type of rock"], a:["Living things and their environment","Organisms and their environment"]},
 
-  // Atoms (11-25)
-  {q:"Which subatomic particle has a positive charge?", o:["Electron","Neutron","Proton","Ion"], a:"Proton"},
-  {q:"Which subatomic particle has a negative charge?", o:["Proton","Electron","Neutron","Isotope"], a:"Electron"},
-  {q:"Which subatomic particle has no charge?", o:["Electron","Proton","Neutron","Ion"], a:"Neutron"},
-  {q:"Where are protons and neutrons found?", o:["In the nucleus","In energy levels","Outside the atom","In waves"], a:"In the nucleus"},
-  {q:"What is the atomic number?", o:["Number of neutrons","Number of protons","Number of electrons + neutrons","Mass number"], a:"Number of protons"},
-  {q:"What is the mass number?", o:["Protons + neutrons","Protons + electrons","Electrons + neutrons","Only protons"], a:"Protons + neutrons"},
-  {q:"What is an ion?", o:["A neutral atom","A charged atom","A type of wave","A proton"], a:"A charged atom"},
-  {q:"How does an atom become a positive ion?", o:["Gains electrons","Loses electrons","Gains neutrons","Loses protons"], a:"Loses electrons"},
-  {q:"How does an atom become a negative ion?", o:["Loses electrons","Gains electrons","Loses neutrons","Gains protons"], a:"Gains electrons"},
-  {q:"What are isotopes?", o:["Atoms with different numbers of protons","Atoms with the same protons but different neutrons","Atoms with no neutrons","Charged atoms"], a:"Atoms with the same protons but different neutrons"},
-  {q:"Which statement is true about isotopes of the same element?", o:["They have different atomic numbers","They have the same atomic number","They have no protons","They are always ions"], a:"They have the same atomic number"},
-  {q:"What is radiation?", o:["Energy or particles given off by unstable nuclei","A type of bond","A neutral atom","A wave reflection"], a:"Energy or particles given off by unstable nuclei"},
-  {q:"Which type of radiation is often blocked by paper?", o:["Alpha","Gamma","X-ray","Radio"], a:"Alpha"},
-  {q:"Which type of radiation is the most penetrating?", o:["Alpha","Beta","Gamma","Neutron"], a:"Gamma"},
-  {q:"What happens in radioactive decay?", o:["An unstable nucleus becomes more stable","The atom becomes a molecule","The electron disappears","The atom turns into light"], a:"An unstable nucleus becomes more stable"},
+  {q:"Which subatomic particle has a positive charge?", o:["Electron","Neutron","Proton","Ion"], a:["Proton"]},
+  {q:"Which subatomic particle has a negative charge?", o:["Proton","Electron","Neutron","Isotope"], a:["Electron"]},
+  {q:"Which subatomic particle has no charge?", o:["Electron","Proton","Neutron","Ion"], a:["Neutron"]},
+  {q:"Where are protons and neutrons found?", o:["In the nucleus","In energy levels","Outside the atom","In waves"], a:["In the nucleus","In the nucleus of the atom"]},
+  {q:"What is the atomic number?", o:["Number of neutrons","Number of protons","Number of electrons + neutrons","Mass number"], a:["Number of protons"]},
+  {q:"What is the mass number?", o:["Protons + neutrons","Protons + electrons","Electrons + neutrons","Only protons"], a:["Protons + neutrons"]},
+  {q:"What is an ion?", o:["A neutral atom","A charged atom","A type of wave","A proton"], a:["A charged atom","An atom with a charge"]},
+  {q:"How does an atom become a positive ion?", o:["Gains electrons","Loses electrons","Gains neutrons","Loses protons"], a:["Loses electrons"]},
+  {q:"How does an atom become a negative ion?", o:["Loses electrons","Gains electrons","Loses neutrons","Gains protons"], a:["Gains electrons"]},
+  {q:"What are isotopes?", o:["Atoms with different numbers of protons","Atoms with the same protons but different neutrons","Atoms with no neutrons","Charged atoms"], a:["Atoms with the same protons but different neutrons"]},
+  {q:"Which statement is true about isotopes of the same element?", o:["They have different atomic numbers","They have the same atomic number","They have no protons","They are always ions"], a:["They have the same atomic number"]},
+  {q:"What is radiation?", o:["Energy or particles given off by unstable nuclei","A type of bond","A neutral atom","A wave reflection"], a:["Energy or particles given off by unstable nuclei"]},
+  {q:"Which type of radiation is often blocked by paper?", o:["Alpha","Beta","Gamma","Radio"], a:["Alpha"]},
+  {q:"Which type of radiation is the most penetrating?", o:["Alpha","Beta","Gamma","Neutron"], a:["Gamma"]},
+  {q:"What happens in radioactive decay?", o:["An unstable nucleus becomes more stable","The atom becomes a molecule","The electron disappears","The atom turns into light"], a:["An unstable nucleus becomes more stable"]},
 
-  // Waves (26-40)
-  {q:"What is the distance between two wave crests called?", o:["Amplitude","Frequency","Wavelength","Reflection"], a:"Wavelength"},
-  {q:"What is the height of a wave from rest position called?", o:["Amplitude","Wavelength","Refraction","Pitch"], a:"Amplitude"},
-  {q:"What does frequency measure?", o:["Wave height","Number of waves per second","Colour of light","Distance between troughs"], a:"Number of waves per second"},
-  {q:"What happens when a wave reflects?", o:["It bounces back","It stops","It changes into heat","It disappears"], a:"It bounces back"},
-  {q:"What is the law of reflection about angles?", o:["Angle of incidence equals angle of reflection","Angle of incidence is double the angle of reflection","All angles are equal","Light does not reflect"], a:"Angle of incidence equals angle of reflection"},
-  {q:"What is brightness linked to?", o:["Light intensity","Wavelength only","Temperature only","Mass"], a:"Light intensity"},
-  {q:"What colour has the longest wavelength?", o:["Blue","Green","Red","Violet"], a:"Red"},
-  {q:"What colour has the shortest wavelength?", o:["Red","Yellow","Blue","Violet"], a:"Violet"},
-  {q:"What colour does an object appear if it reflects red light?", o:["Red","Blue","Black","White"], a:"Red"},
-  {q:"What happens to most other colours when an object looks green?", o:["They are reflected","They are absorbed","They become brighter","They disappear"], a:"They are absorbed"},
-  {q:"Why does a white object look white?", o:["It absorbs all light","It reflects most colours of light","It only reflects red light","It makes light"], a:"It reflects most colours of light"},
-  {q:"Why does a black object look black?", o:["It reflects all light","It absorbs most light","It has no atoms","It gives off light"], a:"It absorbs most light"},
-  {q:"What happens when light is absorbed by a surface?", o:["It bounces away","It changes into another form of energy","It turns into sound","It becomes a proton"], a:"It changes into another form of energy"},
-  {q:"Which wave property is measured in hertz (Hz)?", o:["Wavelength","Amplitude","Frequency","Brightness"], a:"Frequency"},
-  {q:"Which part of a wave is the lowest point?", o:["Crest","Trough","Peak","Node"], a:"Trough"},
+  {q:"What is the distance between two wave crests called?", o:["Amplitude","Frequency","Wavelength","Reflection"], a:["Wavelength"]},
+  {q:"What is the height of a wave from rest position called?", o:["Amplitude","Wavelength","Refraction","Pitch"], a:["Amplitude"]},
+  {q:"What does frequency measure?", o:["Wave height","Number of waves per second","Colour of light","Distance between troughs"], a:["Number of waves per second"]},
+  {q:"What happens when a wave reflects?", o:["It bounces back","It stops","It changes into heat","It disappears"], a:["It bounces back"]},
+  {q:"What is the law of reflection about angles?", o:["Angle of incidence equals angle of reflection","Angle of incidence is double the angle of reflection","All angles are equal","Light does not reflect"], a:["Angle of incidence equals angle of reflection"]},
+  {q:"What is brightness linked to?", o:["Light intensity","Wavelength only","Temperature only","Mass"], a:["Light intensity"]},
+  {q:"What colour has the longest wavelength?", o:["Blue","Green","Red","Violet"], a:["Red"]},
+  {q:"What colour has the shortest wavelength?", o:["Red","Yellow","Blue","Violet"], a:["Violet"]},
+  {q:"What colour does an object appear if it reflects red light?", o:["Red","Blue","Black","White"], a:["Red"]},
+  {q:"What happens to most other colours when an object looks green?", o:["They are reflected","They are absorbed","They become brighter","They disappear"], a:["They are absorbed"]},
+  {q:"Why does a white object look white?", o:["It absorbs all light","It reflects most colours of light","It only reflects red light","It makes light"], a:["It reflects most colours of light"]},
+  {q:"Why does a black object look black?", o:["It reflects all light","It absorbs most light","It has no atoms","It gives off light"], a:["It absorbs most light"]},
+  {q:"What happens when light is absorbed by a surface?", o:["It bounces away","It changes into another form of energy","It turns into sound","It becomes a proton"], a:["It changes into another form of energy"]},
+  {q:"Which wave property is measured in hertz (Hz)?", o:["Wavelength","Amplitude","Frequency","Brightness"], a:["Frequency"]},
+  {q:"Which part of a wave is the lowest point?", o:["Crest","Trough","Peak","Node"], a:["Trough"]},
 
-  // Mixed revision (41-50)
-  {q:"What is the main input needed for photosynthesis?", o:["Sunlight","Salt","Sound","Magnetism"], a:"Sunlight"},
-  {q:"What is the main product stored by plants from photosynthesis?", o:["Glucose","Protein","Water","Carbon dioxide"], a:"Glucose"},
-  {q:"What part of the atom mostly determines the element?", o:["Number of protons","Number of neutrons","Number of electrons only","Mass number only"], a:"Number of protons"},
-  {q:"Which charge does a proton have?", o:["Negative","Neutral","Positive","No charge"], a:"Positive"},
-  {q:"Which charge does an electron have?", o:["Negative","Positive","Neutral","No charge"], a:"Negative"},
-  {q:"What does the geosphere include?", o:["Rocks and land","Clouds","Animals","Ocean water only"], a:"Rocks and land"},
-  {q:"Which process moves water from plants into the air?", o:["Transpiration","Condensation","Sublimation","Freezing"], a:"Transpiration"},
-  {q:"Which cycle moves carbon through living things and the atmosphere?", o:["Water cycle","Rock cycle","Carbon cycle","Nitrogen cycle"], a:"Carbon cycle"},
-  {q:"What happens in respiration in cells?", o:["Glucose is broken down to release energy","Oxygen is made from water","Light is stored in leaves","Rocks are dissolved"], a:"Glucose is broken down to release energy"},
-  {q:"What is an ecosystem made of?", o:["Only animals","Only plants","Living and non-living things interacting","Only soil and water"], a:"Living and non-living things interacting"}
+  {q:"What is the main input needed for photosynthesis?", o:["Sunlight","Salt","Sound","Magnetism"], a:["Sunlight","Light energy"]},
+  {q:"What is the main product stored by plants from photosynthesis?", o:["Glucose","Protein","Water","Carbon dioxide"], a:["Glucose","Sugar"]},
+  {q:"What part of the atom mostly determines the element?", o:["Number of protons","Number of neutrons","Number of electrons only","Mass number only"], a:["Number of protons"]},
+  {q:"Which charge does a proton have?", o:["Negative","Neutral","Positive","No charge"], a:["Positive"]},
+  {q:"Which charge does an electron have?", o:["Negative","Positive","Neutral","No charge"], a:["Negative"]},
+  {q:"What does the geosphere include?", o:["Rocks and land","Clouds","Animals","Ocean water only"], a:["Rocks and land","The solid Earth"]},
+  {q:"Which process moves water from plants into the air?", o:["Transpiration","Condensation","Sublimation","Freezing"], a:["Transpiration"]},
+  {q:"Which cycle moves carbon through living things and the atmosphere?", o:["Water cycle","Rock cycle","Carbon cycle","Nitrogen cycle"], a:["Carbon cycle"]},
+  {q:"What happens in respiration in cells?", o:["Glucose is broken down to release energy","Oxygen is made from water","Light is stored in leaves","Rocks are dissolved"], a:["Glucose is broken down to release energy"]},
+  {q:"What is an ecosystem made of?", o:["Only animals","Only plants","Living and non-living things interacting","Only soil and water"], a:["Living and non-living things interacting"]}
 ];
 
 let current = 0;
@@ -220,6 +216,18 @@ const scoreCountEl = document.getElementById("scoreCount");
 const pctCountEl = document.getElementById("pctCount");
 const progressBar = document.getElementById("progressBar");
 const tipEl = document.getElementById("tip");
+
+function normalize(text) {
+  return String(text).toLowerCase().trim().replace(/\s+/g, " ");
+}
+
+function answerMatches(selected, acceptedList) {
+  const s = normalize(selected);
+  return acceptedList.some(a => {
+    const n = normalize(a);
+    return s === n || s.includes(n) || n.includes(s);
+  });
+}
 
 function updateTop() {
   qCountEl.textContent = `Question ${Math.min(current + 1, questions.length)} of ${questions.length}`;
@@ -267,15 +275,15 @@ function selectAnswer(button, selected) {
 
   buttons.forEach(btn => {
     btn.disabled = true;
-    if (btn.textContent === q.a) btn.classList.add("correct");
+    if (answerMatches(btn.textContent, q.a)) btn.classList.add("correct");
   });
 
-  if (selected === q.a) {
+  if (answerMatches(selected, q.a)) {
     score++;
-    feedbackEl.innerHTML = "Correct.";
+    feedbackEl.textContent = "Correct.";
     button.classList.add("correct");
   } else {
-    feedbackEl.innerHTML = `Incorrect. Correct answer: ${q.a}`;
+    feedbackEl.textContent = `Incorrect. Correct answer: ${q.a[0]}`;
     button.classList.add("wrong");
   }
 
