@@ -3,53 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Science Revision Quiz</title>
+<title>Science Quiz</title>
 
 <style>
     body{
         font-family: Arial, sans-serif;
         background:#f4f4f4;
-        margin:0;
-        padding:40px;
         display:flex;
         justify-content:center;
+        align-items:center;
+        height:100vh;
+        margin:0;
     }
 
-    .container{
+    .quiz-box{
         background:white;
         width:700px;
-        max-width:95%;
+        max-width:90%;
         padding:30px;
         border-radius:15px;
         box-shadow:0 4px 15px rgba(0,0,0,0.15);
-    }
-
-    h1{
         text-align:center;
     }
 
-    .question{
-        margin-bottom:25px;
+    h1{
+        margin-bottom:20px;
     }
 
-    .question h3{
-        margin-bottom:10px;
+    #question{
+        font-size:22px;
+        margin-bottom:20px;
     }
 
-    input[type=text]{
-        width:100%;
-        padding:10px;
+    input{
+        width:90%;
+        padding:12px;
+        font-size:18px;
         border-radius:8px;
         border:1px solid #ccc;
-        font-size:16px;
     }
 
     button{
-        width:100%;
-        padding:14px;
+        margin-top:20px;
+        padding:12px 25px;
         font-size:18px;
         border:none;
-        border-radius:10px;
+        border-radius:8px;
         background:#2563eb;
         color:white;
         cursor:pointer;
@@ -59,12 +58,9 @@
         background:#1d4ed8;
     }
 
-    #results{
-        margin-top:30px;
-        padding:20px;
-        border-radius:10px;
-        background:#eef2ff;
-        display:none;
+    #feedback{
+        margin-top:20px;
+        font-size:20px;
     }
 
     .correct{
@@ -74,125 +70,190 @@
     .wrong{
         color:red;
     }
+
+    #score{
+        margin-top:20px;
+        font-size:22px;
+        font-weight:bold;
+    }
 </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Science Exam Quiz</h1>
+<div class="quiz-box">
 
-    <form id="quizForm">
+    <h1>Science Revision Quiz</h1>
 
-        <div class="question">
-            <h3>1. What process changes liquid water into water vapour?</h3>
-            <input type="text" id="q1">
-        </div>
+    <div id="question"></div>
 
-        <div class="question">
-            <h3>2. Name ONE global Earth system.</h3>
-            <input type="text" id="q2">
-        </div>
+    <input type="text" id="answer" placeholder="Type your answer here">
 
-        <div class="question">
-            <h3>3. What gas do plants take in during photosynthesis?</h3>
-            <input type="text" id="q3">
-        </div>
+    <br>
 
-        <div class="question">
-            <h3>4. Which subatomic particle has a positive charge?</h3>
-            <input type="text" id="q4">
-        </div>
+    <button onclick="submitAnswer()">Submit</button>
 
-        <div class="question">
-            <h3>5. What is the atomic number?</h3>
-            <input type="text" id="q5">
-        </div>
+    <div id="feedback"></div>
 
-        <div class="question">
-            <h3>6. What is an ion?</h3>
-            <input type="text" id="q6">
-        </div>
+    <div id="score"></div>
 
-        <div class="question">
-            <h3>7. What is the distance between wave crests called?</h3>
-            <input type="text" id="q7">
-        </div>
-
-        <div class="question">
-            <h3>8. Which colour has the longest wavelength?</h3>
-            <input type="text" id="q8">
-        </div>
-
-        <div class="question">
-            <h3>9. What happens when a wave reflects?</h3>
-            <input type="text" id="q9">
-        </div>
-
-        <div class="question">
-            <h3>10. Why does an object appear green?</h3>
-            <input type="text" id="q10">
-        </div>
-
-        <button type="button" onclick="checkQuiz()">Submit Quiz</button>
-
-    </form>
-
-    <div id="results"></div>
 </div>
 
 <script>
-function normalize(text){
-    return text.toLowerCase().trim();
+
+const questions = [
+
+{
+    question: "What process changes liquid water into water vapour?",
+    answers: ["evaporation"]
+},
+
+{
+    question: "Name one of the four global Earth systems.",
+    answers: ["atmosphere","hydrosphere","biosphere","geosphere","lithosphere"]
+},
+
+{
+    question: "What gas do plants take in during photosynthesis?",
+    answers: ["carbon dioxide","co2"]
+},
+
+{
+    question: "What is the main purpose of respiration?",
+    answers: ["release energy","produce energy","get energy"]
+},
+
+{
+    question: "What is an ecosystem?",
+    answers: ["living things and environment","organisms and environment"]
+},
+
+{
+    question: "Which subatomic particle has a positive charge?",
+    answers: ["proton","protons"]
+},
+
+{
+    question: "What is the atomic number?",
+    answers: ["number of protons","amount of protons"]
+},
+
+{
+    question: "What is an ion?",
+    answers: ["charged atom","atom with charge"]
+},
+
+{
+    question: "What are isotopes?",
+    answers: ["same protons different neutrons","different neutrons"]
+},
+
+{
+    question: "What happens during radiation?",
+    answers: ["energy released","particles released","waves released"]
+},
+
+{
+    question: "What is the distance between wave crests called?",
+    answers: ["wavelength"]
+},
+
+{
+    question: "What happens when a wave reflects?",
+    answers: ["bounces back","changes direction"]
+},
+
+{
+    question: "Which colour has the longest wavelength?",
+    answers: ["red"]
+},
+
+{
+    question: "Why does an object appear green?",
+    answers: ["reflects green light","green light reflected"]
+},
+
+{
+    question: "What usually happens to brightness when light intensity increases?",
+    answers: ["gets brighter","brightness increases","brighter"]
 }
 
-function checkQuiz(){
+];
 
-    let score = 0;
+let currentQuestion = 0;
+let score = 0;
 
-    const answers = {
-        q1:["evaporation"],
-        q2:["atmosphere","hydrosphere","biosphere","geosphere","lithosphere"],
-        q3:["carbon dioxide","co2"],
-        q4:["proton","protons"],
-        q5:["number of protons","protons in the nucleus"],
-        q6:["charged atom","atom with charge","charged particle"],
-        q7:["wavelength"],
-        q8:["red"],
-        q9:["bounces back","changes direction","reflects back"],
-        q10:["reflects green light","green light is reflected"]
-    };
+const questionEl = document.getElementById("question");
+const answerEl = document.getElementById("answer");
+const feedbackEl = document.getElementById("feedback");
+const scoreEl = document.getElementById("score");
 
-    let output = "<h2>Results</h2>";
+function loadQuestion(){
 
-    for(let key in answers){
+    if(currentQuestion >= questions.length){
 
-        let userAnswer = normalize(document.getElementById(key).value);
+        let percent = Math.round((score / questions.length) * 100);
 
-        let correct = answers[key].some(ans =>
-            userAnswer.includes(ans)
-        );
+        questionEl.innerHTML = "Quiz Complete!";
+        answerEl.style.display = "none";
 
-        if(correct){
-            score++;
-            output += `<p class="correct">${key.toUpperCase()}: Correct</p>`;
+        feedbackEl.innerHTML = `
+        Final Score: ${score}/${questions.length} (${percent}%)
+        `;
+
+        if(percent >= 50){
+            scoreEl.innerHTML = "<span class='correct'>PASS</span>";
         }else{
-            output += `<p class="wrong">${key.toUpperCase()}: Incorrect</p>`;
+            scoreEl.innerHTML = "<span class='wrong'>FAIL - Try Again</span>";
         }
+
+        return;
     }
 
-    let percent = (score / 10) * 100;
+    questionEl.innerHTML =
+        `Question ${currentQuestion + 1}:<br><br>` +
+        questions[currentQuestion].question;
 
-    output += `<h2>Score: ${score}/10 (${percent}%)</h2>`;
-
-    if(percent >= 50){
-        output += "<h3 class='correct'>PASS</h3>";
-    }else{
-        output += "<h3 class='wrong'>FAIL - Try Again</h3>";
-    }
-
-    document.getElementById("results").style.display = "block";
-    document.getElementById("results").innerHTML = output;
+    answerEl.value = "";
+    feedbackEl.innerHTML = "";
 }
+
+function submitAnswer(){
+
+    let userAnswer =
+        answerEl.value.toLowerCase().trim();
+
+    let correctAnswers =
+        questions[currentQuestion].answers;
+
+    let correct = correctAnswers.some(answer =>
+        userAnswer.includes(answer)
+    );
+
+    if(correct){
+
+        score++;
+
+        feedbackEl.innerHTML =
+        `<span class="correct">
+        Correct!
+        </span>`;
+
+    }else{
+
+        feedbackEl.innerHTML =
+        `<span class="wrong">
+        Incorrect.<br>
+        Correct answer: ${correctAnswers[0]}
+        </span>`;
+    }
+
+    currentQuestion++;
+
+    setTimeout(loadQuestion, 2000);
+}
+
+loadQuestion();
+
 </script>
 
 </body>
