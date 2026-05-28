@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DEADZONE V9.0</title>
+<title>DEADZONE V9.1</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; user-select: none; }
@@ -528,7 +528,7 @@ function mkPlayer() {
   return {
     x: 16.5, y: 16.5,
     angle: 0,
-    moveSpeed: 0.06,
+    moveSpeed: 0.1,
     health: 100, maxHealth: 100,
     weapons: [{ ...WEAPONS.pistol, mag: WEAPONS.pistol.magSize, reserve: WEAPONS.pistol.reserveMax }],
     currentWeapon: 0,
@@ -540,7 +540,7 @@ const keys = {};
 const mouse = { dx: 0, justDown: false, down: false };
 let pointerLocked = false;
 
-document.addEventListener('keydown', e => {
+function handleKeyDown(e) {
   keys[e.code] = true;
   if (G.state !== 'playing') return;
   if (e.code === 'Escape') { pauseGame(); return; }
@@ -548,8 +548,13 @@ document.addEventListener('keydown', e => {
   if (e.code === 'Digit1')  switchWeapon(0);
   if (e.code === 'Digit2')  switchWeapon(1);
   if (e.code === 'Digit3')  switchWeapon(2);
-});
-document.addEventListener('keyup', e => { keys[e.code] = false; });
+  e.preventDefault();
+}
+function handleKeyUp(e) { keys[e.code] = false; }
+document.addEventListener('keydown', handleKeyDown);
+document.addEventListener('keyup', handleKeyUp);
+window.addEventListener('keydown', handleKeyDown);
+window.addEventListener('keyup', handleKeyUp);
 canvas.addEventListener('click', () => { if (G.state === 'playing') canvas.requestPointerLock(); });
 document.addEventListener('pointerlockchange', () => {
   pointerLocked = document.pointerLockElement === canvas;
@@ -635,9 +640,13 @@ function gameLoop(now) {
 
 function update(dt, now) {
   const p = G.player;
-  const sens = 0.0018;
+  // Mouse look (requires pointer lock)
+  const sens = 0.0025;
   p.angle += mouse.dx * sens;
   mouse.dx = 0;
+  // Keyboard turning fallback (Q/E or comma/period)
+  if (keys['KeyQ']||keys['Comma'])  p.angle -= 0.04;
+  if (keys['KeyE']||keys['Period']) p.angle += 0.04;
 
   let moveX = 0, moveY = 0;
   const spd = (keys['ShiftLeft']||keys['ShiftRight']) ? p.moveSpeed*1.8 : p.moveSpeed;
@@ -646,9 +655,11 @@ function update(dt, now) {
   if (keys['KeyA']||keys['ArrowLeft'])  { moveX += Math.cos(p.angle-Math.PI/2)*spd; moveY += Math.sin(p.angle-Math.PI/2)*spd; }
   if (keys['KeyD']||keys['ArrowRight']) { moveX += Math.cos(p.angle+Math.PI/2)*spd; moveY += Math.sin(p.angle+Math.PI/2)*spd; }
 
-  const margin = 0.28;
-  if (mapAt(p.x + moveX, p.y) === 0) p.x += moveX;
-  if (mapAt(p.x, p.y + moveY) === 0) p.y += moveY;
+  // Collision — try full move, then axis-separated
+  const newX = p.x + moveX, newY = p.y + moveY;
+  if (mapAt(newX, newY) === 0) { p.x = newX; p.y = newY; }
+  else if (mapAt(newX, p.y) === 0) { p.x = newX; }
+  else if (mapAt(p.x, newY) === 0) { p.y = newY; }
 
   const moving = moveX!==0||moveY!==0;
   if (moving) p.bobPhase += dt * 8;
@@ -772,12 +783,12 @@ function shoot(now) {
 function bulletRaycast(ox, oy, angle, dmg) {
   const dx = Math.cos(angle), dy = Math.sin(angle);
   let x = ox, y = oy;
-  for (let step=0; step<40; step++) {
-    x += dx*0.12; y += dy*0.12;
-    if (mapAt(x,y) !== 0) break;
-    for (let i=G.enemies.length-1; i>=0; i--) {
+  for (let step = 0; step < 64; step++) {
+    x += dx * 0.08; y += dy * 0.08;
+    if (mapAt(x, y) !== 0) break;
+    for (let i = G.enemies.length-1; i >= 0; i--) {
       const e = G.enemies[i];
-      if (Math.hypot(x-e.x, y-e.y) < e.radius+0.12) {
+      if (Math.hypot(x - e.x, y - e.y) < e.radius + 0.25) {
         e.health -= dmg;
         spawnBloodParticles(e.x, e.y);
         if (e.health <= 0) killEnemy(i);
@@ -875,6 +886,8 @@ function render3D() {
   const FOV = Math.PI / 3;
   const halfFOV = FOV / 2;
 
+  G.zBuffer.fill(Infinity);
+
   ctx.fillStyle = CEILING_COLOR;
   ctx.fillRect(0, 0, W, HH + bob);
   ctx.fillStyle = FLOOR_COLOR;
@@ -950,9 +963,11 @@ function drawSprite(sp, p, FOV, HH, bob) {
   let angle = Math.atan2(dy, dx) - p.angle;
   while (angle < -Math.PI) angle += Math.PI*2;
   while (angle >  Math.PI) angle -= Math.PI*2;
-  if (Math.abs(angle) > FOV * 0.75) return;
+  if (Math.abs(angle) > FOV * 0.6) return;
 
   const W = RES_W, H = RES_H;
+  // Correct screenX: map angle from [-halfFOV..halfFOV] to [0..W]
+  const halfFOV = FOV / 2;
   const screenX = Math.floor((0.5 + angle / FOV) * W);
   const spriteH = Math.min(H, Math.floor(H / dist));
   const spriteW = spriteH;
