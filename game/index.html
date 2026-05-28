@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DEADZONE — V6.3</title>
+<title>DEADZONE V7.0</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; }
@@ -29,7 +29,6 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 #kill-feed { position: absolute; top: 30px; left: 40px; }
 .kill-msg { color: #ff4444; font-size: 12px; letter-spacing: 2px; animation: fadeKill 2s forwards; margin-bottom: 4px; }
 .pickup-msg { color: #00ff88; font-size: 12px; letter-spacing: 2px; animation: fadeKill 2.5s forwards; margin-bottom: 4px; }
-.regen-msg { color: #00ff88; font-size: 12px; letter-spacing: 2px; animation: fadeKill 1.5s forwards; margin-bottom: 4px; }
 .record-msg { color: #ffdd00; font-size: 13px; letter-spacing: 2px; animation: fadeKill 4s forwards; margin-bottom: 4px; font-weight: bold; }
 @keyframes fadeKill { 0%{opacity:1;transform:translateX(0)} 80%{opacity:1} 100%{opacity:0;transform:translateX(-20px)} }
 #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(ellipse at center, transparent 30%, rgba(255,0,0,0.45) 100%); opacity:0; pointer-events:none; transition: opacity 0.1s; z-index:9; }
@@ -37,31 +36,21 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 #reload-track { width: 120px; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; }
 #reload-fill { height: 100%; background: #ff8800; border-radius: 2px; width: 0%; }
 #reload-text { color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 3px; text-align: center; margin-bottom: 6px; }
-#pickup-prompt { position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%); color: #00ff88; font-size: 12px; letter-spacing: 3px; text-align: center; opacity: 0; transition: opacity 0.2s; text-transform: uppercase; }
-#minimap { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 150px; height: 150px; border-radius: 50%; overflow: hidden; }
+#minimap { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 150px; height: 150px; border-radius: 50%; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
 #minimap-canvas { width: 150px; height: 150px; }
 #weapon-slots { position: absolute; bottom: 200px; right: 40px; display: flex; flex-direction: column; gap: 4px; }
 .weapon-slot { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); padding: 6px 10px; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.4); text-align: right; min-width: 120px; }
 .weapon-slot.active { border-color: rgba(255,136,0,0.8); color: #ff8800; }
 .weapon-slot.empty { color: rgba(255,255,255,0.15); }
 #wave-announce { position: absolute; top: 40%; left: 50%; transform: translate(-50%,-50%); color: #ff8800; font-size: 32px; letter-spacing: 8px; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
-.pickup-label { position: absolute; pointer-events: none; text-align: center; transform: translate(-50%, -50%); z-index: 20; }
-.pickup-label-name { color: #ffcc44; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 8px rgba(255,180,0,0.8); display: block; }
-.pickup-label-hint { color: rgba(255,255,255,0.45); font-size: 9px; letter-spacing: 2px; display: block; margin-top: 2px; }
-#pickup-labels { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:20; }
-
-/* ── SCREENS ── */
 .screen { position: fixed; top:0; left:0; width:100%; height:100%; display:none; flex-direction:column; align-items:center; justify-content:center; z-index:100; color:#fff; }
 .screen.active { display: flex; }
-
-/* ── AUTH / MENU SCREENS ── */
 #auth-screen { background: #000; }
 #start-screen { background: rgba(0,0,0,0.93); }
 #pause-screen { background: rgba(0,0,0,0.78); pointer-events: all; }
 #game-over-screen { background: rgba(0,0,0,0.92); }
 #leaderboard-screen { background: rgba(0,0,0,0.96); overflow-y: auto; }
 #feedback-screen { background: rgba(0,0,0,0.96); }
-
 .game-title { font-size: 72px; font-weight: 900; letter-spacing: 12px; color: #fff; text-shadow: 0 0 40px rgba(255,68,68,0.5); margin-bottom: 8px; }
 .subtitle { color: rgba(255,255,255,0.4); letter-spacing: 8px; font-size: 13px; margin-bottom: 50px; }
 .btn { border: none; font-family: 'Courier New', monospace; font-size: 14px; letter-spacing: 4px; cursor: pointer; text-transform: uppercase; transition: all 0.2s; padding: 16px 48px; }
@@ -70,8 +59,6 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; }
 .btn-secondary:hover { background: rgba(255,255,255,0.1); }
 .btn-sm { padding: 10px 28px; font-size: 12px; }
-.btn-danger { background: transparent; border: 1px solid rgba(255,60,60,0.5); color: #ff4444; }
-.btn-danger:hover { background: rgba(255,60,60,0.1); }
 .controls-hint { margin-top: 40px; color: rgba(255,255,255,0.3); font-size: 11px; letter-spacing: 2px; line-height: 2.4; text-align: center; }
 #pause-title { font-size: 52px; letter-spacing: 12px; margin-bottom: 12px; }
 #pause-sub { color: rgba(255,255,255,0.35); letter-spacing: 4px; font-size: 12px; margin-bottom: 36px; }
@@ -79,12 +66,10 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 #game-over-title { font-size: 60px; letter-spacing: 8px; color: #ff4444; margin-bottom: 12px; }
 #final-score { font-size: 22px; color: rgba(255,255,255,0.65); margin: 0 0 8px; letter-spacing: 4px; }
 #final-record-msg { font-size: 14px; letter-spacing: 3px; margin-bottom: 24px; min-height: 20px; color: #ffdd00; }
-
-/* ── AUTH FORM ── */
 .auth-container { width: 380px; }
 .auth-title { font-size: 56px; font-weight: 900; letter-spacing: 10px; margin-bottom: 6px; }
 .auth-sub { color: rgba(255,255,255,0.35); letter-spacing: 6px; font-size: 11px; margin-bottom: 44px; }
-.auth-tabs { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.auth-tabs { display: flex; margin-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .auth-tab { background: none; border: none; color: rgba(255,255,255,0.35); font-family: 'Courier New',monospace; font-size: 12px; letter-spacing: 3px; cursor: pointer; padding: 10px 24px 12px; text-transform: uppercase; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .2s; }
 .auth-tab.active { color: #ff4444; border-bottom-color: #ff4444; }
 .auth-form { display: flex; flex-direction: column; gap: 14px; }
@@ -99,14 +84,12 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 .auth-username { color: rgba(255,255,255,0.4); font-size: 10px; letter-spacing: 2px; }
 .auth-signout { background: none; border: none; color: rgba(255,60,60,0.5); font-family: 'Courier New',monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
 .auth-signout:hover { color: #ff4444; }
-
-/* ── LEADERBOARD ── */
 .lb-container { width: 560px; max-height: 80vh; }
 .lb-title { font-size: 42px; letter-spacing: 10px; color: #fff; margin-bottom: 6px; }
 .lb-sub { color: rgba(255,255,255,0.3); letter-spacing: 5px; font-size: 11px; margin-bottom: 32px; }
 .lb-table { width: 100%; border-collapse: collapse; }
 .lb-table th { color: rgba(255,255,255,0.3); font-size: 10px; letter-spacing: 3px; text-align: left; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.lb-table td { padding: 12px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; letter-spacing: 1px; color: rgba(255,255,255,0.75); }
+.lb-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; letter-spacing: 1px; color: rgba(255,255,255,0.75); }
 .lb-table tr.me td { color: #ff8800; }
 .lb-table tr:first-child td { color: #ffdd00; }
 .lb-rank { font-size: 11px; color: rgba(255,255,255,0.3); }
@@ -115,8 +98,6 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 .lb-rank-3 { color: #cd7f32; }
 .lb-empty { color: rgba(255,255,255,0.25); font-size: 12px; letter-spacing: 3px; text-align: center; padding: 32px; }
 .lb-actions { display: flex; gap: 12px; margin-top: 28px; }
-
-/* ── FEEDBACK ── */
 .fb-container { width: 480px; }
 .fb-title { font-size: 42px; letter-spacing: 10px; margin-bottom: 6px; }
 .fb-sub { color: rgba(255,255,255,0.3); letter-spacing: 5px; font-size: 11px; margin-bottom: 32px; }
@@ -134,7 +115,6 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 <canvas id="canvas"></canvas>
 <div id="damage-overlay"></div>
 
-<!-- HUD -->
 <div id="hud">
   <div id="crosshair"></div>
   <div id="health-bar">
@@ -142,18 +122,26 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
     <div id="health-track"><div id="health-fill"></div></div>
     <div id="regen-indicator" style="opacity:0">+ REGENERATING</div>
   </div>
-  <div id="ammo-display"><div id="ammo-count">12</div><div id="ammo-reserve">/ 48</div><div id="weapon-name">Pistol</div></div>
-  <div id="score-display"><div id="score-label">Score</div><div id="score-value">0</div><div id="wave-display">WAVE 1</div></div>
+  <div id="ammo-display">
+    <div id="ammo-count">--</div>
+    <div id="ammo-reserve"></div>
+    <div id="weapon-name"></div>
+  </div>
+  <div id="score-display">
+    <div id="score-label">Score</div>
+    <div id="score-value">0</div>
+    <div id="wave-display">WAVE 1</div>
+  </div>
   <div id="kill-feed"></div>
-  <div id="reload-bar"><div id="reload-text">RELOADING</div><div id="reload-track"><div id="reload-fill"></div></div></div>
-  <div id="pickup-prompt"></div>
+  <div id="reload-bar">
+    <div id="reload-text">RELOADING</div>
+    <div id="reload-track"><div id="reload-fill"></div></div>
+  </div>
   <div id="minimap"><canvas id="minimap-canvas" width="150" height="150"></canvas></div>
   <div id="weapon-slots"></div>
   <div id="wave-announce"></div>
 </div>
-<div id="pickup-labels"></div>
 
-<!-- User Info Bar (shown when logged in) -->
 <div class="auth-user-info" id="user-info-bar" style="display:none">
   <span class="auth-username" id="ui-username"></span>
   <button class="auth-signout" id="signout-btn">Sign Out</button>
@@ -168,7 +156,7 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
       <button class="auth-tab active" id="tab-login">Login</button>
       <button class="auth-tab" id="tab-register">Register</button>
     </div>
-    <div class="auth-form" id="auth-form">
+    <div class="auth-form">
       <input class="auth-input" id="auth-username-field" type="text" placeholder="Username" autocomplete="off" style="display:none">
       <input class="auth-input" id="auth-email" type="email" placeholder="Email" autocomplete="off">
       <input class="auth-input" id="auth-password" type="password" placeholder="Password">
@@ -191,16 +179,15 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
   </div>
   <div class="controls-hint">
     WASD — Move &nbsp;|&nbsp; Mouse — Aim &nbsp;|&nbsp; Click — Shoot<br>
-    R — Reload &nbsp;|&nbsp; Shift — Sprint &nbsp;|&nbsp; Space — Jump<br>
-    E — Pick Up Weapon &nbsp;|&nbsp; Q — Drop Weapon<br>
-    1 / 2 / 3 — Switch Weapon &nbsp;|&nbsp; ESC — Pause
+    R — Reload &nbsp;|&nbsp; Shift — Sprint &nbsp;|&nbsp; 1/2/3 — Switch Weapon<br>
+    ESC — Pause
   </div>
 </div>
 
 <!-- PAUSE SCREEN -->
 <div id="pause-screen" class="screen">
   <div id="pause-title">PAUSED</div>
-  <div id="pause-sub">Everything is frozen</div>
+  <div id="pause-sub" style="color:rgba(255,255,255,0.35);letter-spacing:4px;font-size:12px;margin-bottom:36px;">Everything is frozen</div>
   <div class="pause-btns">
     <button class="btn btn-primary" id="resume-btn">RESUME</button>
     <button class="btn btn-secondary btn-sm" id="pause-lb-btn">LEADERBOARD</button>
@@ -214,7 +201,7 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
   <div id="final-score">SCORE: 0 | WAVE: 1</div>
   <div id="final-record-msg"></div>
   <div style="display:flex;gap:12px;">
-    <button class="btn btn-secondary" id="restart-btn">PLAY AGAIN</button>
+    <button class="btn btn-primary" id="restart-btn">PLAY AGAIN</button>
     <button class="btn btn-secondary btn-sm" id="go-lb-btn">LEADERBOARD</button>
     <button class="btn btn-secondary btn-sm" id="go-fb-btn">FEEDBACK</button>
   </div>
@@ -270,54 +257,41 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-const firebaseConfig = {
+// ═══════════════════════════════════════════════
+// FIREBASE & AUTH
+// ═══════════════════════════════════════════════
+firebase.initializeApp({
   apiKey: "AIzaSyDEsmdqWZ2lBU7MpnXCjD12aQViUDb4dqA",
   authDomain: "innovateprogram-fd00c.firebaseapp.com",
   projectId: "innovateprogram-fd00c",
   storageBucket: "innovateprogram-fd00c.firebasestorage.app",
   messagingSenderId: "1006945173823",
   appId: "1:1006945173823:web:8cf8449b9836bab60b938a"
-};
-
-firebase.initializeApp(firebaseConfig);
+});
 const auth = firebase.auth();
-const db = firebase.firestore();
+const db   = firebase.firestore();
 
-window._fbReady = true;
-window._currentUser = null;
-window._isGuest = false;
+window._currentUser      = null;
+window._isGuest          = false;
 window._personalBestWave = 0;
-window._personalBestScore = 0;
-window._globalBestWave = 0;
-window._globalBestScore = 0;
-
-// ── HELPERS ──
-function showError(msg) {
-  document.getElementById('auth-error').textContent = msg;
-}
-
-function clearError() {
-  document.getElementById('auth-error').textContent = '';
-}
+window._personalBestScore= 0;
+window._globalBestWave   = 0;
+window._globalBestScore  = 0;
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-window.showScreen = showScreen;
 
-// ── FIREBASE HELPERS ──
 async function fetchGlobalBests() {
   try {
     const snap = await db.collection('leaderboard').orderBy('wave','desc').limit(1).get();
     if (!snap.empty) {
       const d = snap.docs[0].data();
-      window._globalBestWave = d.wave || 0;
+      window._globalBestWave  = d.wave  || 0;
       window._globalBestScore = d.score || 0;
     }
-  } catch(e) {
-    console.warn('fetchGlobalBests failed:', e);
-  }
+  } catch(e) {}
 }
 
 async function fetchPersonalBest(uid) {
@@ -325,200 +299,145 @@ async function fetchPersonalBest(uid) {
     const snap = await db.collection('users').doc(uid).get();
     if (snap.exists) {
       const d = snap.data();
-      window._personalBestWave = d.bestWave || 0;
+      window._personalBestWave  = d.bestWave  || 0;
       window._personalBestScore = d.bestScore || 0;
     }
-  } catch(e) {
-    console.warn('fetchPersonalBest failed:', e);
-  }
+  } catch(e) {}
 }
 
-window.submitScore = async function(waveDone, finalScore, username) {
-  const uid = window._currentUser ? window._currentUser.uid : null;
-  const name = username || (window._currentUser ? (window._currentUser.displayName || window._currentUser.email) : 'Guest');
+window.submitScore = async function(wave, score) {
+  const uid  = window._currentUser ? window._currentUser.uid : null;
+  const name = window._currentUser ? (window._currentUser.displayName || window._currentUser.email) : 'Guest';
   let beatPersonal = false, beatGlobal = false;
   if (!uid) return { beatPersonal, beatGlobal };
   try {
-    if (waveDone > window._personalBestWave || (waveDone === window._personalBestWave && finalScore > window._personalBestScore)) {
+    if (wave > window._personalBestWave || (wave === window._personalBestWave && score > window._personalBestScore)) {
       beatPersonal = true;
-      window._personalBestWave = waveDone;
-      window._personalBestScore = finalScore;
-      await db.collection('users').doc(uid).set(
-        { bestWave: waveDone, bestScore: finalScore, username: name, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
-        { merge: true }
-      );
-      await db.collection('leaderboard').doc(uid).set({
-        username: name, wave: waveDone, score: finalScore, uid,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      window._personalBestWave  = wave;
+      window._personalBestScore = score;
+      await db.collection('users').doc(uid).set({ bestWave: wave, bestScore: score, username: name, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      await db.collection('leaderboard').doc(uid).set({ username: name, wave, score, uid, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
-    if (waveDone > window._globalBestWave || (waveDone === window._globalBestWave && finalScore > window._globalBestScore)) {
+    if (wave > window._globalBestWave || (wave === window._globalBestWave && score > window._globalBestScore)) {
       beatGlobal = true;
-      window._globalBestWave = waveDone;
-      window._globalBestScore = finalScore;
+      window._globalBestWave  = wave;
+      window._globalBestScore = score;
     }
-  } catch(e) {
-    console.warn('submitScore failed:', e);
-  }
+  } catch(e) { console.warn('submitScore:', e); }
   return { beatPersonal, beatGlobal };
 };
 
-window.loadLeaderboard = async function() {
+async function loadLeaderboard() {
   try {
     const snap = await db.collection('leaderboard').orderBy('wave','desc').orderBy('score','desc').limit(20).get();
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch(e) {
-    console.warn('loadLeaderboard failed:', e);
-    return [];
-  }
+  } catch(e) { return []; }
+}
+
+window.submitFeedback = async function(category, message) {
+  const uid  = window._currentUser ? window._currentUser.uid : 'guest';
+  const name = window._currentUser ? (window._currentUser.displayName || window._currentUser.email) : 'Guest';
+  await db.collection('feedback').add({ category, message, username: name, uid, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 };
 
-window.submitFeedback = async function(category, message, username) {
-  const uid = window._currentUser ? window._currentUser.uid : 'guest';
-  const name = username || (window._currentUser ? (window._currentUser.displayName || window._currentUser.email) : 'Guest');
+// Auth UI
+let authMode = 'login', _registering = false;
+const tabLogin          = document.getElementById('tab-login');
+const tabReg            = document.getElementById('tab-register');
+const authUsernameField = document.getElementById('auth-username-field');
+const authSubmitBtn     = document.getElementById('auth-submit-btn');
+const authErrorEl       = document.getElementById('auth-error');
+
+function setAuthError(msg) { authErrorEl.textContent = msg; }
+
+tabLogin.addEventListener('click', () => {
+  authMode = 'login';
+  tabLogin.classList.add('active'); tabReg.classList.remove('active');
+  authSubmitBtn.textContent = 'LOGIN';
+  authUsernameField.style.display = 'none';
+  setAuthError('');
+});
+tabReg.addEventListener('click', () => {
+  authMode = 'register';
+  tabReg.classList.add('active'); tabLogin.classList.remove('active');
+  authSubmitBtn.textContent = 'CREATE ACCOUNT';
+  authUsernameField.style.display = 'block';
+  setAuthError('');
+});
+
+authSubmitBtn.addEventListener('click', async () => {
+  setAuthError('');
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value.trim();
+  const username = authUsernameField.value.trim();
+  if (!email || !password) { setAuthError('Email and password required.'); return; }
+  if (password.length < 6) { setAuthError('Password must be at least 6 characters.'); return; }
+  if (authMode === 'register' && !username) { setAuthError('Username required.'); return; }
+  authSubmitBtn.disabled = true;
   try {
-    await db.collection('feedback').add({
-      category, message, username: name, uid,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    if (authMode === 'register') {
+      _registering = true;
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      await cred.user.updateProfile({ displayName: username });
+      db.collection('users').doc(cred.user.uid).set({ username, email, bestWave: 0, bestScore: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
+      _registering = false;
+      window._currentUser = cred.user;
+      window._isGuest = false;
+      await fetchGlobalBests(); await fetchPersonalBest(cred.user.uid);
+      document.getElementById('ui-username').textContent = username;
+      document.getElementById('user-info-bar').style.display = 'flex';
+      showScreen('start-screen');
+    } else {
+      await auth.signInWithEmailAndPassword(email, password);
+    }
   } catch(e) {
-    console.warn('submitFeedback failed:', e);
-    throw e;
+    _registering = false;
+    let msg = (e.message || 'Error').replace('Firebase: ','').replace(/\(auth\/.*?\)/,'').trim();
+    setAuthError(msg);
   }
-};
+  authSubmitBtn.disabled = false;
+});
 
-// ── AUTH STATE ──
-let _registering = false;
+document.getElementById('guest-btn').addEventListener('click', () => {
+  window._isGuest = true; window._currentUser = null;
+  document.getElementById('user-info-bar').style.display = 'none';
+  showScreen('start-screen');
+});
+
+document.getElementById('signout-btn').addEventListener('click', async () => {
+  try { await auth.signOut(); } catch(e) {}
+  window._currentUser = null; window._isGuest = false;
+  window._personalBestWave = 0; window._personalBestScore = 0;
+  document.getElementById('user-info-bar').style.display = 'none';
+  if (window.gameState === 'playing') endGame();
+  showScreen('auth-screen');
+});
 
 auth.onAuthStateChanged(async user => {
   if (_registering) return;
   if (user) {
-    window._currentUser = user;
-    window._isGuest = false;
-    await fetchGlobalBests();
-    await fetchPersonalBest(user.uid);
+    window._currentUser = user; window._isGuest = false;
+    await fetchGlobalBests(); await fetchPersonalBest(user.uid);
     document.getElementById('ui-username').textContent = user.displayName || user.email;
     document.getElementById('user-info-bar').style.display = 'flex';
     showScreen('start-screen');
   }
 });
 
-// ── AUTH UI ──
-let authMode = 'login';
-
-const tabLogin = document.getElementById('tab-login');
-const tabReg   = document.getElementById('tab-register');
-const authUsernameField = document.getElementById('auth-username-field');
-const authSubmitBtn     = document.getElementById('auth-submit-btn');
-
-tabLogin.addEventListener('click', () => {
-  authMode = 'login';
-  tabLogin.classList.add('active');
-  tabReg.classList.remove('active');
-  authSubmitBtn.textContent = 'LOGIN';
-  authUsernameField.style.display = 'none';
-  clearError();
-});
-
-tabReg.addEventListener('click', () => {
-  authMode = 'register';
-  tabReg.classList.add('active');
-  tabLogin.classList.remove('active');
-  authSubmitBtn.textContent = 'CREATE ACCOUNT';
-  authUsernameField.style.display = 'block';
-  clearError();
-});
-
-authSubmitBtn.addEventListener('click', async () => {
-  clearError();
-  const email    = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value.trim();
-  const username = authUsernameField.value.trim();
-
-  if (!email || !password) { showError('Email and password required.'); return; }
-  if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
-  if (authMode === 'register' && !username) { showError('Username required.'); return; }
-
-  authSubmitBtn.disabled = true;
-
-  try {
-    if (authMode === 'register') {
-      _registering = true;
-
-      // 1. Create auth user
-      const cred = await auth.createUserWithEmailAndPassword(email, password);
-
-      // 2. Set display name
-      await cred.user.updateProfile({ displayName: username });
-
-      // 3. Write user doc to Firestore (non-blocking — don't fail registration if this fails)
-      db.collection('users').doc(cred.user.uid).set({
-        username, email, bestWave: 0, bestScore: 0,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).catch(e => console.warn('User doc write failed (non-fatal):', e));
-
-      _registering = false;
-      window._currentUser = cred.user;
-      window._isGuest = false;
-
-      await fetchGlobalBests();
-      await fetchPersonalBest(cred.user.uid);
-
-      document.getElementById('ui-username').textContent = username;
-      document.getElementById('user-info-bar').style.display = 'flex';
-      showScreen('start-screen');
-
-    } else {
-      // Login — onAuthStateChanged will handle the rest
-      await auth.signInWithEmailAndPassword(email, password);
-    }
-  } catch(e) {
-    _registering = false;
-    console.error('Auth error:', e);
-    // Show a clean, readable error
-    let msg = e.message || 'Something went wrong.';
-    msg = msg.replace('Firebase: ', '').replace(/\(auth\/.*?\)/, '').trim();
-    showError(msg);
-  }
-
-  authSubmitBtn.disabled = false;
-});
-
-document.getElementById('guest-btn').addEventListener('click', () => {
-  window._isGuest = true;
-  window._currentUser = null;
-  document.getElementById('user-info-bar').style.display = 'none';
-  showScreen('start-screen');
-});
-
-document.getElementById('signout-btn').addEventListener('click', async () => {
-  try { await auth.signOut(); } catch(e) { console.warn(e); }
-  window._currentUser = null;
-  window._isGuest = false;
-  window._personalBestWave = 0;
-  window._personalBestScore = 0;
-  document.getElementById('user-info-bar').style.display = 'none';
-  showScreen('auth-screen');
-  if (window.gameState === 'playing' && typeof endGame === 'function') endGame();
-});
-
-// ── LEADERBOARD ──
+// Leaderboard UI
 async function renderLeaderboard() {
   const tbody = document.getElementById('lb-body');
   tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">Loading...</td></tr>';
-  const rows = await window.loadLeaderboard();
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">No scores yet. Be the first!</td></tr>';
-    return;
-  }
+  const rows = await loadLeaderboard();
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">No scores yet. Be the first!</td></tr>'; return; }
   tbody.innerHTML = '';
   rows.forEach((r, i) => {
     const tr = document.createElement('tr');
     const isMe = window._currentUser && r.uid === window._currentUser.uid;
     if (isMe) tr.classList.add('me');
-    const rankClass = i===0?'lb-rank-1':i===1?'lb-rank-2':i===2?'lb-rank-3':'lb-rank';
+    const rc = i===0?'lb-rank-1':i===1?'lb-rank-2':i===2?'lb-rank-3':'lb-rank';
     const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
-    tr.innerHTML = `<td class="${rankClass}">${medal}</td><td>${r.username||'???'}${isMe?' (you)':''}</td><td>Wave ${r.wave}</td><td>${(r.score||0).toLocaleString()}</td>`;
+    tr.innerHTML = `<td class="${rc}">${medal}</td><td>${r.username||'???'}${isMe?' (you)':''}</td><td>Wave ${r.wave}</td><td>${(r.score||0).toLocaleString()}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -529,42 +448,687 @@ document.getElementById('pause-lb-btn').addEventListener('click', () => { render
 document.getElementById('go-lb-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('leaderboard-screen'); });
 document.getElementById('leaderboard-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('leaderboard-screen'); });
 
-// ── FEEDBACK ──
-document.getElementById('fb-back-btn').addEventListener('click', () => {
-  showScreen(window.gameState==='playing' ? 'pause-screen' : (window._currentUser||window._isGuest) ? 'start-screen' : 'auth-screen');
-});
-document.getElementById('feedback-btn').addEventListener('click', () => {
-  document.getElementById('fb-success').style.display = 'none';
-  showScreen('feedback-screen');
-});
-document.getElementById('pause-fb-btn').addEventListener('click', () => {
-  document.getElementById('fb-success').style.display = 'none';
-  showScreen('feedback-screen');
-});
-document.getElementById('go-fb-btn').addEventListener('click', () => {
-  document.getElementById('fb-success').style.display = 'none';
-  showScreen('feedback-screen');
-});
-
+// Feedback UI
+document.getElementById('fb-back-btn').addEventListener('click', () => showScreen(window.gameState==='playing'?'pause-screen':(window._currentUser||window._isGuest)?'start-screen':'auth-screen'));
+document.getElementById('feedback-btn').addEventListener('click',  () => { document.getElementById('fb-success').style.display='none'; showScreen('feedback-screen'); });
+document.getElementById('pause-fb-btn').addEventListener('click', () => { document.getElementById('fb-success').style.display='none'; showScreen('feedback-screen'); });
+document.getElementById('go-fb-btn').addEventListener('click',    () => { document.getElementById('fb-success').style.display='none'; showScreen('feedback-screen'); });
 document.getElementById('fb-submit-btn').addEventListener('click', async () => {
   const cat = document.getElementById('fb-category').value;
   const msg = document.getElementById('fb-message').value.trim();
   const err = document.getElementById('fb-error');
-  const suc = document.getElementById('fb-success');
   err.textContent = '';
   if (!msg) { err.textContent = 'Please enter a message.'; return; }
   try {
-    const name = window._currentUser ? (window._currentUser.displayName || window._currentUser.email) : 'Guest';
-    await window.submitFeedback(cat, msg, name);
+    await window.submitFeedback(cat, msg);
     document.getElementById('fb-message').value = '';
-    suc.style.display = 'block';
-  } catch(e) {
-    err.textContent = 'Failed to submit. Try again.';
-  }
+    document.getElementById('fb-success').style.display = 'block';
+  } catch(e) { err.textContent = 'Failed to submit. Try again.'; }
 });
 
-// ── INIT ──
 fetchGlobalBests();
+
+// ═══════════════════════════════════════════════
+// GAME ENGINE
+// ═══════════════════════════════════════════════
+const canvas    = document.getElementById('canvas');
+const ctx       = canvas.getContext('2d');
+const mmCanvas  = document.getElementById('minimap-canvas');
+const mmCtx     = mmCanvas.getContext('2d');
+
+window.gameState = 'menu'; // menu | playing | paused | over
+
+// Resize canvas to actual pixel size
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// ── WEAPONS ──
+const WEAPONS = {
+  pistol:   { name:'PISTOL',    damage:25, fireRate:400,  reload:1200, magSize:12, reserveMax:60,  bulletSpeed:14, spread:0.04, auto:false, color:'#88aaff' },
+  shotgun:  { name:'SHOTGUN',   damage:18, fireRate:800,  reload:1800, magSize:6,  reserveMax:30,  bulletSpeed:12, spread:0.18, pellets:6, auto:false, color:'#ff8844' },
+  rifle:    { name:'RIFLE',     damage:35, fireRate:150,  reload:2000, magSize:30, reserveMax:120, bulletSpeed:18, spread:0.02, auto:true,  color:'#44ff88' },
+  smg:      { name:'SMG',       damage:15, fireRate:100,  reload:1500, magSize:25, reserveMax:100, bulletSpeed:16, spread:0.08, auto:true,  color:'#ffdd44' },
+};
+
+// ── GAME STATE ──
+let player, bullets, enemies, pickups, particles, score, wave, waveTimer, waveActive, enemiesLeft, reloading, reloadTimer, reloadStart, lastShot, damageFlash, regenTimer, lastTime, animId;
+
+const keys    = {};
+const mouse   = { x: 0, y: 0, down: false };
+
+// World size
+const WORLD_W = 3000;
+const WORLD_H = 3000;
+const TILE    = 80;
+
+// Camera
+let camX = 0, camY = 0;
+
+function worldToScreen(wx, wy) {
+  return { x: wx - camX + canvas.width/2, y: wy - camY + canvas.height/2 };
+}
+
+function screenToWorld(sx, sy) {
+  return { x: sx + camX - canvas.width/2, y: sy + camY - canvas.height/2 };
+}
+
+function initGame() {
+  player = {
+    x: WORLD_W/2, y: WORLD_H/2,
+    vx: 0, vy: 0,
+    radius: 16,
+    speed: 220,
+    health: 100,
+    maxHealth: 100,
+    weapons: [
+      { ...WEAPONS.pistol,  mag: WEAPONS.pistol.magSize,  reserve: WEAPONS.pistol.reserveMax  },
+    ],
+    currentWeapon: 0,
+    angle: 0,
+  };
+  bullets   = [];
+  enemies   = [];
+  pickups   = [];
+  particles = [];
+  score     = 0;
+  wave      = 0;
+  waveTimer = 0;
+  waveActive= false;
+  enemiesLeft=0;
+  reloading = false;
+  reloadTimer=0;
+  reloadStart=0;
+  lastShot  = 0;
+  damageFlash=0;
+  regenTimer = 0;
+  lastTime  = performance.now();
+  camX = player.x;
+  camY = player.y;
+
+  updateHUD();
+  nextWave();
+  window.gameState = 'playing';
+  if (animId) cancelAnimationFrame(animId);
+  gameLoop(performance.now());
+}
+
+function nextWave() {
+  wave++;
+  waveActive = false;
+  waveTimer  = 3000; // 3s between waves
+  enemiesLeft= 0;
+  announceWave();
+  document.getElementById('wave-display').textContent = 'WAVE ' + wave;
+}
+
+function spawnWave() {
+  waveActive = true;
+  const count = 5 + wave * 3;
+  enemiesLeft = count;
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => spawnEnemy(), i * 300);
+  }
+}
+
+function spawnEnemy() {
+  // Spawn outside camera view
+  const angle  = Math.random() * Math.PI * 2;
+  const dist   = 500 + Math.random() * 300;
+  const x      = Math.max(40, Math.min(WORLD_W-40, player.x + Math.cos(angle)*dist));
+  const y      = Math.max(40, Math.min(WORLD_H-40, player.y + Math.sin(angle)*dist));
+  const isHeavy= wave > 3 && Math.random() < 0.2;
+  const isElite= wave > 6 && Math.random() < 0.1;
+  enemies.push({
+    x, y,
+    radius  : isHeavy ? 24 : isElite ? 20 : 14,
+    speed   : isHeavy ? 70 : isElite ? 160 : 100 + wave*5,
+    health  : isHeavy ? 200 : isElite ? 120 : 50 + wave*10,
+    maxHealth:isHeavy ? 200 : isElite ? 120 : 50 + wave*10,
+    damage  : isHeavy ? 20  : isElite ? 15  : 10,
+    color   : isHeavy ? '#ff2200' : isElite ? '#ff00ff' : '#ff4444',
+    dead    : false,
+    shootCooldown: isElite ? 1500 : 99999,
+    lastShot: 0,
+    type    : isHeavy ? 'heavy' : isElite ? 'elite' : 'basic',
+  });
+}
+
+// ── MAIN LOOP ──
+function gameLoop(now) {
+  if (window.gameState !== 'playing') return;
+  const dt = Math.min((now - lastTime) / 1000, 0.05); // seconds, capped
+  lastTime = now;
+
+  update(dt, now);
+  render();
+  renderMinimap();
+
+  animId = requestAnimationFrame(gameLoop);
+}
+
+function update(dt, now) {
+  updatePlayer(dt, now);
+  updateBullets(dt);
+  updateEnemies(dt, now);
+  updateParticles(dt);
+  updatePickups();
+  updateReload(dt, now);
+  updateRegen(dt);
+  updateWaveTimer(dt, now);
+  updateCamera(dt);
+  updateHUD();
+  checkPlayerDead();
+}
+
+function updatePlayer(dt, now) {
+  // Direction
+  let dx = 0, dy = 0;
+  if (keys['KeyW'] || keys['ArrowUp'])    dy -= 1;
+  if (keys['KeyS'] || keys['ArrowDown'])  dy += 1;
+  if (keys['KeyA'] || keys['ArrowLeft'])  dx -= 1;
+  if (keys['KeyD'] || keys['ArrowRight']) dx += 1;
+  const len = Math.hypot(dx, dy);
+  if (len > 0) { dx /= len; dy /= len; }
+  const spd = keys['ShiftLeft'] || keys['ShiftRight'] ? player.speed * 1.6 : player.speed;
+  player.vx += (dx * spd - player.vx) * 10 * dt;
+  player.vy += (dy * spd - player.vy) * 10 * dt;
+  player.x  += player.vx * dt;
+  player.y  += player.vy * dt;
+  // Clamp to world
+  player.x = Math.max(player.radius, Math.min(WORLD_W - player.radius, player.x));
+  player.y = Math.max(player.radius, Math.min(WORLD_H - player.radius, player.y));
+
+  // Aim
+  const wp = worldToScreen(player.x, player.y);
+  player.angle = Math.atan2(mouse.y - wp.y, mouse.x - wp.x);
+
+  // Shoot
+  const wep = player.weapons[player.currentWeapon];
+  if (mouse.down && !reloading && wep.mag > 0) {
+    if ((wep.auto && now - lastShot > wep.fireRate) || (!wep.auto && mouse.justDown)) {
+      shoot(now);
+    }
+  }
+  mouse.justDown = false;
+}
+
+function shoot(now) {
+  const wep = player.weapons[player.currentWeapon];
+  if (wep.mag <= 0) { startReload(now); return; }
+  wep.mag--;
+  lastShot = now;
+  const pellets = wep.pellets || 1;
+  for (let p = 0; p < pellets; p++) {
+    const spread = (Math.random() - 0.5) * wep.spread * 2;
+    const angle  = player.angle + spread;
+    bullets.push({
+      x: player.x, y: player.y,
+      vx: Math.cos(angle) * wep.bulletSpeed,
+      vy: Math.sin(angle) * wep.bulletSpeed,
+      damage: wep.damage,
+      life: 1.2,
+      fromPlayer: true,
+      color: wep.color,
+    });
+  }
+  // Muzzle flash
+  for (let i = 0; i < 5; i++) {
+    const a = player.angle + (Math.random()-0.5)*0.6;
+    particles.push({ x:player.x, y:player.y, vx:Math.cos(a)*4, vy:Math.sin(a)*4, life:0.12, maxLife:0.12, color:'#ffcc44', size:3 });
+  }
+}
+
+function startReload(now) {
+  const wep = player.weapons[player.currentWeapon];
+  if (reloading || wep.mag === wep.magSize || wep.reserve <= 0) return;
+  reloading   = true;
+  reloadStart = now;
+  reloadTimer = wep.reload;
+  document.getElementById('reload-bar').style.opacity = '1';
+}
+
+function updateReload(dt, now) {
+  if (!reloading) return;
+  const wep      = player.weapons[player.currentWeapon];
+  const elapsed  = now - reloadStart;
+  const pct      = Math.min(elapsed / reloadTimer, 1);
+  document.getElementById('reload-fill').style.width = (pct * 100) + '%';
+  if (pct >= 1) {
+    const needed = wep.magSize - wep.mag;
+    const take   = Math.min(needed, wep.reserve);
+    wep.mag     += take;
+    wep.reserve -= take;
+    reloading    = false;
+    document.getElementById('reload-bar').style.opacity = '0';
+  }
+}
+
+function updateBullets(dt) {
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    b.x   += b.vx * 60 * dt;
+    b.y   += b.vy * 60 * dt;
+    b.life -= dt;
+    // World bounds
+    if (b.x < 0 || b.x > WORLD_W || b.y < 0 || b.y > WORLD_H || b.life <= 0) {
+      bullets.splice(i, 1); continue;
+    }
+    // Hit enemies
+    if (b.fromPlayer) {
+      for (let j = enemies.length - 1; j >= 0; j--) {
+        const e = enemies[j];
+        if (e.dead) continue;
+        if (Math.hypot(b.x - e.x, b.y - e.y) < e.radius + 4) {
+          e.health -= b.damage;
+          spawnHitParticles(b.x, b.y, '#ff4444');
+          bullets.splice(i, 1);
+          if (e.health <= 0) killEnemy(j);
+          break;
+        }
+      }
+    } else {
+      // Enemy bullet hits player
+      if (Math.hypot(b.x - player.x, b.y - player.y) < player.radius + 4) {
+        hurtPlayer(b.damage);
+        spawnHitParticles(b.x, b.y, '#ff8800');
+        bullets.splice(i, 1);
+      }
+    }
+  }
+}
+
+function killEnemy(idx) {
+  const e = enemies[idx];
+  e.dead  = true;
+  score  += e.type === 'heavy' ? 150 : e.type === 'elite' ? 200 : 100;
+  addKillFeed('Enemy eliminated');
+  spawnHitParticles(e.x, e.y, e.color, 12);
+  // Chance to drop weapon
+  if (Math.random() < 0.25) spawnPickup(e.x, e.y);
+  enemies.splice(idx, 1);
+  enemiesLeft--;
+  document.getElementById('score-value').textContent = score.toLocaleString();
+  if (waveActive && enemies.length === 0) {
+    waveActive = false;
+    setTimeout(nextWave, 2000);
+  }
+}
+
+function hurtPlayer(dmg) {
+  player.health = Math.max(0, player.health - dmg);
+  damageFlash   = 0.4;
+  regenTimer    = 5; // 5s before regen kicks in
+  document.getElementById('damage-overlay').style.opacity = '1';
+  setTimeout(() => { document.getElementById('damage-overlay').style.opacity = '0'; }, 150);
+}
+
+function updateRegen(dt) {
+  if (player.health <= 0) return;
+  if (player.health < player.maxHealth) {
+    regenTimer -= dt;
+    if (regenTimer <= 0) {
+      player.health = Math.min(player.maxHealth, player.health + 8 * dt);
+      document.getElementById('regen-indicator').style.opacity = '1';
+    } else {
+      document.getElementById('regen-indicator').style.opacity = '0';
+    }
+  } else {
+    document.getElementById('regen-indicator').style.opacity = '0';
+  }
+}
+
+function updateEnemies(dt, now) {
+  for (const e of enemies) {
+    if (e.dead) continue;
+    const dx  = player.x - e.x;
+    const dy  = player.y - e.y;
+    const dist= Math.hypot(dx, dy);
+    if (dist > 0) {
+      e.x += (dx/dist) * e.speed * dt;
+      e.y += (dy/dist) * e.speed * dt;
+    }
+    // Melee damage
+    if (dist < player.radius + e.radius + 2) {
+      hurtPlayer(e.damage * dt * 2);
+    }
+    // Elite shoots
+    if (e.type === 'elite' && now - e.lastShot > e.shootCooldown) {
+      e.lastShot = now;
+      const a    = Math.atan2(player.y - e.y, player.x - e.x);
+      bullets.push({ x:e.x, y:e.y, vx:Math.cos(a)*8, vy:Math.sin(a)*8, damage:12, life:2, fromPlayer:false, color:'#ff00ff' });
+    }
+    // Clamp to world
+    e.x = Math.max(e.radius, Math.min(WORLD_W-e.radius, e.x));
+    e.y = Math.max(e.radius, Math.min(WORLD_H-e.radius, e.y));
+  }
+}
+
+function updateParticles(dt) {
+  for (let i = particles.length-1; i >= 0; i--) {
+    const p = particles[i];
+    p.x    += p.vx;
+    p.y    += p.vy;
+    p.vx   *= 0.92;
+    p.vy   *= 0.92;
+    p.life -= dt;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function spawnHitParticles(x, y, color, count=6) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = 1 + Math.random() * 3;
+    particles.push({ x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, life:0.3+Math.random()*0.2, maxLife:0.5, color, size:2+Math.random()*2 });
+  }
+}
+
+function spawnPickup(x, y) {
+  const types = Object.keys(WEAPONS);
+  const type  = types[Math.floor(Math.random()*types.length)];
+  const wep   = WEAPONS[type];
+  pickups.push({ x, y, type, name: wep.name, color: wep.color, pulse: 0 });
+}
+
+function updatePickups() {
+  for (const p of pickups) p.pulse += 0.05;
+  // Auto-pickup when close
+  for (let i = pickups.length-1; i >= 0; i--) {
+    const p    = pickups[i];
+    const dist = Math.hypot(player.x - p.x, player.y - p.y);
+    if (dist < 40) {
+      pickupWeapon(p);
+      pickups.splice(i, 1);
+    }
+  }
+}
+
+function pickupWeapon(p) {
+  const wepDef = WEAPONS[p.type];
+  // Check if already have this weapon type
+  const existing = player.weapons.find(w => w.name === wepDef.name);
+  if (existing) {
+    const add = Math.floor(wepDef.magSize * 1.5);
+    existing.reserve = Math.min(existing.reserveMax, existing.reserve + add);
+    addKillFeed('+ Ammo: ' + wepDef.name, 'pickup');
+  } else if (player.weapons.length < 3) {
+    player.weapons.push({ ...wepDef, mag: wepDef.magSize, reserve: wepDef.reserveMax });
+    addKillFeed('+ Picked up: ' + wepDef.name, 'pickup');
+  } else {
+    // Replace current
+    player.weapons[player.currentWeapon] = { ...wepDef, mag: wepDef.magSize, reserve: wepDef.reserveMax };
+    addKillFeed('+ Swapped: ' + wepDef.name, 'pickup');
+  }
+}
+
+function updateWaveTimer(dt, now) {
+  if (!waveActive) {
+    waveTimer -= dt * 1000;
+    if (waveTimer <= 0) spawnWave();
+  }
+}
+
+function updateCamera(dt) {
+  camX += (player.x - camX) * 8 * dt;
+  camY += (player.y - camY) * 8 * dt;
+}
+
+function checkPlayerDead() {
+  if (player.health <= 0) endGame();
+}
+
+function updateHUD() {
+  // Health
+  const hpPct = Math.max(0, player.health / player.maxHealth * 100);
+  document.getElementById('health-fill').style.width = hpPct + '%';
+  // Ammo
+  const wep = player.weapons[player.currentWeapon];
+  document.getElementById('ammo-count').textContent   = wep.mag;
+  document.getElementById('ammo-reserve').textContent  = '/ ' + wep.reserve;
+  document.getElementById('weapon-name').textContent   = wep.name;
+  // Weapon slots
+  const slotsEl = document.getElementById('weapon-slots');
+  slotsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const div = document.createElement('div');
+    div.className = 'weapon-slot' + (i === player.currentWeapon ? ' active' : '') + (!player.weapons[i] ? ' empty' : '');
+    div.textContent = player.weapons[i] ? (i+1)+' '+player.weapons[i].name : (i+1)+' ---';
+    slotsEl.appendChild(div);
+  }
+}
+
+// ── RENDER ──
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Background grid
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth   = 1;
+  const offX = -(camX - canvas.width/2) % TILE;
+  const offY = -(camY - canvas.height/2) % TILE;
+  for (let x = offX; x < canvas.width;  x += TILE) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+  for (let y = offY; y < canvas.height; y += TILE) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
+  ctx.restore();
+
+  // World border
+  const tl = worldToScreen(0, 0);
+  const br = worldToScreen(WORLD_W, WORLD_H);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,68,68,0.4)';
+  ctx.lineWidth   = 3;
+  ctx.setLineDash([20, 10]);
+  ctx.strokeRect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // Pickups
+  for (const p of pickups) {
+    const sp   = worldToScreen(p.x, p.y);
+    const pulse= Math.sin(p.pulse) * 4;
+    ctx.save();
+    ctx.shadowBlur  = 15 + pulse;
+    ctx.shadowColor = p.color;
+    ctx.fillStyle   = p.color;
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.y, 10 + pulse * 0.3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle   = '#fff';
+    ctx.font        = 'bold 8px Courier New';
+    ctx.textAlign   = 'center';
+    ctx.fillText(p.name, sp.x, sp.y + 22);
+    ctx.restore();
+  }
+
+  // Particles
+  for (const p of particles) {
+    const sp  = worldToScreen(p.x, p.y);
+    const alpha = Math.max(0, p.life / (p.maxLife||0.5));
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle   = p.color;
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.y, p.size||2, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Enemies
+  for (const e of enemies) {
+    if (e.dead) continue;
+    const sp = worldToScreen(e.x, e.y);
+    ctx.save();
+    ctx.shadowBlur  = 10;
+    ctx.shadowColor = e.color;
+    ctx.fillStyle   = e.color;
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.y, e.radius, 0, Math.PI*2);
+    ctx.fill();
+    // Health bar
+    const bw   = e.radius * 2;
+    const bh   = 4;
+    const bx   = sp.x - e.radius;
+    const by   = sp.y - e.radius - 10;
+    const hpPct= e.health / e.maxHealth;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.fillStyle = hpPct > 0.5 ? '#44ff88' : hpPct > 0.25 ? '#ffaa00' : '#ff4444';
+    ctx.fillRect(bx, by, bw * hpPct, bh);
+    ctx.restore();
+  }
+
+  // Bullets
+  for (const b of bullets) {
+    const sp = worldToScreen(b.x, b.y);
+    ctx.save();
+    ctx.shadowBlur  = 6;
+    ctx.shadowColor = b.color;
+    ctx.fillStyle   = b.color;
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.y, 3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Player
+  const pp = worldToScreen(player.x, player.y);
+  ctx.save();
+  ctx.translate(pp.x, pp.y);
+  ctx.rotate(player.angle);
+  // Body
+  ctx.shadowBlur  = 15;
+  ctx.shadowColor = '#4488ff';
+  ctx.fillStyle   = '#4488ff';
+  ctx.beginPath();
+  ctx.arc(0, 0, player.radius, 0, Math.PI*2);
+  ctx.fill();
+  // Gun barrel
+  ctx.fillStyle   = '#aaccff';
+  ctx.shadowColor = '#aaccff';
+  ctx.shadowBlur  = 8;
+  ctx.fillRect(8, -3, 16, 6);
+  ctx.restore();
+}
+
+function renderMinimap() {
+  const W = 150, H = 150;
+  mmCtx.clearRect(0, 0, W, H);
+  mmCtx.fillStyle = 'rgba(0,0,0,0.7)';
+  mmCtx.fillRect(0, 0, W, H);
+
+  const scaleX = W / WORLD_W;
+  const scaleY = H / WORLD_H;
+
+  // Enemies
+  for (const e of enemies) {
+    mmCtx.fillStyle = e.color;
+    mmCtx.beginPath();
+    mmCtx.arc(e.x * scaleX, e.y * scaleY, 2, 0, Math.PI*2);
+    mmCtx.fill();
+  }
+  // Player
+  mmCtx.fillStyle = '#4488ff';
+  mmCtx.beginPath();
+  mmCtx.arc(player.x * scaleX, player.y * scaleY, 3, 0, Math.PI*2);
+  mmCtx.fill();
+}
+
+// ── END GAME ──
+async function endGame() {
+  window.gameState = 'over';
+  cancelAnimationFrame(animId);
+
+  document.getElementById('final-score').textContent = 'SCORE: ' + score.toLocaleString() + '  |  WAVE: ' + wave;
+  document.getElementById('final-record-msg').textContent = '';
+  showScreen('game-over-screen');
+
+  if (window._currentUser) {
+    const res = await window.submitScore(wave, score);
+    if (res.beatPersonal && res.beatGlobal) {
+      document.getElementById('final-record-msg').textContent = '🏆 NEW GLOBAL RECORD!';
+    } else if (res.beatPersonal) {
+      document.getElementById('final-record-msg').textContent = '⭐ New Personal Best!';
+    }
+  }
+}
+
+function announceWave() {
+  const el = document.getElementById('wave-announce');
+  el.textContent = 'WAVE ' + wave;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2000);
+}
+
+function addKillFeed(msg, type='kill') {
+  const feed = document.getElementById('kill-feed');
+  const div  = document.createElement('div');
+  div.className = type === 'pickup' ? 'pickup-msg' : 'kill-msg';
+  div.textContent = msg;
+  feed.appendChild(div);
+  setTimeout(() => div.remove(), 2500);
+}
+
+// ── INPUT ──
+document.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (window.gameState !== 'playing') return;
+  if (e.code === 'Escape') { pauseGame(); return; }
+  if (e.code === 'KeyR') { startReload(performance.now()); return; }
+  if (e.code === 'Digit1') switchWeapon(0);
+  if (e.code === 'Digit2') switchWeapon(1);
+  if (e.code === 'Digit3') switchWeapon(2);
+});
+document.addEventListener('keyup',  e => { keys[e.code] = false; });
+
+document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+canvas.addEventListener('mousedown', e => {
+  if (e.button === 0) { mouse.down = true; mouse.justDown = true; }
+});
+canvas.addEventListener('mouseup', e => {
+  if (e.button === 0) mouse.down = false;
+});
+
+function switchWeapon(idx) {
+  if (!player.weapons[idx]) return;
+  player.currentWeapon = idx;
+  reloading = false;
+  document.getElementById('reload-bar').style.opacity = '0';
+  updateHUD();
+}
+
+function pauseGame() {
+  window.gameState = 'paused';
+  cancelAnimationFrame(animId);
+  showScreen('pause-screen');
+}
+
+function resumeGame() {
+  window.gameState = 'playing';
+  lastTime = performance.now();
+  gameLoop(lastTime);
+  showScreen('');
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+}
+
+// ── SCREEN BUTTONS ──
+document.getElementById('start-btn').addEventListener('click', () => {
+  initGame();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+});
+
+document.getElementById('resume-btn').addEventListener('click', resumeGame);
+
+document.getElementById('restart-btn').addEventListener('click', () => {
+  initGame();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+});
 </script>
 </body>
 </html>
