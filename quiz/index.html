@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science Revision Quiz</title>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        background:#f4f4f4;
+        margin:0;
+        padding:40px;
+        display:flex;
+        justify-content:center;
+    }
+
+    .container{
+        background:white;
+        width:700px;
+        max-width:95%;
+        padding:30px;
+        border-radius:15px;
+        box-shadow:0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    h1{
+        text-align:center;
+    }
+
+    .question{
+        margin-bottom:25px;
+    }
+
+    .question h3{
+        margin-bottom:10px;
+    }
+
+    input[type=text]{
+        width:100%;
+        padding:10px;
+        border-radius:8px;
+        border:1px solid #ccc;
+        font-size:16px;
+    }
+
+    button{
+        width:100%;
+        padding:14px;
+        font-size:18px;
+        border:none;
+        border-radius:10px;
+        background:#2563eb;
+        color:white;
+        cursor:pointer;
+    }
+
+    button:hover{
+        background:#1d4ed8;
+    }
+
+    #results{
+        margin-top:30px;
+        padding:20px;
+        border-radius:10px;
+        background:#eef2ff;
+        display:none;
+    }
+
+    .correct{
+        color:green;
+    }
+
+    .wrong{
+        color:red;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Science Exam Quiz</h1>
+
+    <form id="quizForm">
+
+        <div class="question">
+            <h3>1. What process changes liquid water into water vapour?</h3>
+            <input type="text" id="q1">
+        </div>
+
+        <div class="question">
+            <h3>2. Name ONE global Earth system.</h3>
+            <input type="text" id="q2">
+        </div>
+
+        <div class="question">
+            <h3>3. What gas do plants take in during photosynthesis?</h3>
+            <input type="text" id="q3">
+        </div>
+
+        <div class="question">
+            <h3>4. Which subatomic particle has a positive charge?</h3>
+            <input type="text" id="q4">
+        </div>
+
+        <div class="question">
+            <h3>5. What is the atomic number?</h3>
+            <input type="text" id="q5">
+        </div>
+
+        <div class="question">
+            <h3>6. What is an ion?</h3>
+            <input type="text" id="q6">
+        </div>
+
+        <div class="question">
+            <h3>7. What is the distance between wave crests called?</h3>
+            <input type="text" id="q7">
+        </div>
+
+        <div class="question">
+            <h3>8. Which colour has the longest wavelength?</h3>
+            <input type="text" id="q8">
+        </div>
+
+        <div class="question">
+            <h3>9. What happens when a wave reflects?</h3>
+            <input type="text" id="q9">
+        </div>
+
+        <div class="question">
+            <h3>10. Why does an object appear green?</h3>
+            <input type="text" id="q10">
+        </div>
+
+        <button type="button" onclick="checkQuiz()">Submit Quiz</button>
+
+    </form>
+
+    <div id="results"></div>
+</div>
+
+<script>
+function normalize(text){
+    return text.toLowerCase().trim();
+}
+
+function checkQuiz(){
+
+    let score = 0;
+
+    const answers = {
+        q1:["evaporation"],
+        q2:["atmosphere","hydrosphere","biosphere","geosphere","lithosphere"],
+        q3:["carbon dioxide","co2"],
+        q4:["proton","protons"],
+        q5:["number of protons","protons in the nucleus"],
+        q6:["charged atom","atom with charge","charged particle"],
+        q7:["wavelength"],
+        q8:["red"],
+        q9:["bounces back","changes direction","reflects back"],
+        q10:["reflects green light","green light is reflected"]
+    };
+
+    let output = "<h2>Results</h2>";
+
+    for(let key in answers){
+
+        let userAnswer = normalize(document.getElementById(key).value);
+
+        let correct = answers[key].some(ans =>
+            userAnswer.includes(ans)
+        );
+
+        if(correct){
+            score++;
+            output += `<p class="correct">${key.toUpperCase()}: Correct</p>`;
+        }else{
+            output += `<p class="wrong">${key.toUpperCase()}: Incorrect</p>`;
+        }
+    }
+
+    let percent = (score / 10) * 100;
+
+    output += `<h2>Score: ${score}/10 (${percent}%)</h2>`;
+
+    if(percent >= 50){
+        output += "<h3 class='correct'>PASS</h3>";
+    }else{
+        output += "<h3 class='wrong'>FAIL - Try Again</h3>";
+    }
+
+    document.getElementById("results").style.display = "block";
+    document.getElementById("results").innerHTML = output;
+}
+</script>
+
+</body>
+</html>
