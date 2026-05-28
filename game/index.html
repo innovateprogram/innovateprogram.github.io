@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DEADZONE — V6.1</title>
+<title>DEADZONE — V6.2</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; }
@@ -266,12 +266,10 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
   </div>
 </div>
 
-<script type="module">
-<!-- Firebase SDKs -->
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyDEsmdqWZ2lBU7MpnXCjD12aQViUDb4dqA",
   authDomain: "innovateprogram-fd00c.firebaseapp.com",
@@ -281,9 +279,9 @@ const firebaseConfig = {
   appId: "1:1006945173823:web:8cf8449b9836bab60b938a"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 window._fbReady = true;
 window._currentUser = null;
@@ -295,25 +293,24 @@ window._globalBestScore = 0;
 
 async function fetchGlobalBests() {
   try {
-    const q = query(collection(db,'leaderboard'), orderBy('wave','desc'), limit(1));
-    const snap = await getDocs(q);
+    const snap = await db.collection('leaderboard').orderBy('wave','desc').limit(1).get();
     if (!snap.empty) {
       const d = snap.docs[0].data();
       window._globalBestWave = d.wave || 0;
       window._globalBestScore = d.score || 0;
     }
-  } catch(e){ console.warn('fetchGlobalBests:', e); }
+  } catch(e) { console.warn('fetchGlobalBests:', e); }
 }
 
 async function fetchPersonalBest(uid) {
   try {
-    const snap = await getDoc(doc(db,'users',uid));
-    if (snap.exists()) {
+    const snap = await db.collection('users').doc(uid).get();
+    if (snap.exists) {
       const d = snap.data();
       window._personalBestWave = d.bestWave || 0;
       window._personalBestScore = d.bestScore || 0;
     }
-  } catch(e){ console.warn('fetchPersonalBest:', e); }
+  } catch(e) { console.warn('fetchPersonalBest:', e); }
 }
 
 window.submitScore = async function(waveDone, finalScore, username) {
@@ -326,8 +323,11 @@ window.submitScore = async function(waveDone, finalScore, username) {
       window._personalBestWave = waveDone;
       window._personalBestScore = finalScore;
       try {
-        await setDoc(doc(db,'users',uid), { bestWave: waveDone, bestScore: finalScore, username: name, updatedAt: serverTimestamp() }, { merge: true });
-      } catch(e){ console.warn(e); }
+        await db.collection('users').doc(uid).set(
+          { bestWave: waveDone, bestScore: finalScore, username: name, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+          { merge: true }
+        );
+      } catch(e) { console.warn(e); }
     }
     if (waveDone > window._globalBestWave || (waveDone === window._globalBestWave && finalScore > window._globalBestScore)) {
       beatGlobal = true;
@@ -336,8 +336,11 @@ window.submitScore = async function(waveDone, finalScore, username) {
     }
     if (beatPersonal) {
       try {
-        await setDoc(doc(db,'leaderboard',uid), { username: name, wave: waveDone, score: finalScore, uid, updatedAt: serverTimestamp() }, { merge: false });
-      } catch(e){ console.warn(e); }
+        await db.collection('leaderboard').doc(uid).set({
+          username: name, wave: waveDone, score: finalScore, uid,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch(e) { console.warn(e); }
     }
   }
   return { beatPersonal, beatGlobal };
@@ -345,8 +348,7 @@ window.submitScore = async function(waveDone, finalScore, username) {
 
 window.loadLeaderboard = async function() {
   try {
-    const q = query(collection(db,'leaderboard'), orderBy('wave','desc'), orderBy('score','desc'), limit(20));
-    const snap = await getDocs(q);
+    const snap = await db.collection('leaderboard').orderBy('wave','desc').orderBy('score','desc').limit(20).get();
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch(e) { console.warn(e); return []; }
 };
@@ -354,7 +356,10 @@ window.loadLeaderboard = async function() {
 window.submitFeedback = async function(category, message, username) {
   const uid = window._currentUser ? window._currentUser.uid : 'guest';
   const name = username || (window._currentUser ? (window._currentUser.displayName || window._currentUser.email) : 'Guest');
-  await addDoc(collection(db,'feedback'), { category, message, username: name, uid, createdAt: serverTimestamp() });
+  await db.collection('feedback').add({
+    category, message, username: name, uid,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
 };
 
 // ── AUTH UI ──
@@ -399,9 +404,12 @@ authSubmitBtn.addEventListener('click', async () => {
   try {
     if (authMode === 'register') {
       _registering = true;
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(cred.user, { displayName: username });
-      await setDoc(doc(db,'users',cred.user.uid), { username, email, bestWave:0, bestScore:0, createdAt: serverTimestamp() });
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      await cred.user.updateProfile({ displayName: username });
+      await db.collection('users').doc(cred.user.uid).set({
+        username, email, bestWave: 0, bestScore: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
       _registering = false;
       window._currentUser = cred.user;
       await fetchGlobalBests();
@@ -410,7 +418,7 @@ authSubmitBtn.addEventListener('click', async () => {
       userInfoBar.style.display = 'flex';
       showScreen('start-screen');
     } else {
-      await signInWithEmailAndPassword(auth, email, password);
+      await auth.signInWithEmailAndPassword(email, password);
     }
   } catch(e) {
     _registering = false;
@@ -427,7 +435,7 @@ guestBtn.addEventListener('click', () => {
 });
 
 document.getElementById('signout-btn').addEventListener('click', async () => {
-  await signOut(auth);
+  await auth.signOut();
   window._currentUser = null;
   window._isGuest = false;
   window._personalBestWave = 0;
@@ -437,7 +445,7 @@ document.getElementById('signout-btn').addEventListener('click', async () => {
   if (window.gameState === 'playing') endGame();
 });
 
-onAuthStateChanged(auth, async user => {
+auth.onAuthStateChanged(async user => {
   if (_registering) return;
   if (user) {
     window._currentUser = user;
@@ -450,12 +458,15 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// Leaderboard
+// ── LEADERBOARD ──
 async function renderLeaderboard() {
   const tbody = document.getElementById('lb-body');
   tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">Loading...</td></tr>';
   const rows = await window.loadLeaderboard();
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">No scores yet. Be the first!</td></tr>'; return; }
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">No scores yet. Be the first!</td></tr>';
+    return;
+  }
   tbody.innerHTML = '';
   rows.forEach((r, i) => {
     const tr = document.createElement('tr');
@@ -473,7 +484,7 @@ document.getElementById('pause-lb-btn').addEventListener('click', () => { render
 document.getElementById('go-lb-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('leaderboard-screen'); });
 document.getElementById('leaderboard-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('leaderboard-screen'); });
 
-// Feedback
+// ── FEEDBACK ──
 document.getElementById('fb-back-btn').addEventListener('click', () => showScreen(window.gameState==='playing'?'pause-screen':window._currentUser||window._isGuest?'start-screen':'auth-screen'));
 document.getElementById('feedback-btn').addEventListener('click', () => { document.getElementById('fb-success').style.display='none'; showScreen('feedback-screen'); });
 document.getElementById('pause-fb-btn').addEventListener('click', () => { document.getElementById('fb-success').style.display='none'; showScreen('feedback-screen'); });
@@ -487,7 +498,7 @@ document.getElementById('fb-submit-btn').addEventListener('click', async () => {
   err.textContent = '';
   if (!msg) { err.textContent = 'Please enter a message.'; return; }
   try {
-    const name = window._currentUser ? (window._currentUser.displayName||window._currentUser.email) : 'Guest';
+    const name = window._currentUser ? (window._currentUser.displayName || window._currentUser.email) : 'Guest';
     await window.submitFeedback(cat, msg, name);
     document.getElementById('fb-message').value = '';
     suc.style.display = 'block';
