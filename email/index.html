@@ -3,116 +3,124 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Email Manager V3</title>
+  <title>Email Manager V5</title>
 
   <style>
     :root {
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #d1d5db;
-      --primary: #2563eb;
-      --danger: #dc2626;
-      --success-bg: #dcfce7;
-      --danger-bg: #fee2e2;
-      --shadow: 0 10px 30px rgba(0,0,0,0.08);
-      --radius: 16px;
+      --bg:#f4f6f8;
+      --card:#fff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:#d1d5db;
+      --primary:#2563eb;
+      --danger:#dc2626;
+      --danger-bg:#fee2e2;
+      --success-bg:#dcfce7;
+      --shadow:0 10px 30px rgba(0,0,0,0.08);
+      --radius:16px;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing:border-box; }
 
     body {
-      margin: 0;
-      font-family: Arial;
-      background: var(--bg);
-      color: var(--text);
+      margin:0;
+      font-family:Arial;
+      background:var(--bg);
+      color:var(--text);
     }
 
     .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px;
-      display: grid;
-      gap: 20px;
+      max-width:1100px;
+      margin:0 auto;
+      padding:24px;
+      display:grid;
+      gap:20px;
     }
 
     .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 20px;
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:20px;
     }
 
-    .email-list { display: grid; gap: 12px; }
+    .email-list { display:grid; gap:12px; }
 
     .email-item {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      cursor: pointer;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px;
+      cursor:pointer;
+      transition:0.15s;
     }
 
+    .email-item:hover { transform:scale(1.01); }
+
     .email-item.inactive {
-      background: var(--danger-bg);
-      border-color: #fca5a5;
-      opacity: 0.9;
+      background:var(--danger-bg);
+      border-color:#fca5a5;
+      opacity:0.9;
     }
 
     .meta {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 6px;
+      font-size:13px;
+      color:var(--muted);
+      margin-top:6px;
     }
 
-    label { font-weight: 700; display:block; margin-bottom:6px; }
+    label { font-weight:700; display:block; margin-bottom:6px; }
 
     input, select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid var(--border);
     }
 
-    .field { margin-bottom: 14px; }
+    .field { margin-bottom:14px; }
 
     button {
-      padding: 10px 14px;
-      border: 0;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
+      padding:10px 14px;
+      border:0;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
     }
 
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
-    .btn-secondary { background: #e5e7eb; }
+    .btn-primary { background:var(--primary); color:#fff; }
+    .btn-danger { background:var(--danger); color:#fff; }
+    .btn-secondary { background:#e5e7eb; }
 
     .badge {
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-weight: 700;
-      margin-left: 6px;
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:999px;
+      font-weight:700;
+      margin-left:6px;
     }
 
-    .main { background: var(--success-bg); }
-    .inactive { background: var(--danger-bg); }
+    .main { background:var(--success-bg); }
+    .inactive { background:var(--danger-bg); }
 
-    .button-row { display:flex; gap:10px; margin-top:10px; }
+    .button-row {
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
   </style>
 </head>
 
 <body>
 <div class="container">
 
-  <!-- STORED FIRST -->
+  <!-- STORED EMAILS -->
   <div class="card">
     <h2>Stored Emails</h2>
     <div id="list" class="email-list"></div>
   </div>
 
-  <!-- ADD SECOND -->
+  <!-- ADD EMAIL (NO INACTIVE OPTION HERE) -->
   <div class="card">
     <h2>Add Email</h2>
 
@@ -132,11 +140,6 @@
     <div class="field">
       <label>Forward To</label>
       <select id="forwardTo"></select>
-    </div>
-
-    <div class="field">
-      <label>Inactive Until (required)</label>
-      <input id="inactiveUntil" type="datetime-local">
     </div>
 
     <div class="button-row">
@@ -172,7 +175,6 @@ const db = getFirestore(app);
 const email = document.getElementById("email");
 const type = document.getElementById("type");
 const forwardTo = document.getElementById("forwardTo");
-const inactiveUntil = document.getElementById("inactiveUntil");
 const list = document.getElementById("list");
 const addBtn = document.getElementById("addBtn");
 
@@ -182,29 +184,16 @@ function isOutlook(e){
   return e.endsWith("@outlook.com") || e.endsWith("@outlook.com.au");
 }
 
-function isPast(dt){
-  return dt && new Date(dt) <= new Date();
-}
-
 /* LOAD */
 async function load(){
   const snap = await getDocs(query(collection(db,"emails"), orderBy("createdAt","desc")));
 
   const items = [];
   snap.forEach(d=>{
-    const x = d.data();
-
-    // AUTO INACTIVE CHECK (based on date/time)
-    const autoInactive = x.inactiveUntil && isPast(x.inactiveUntil);
-
-    items.push({
-      id: d.id,
-      ...x,
-      autoInactive
-    });
+    items.push({id:d.id, ...d.data()});
   });
 
-  const activeMains = items.filter(i => i.type==="main" && !i.autoInactive);
+  const activeMains = items.filter(i=>i.type==="main" && !i.inactive);
 
   forwardTo.innerHTML = `<option value="">Select main email</option>`;
   activeMains.forEach(m=>{
@@ -217,33 +206,38 @@ async function load(){
   list.innerHTML = "";
 
   items.forEach(i=>{
-    const realInactive = i.autoInactive;
-
     const div = document.createElement("div");
-    div.className = "email-item" + (realInactive ? " inactive":"");
-
-    div.onclick = async () => {
-      // manual override toggle (optional control)
-      await updateDoc(doc(db,"emails",i.id), {
-        manualInactive: !i.manualInactive
-      });
-      load();
-    };
+    div.className = "email-item" + (i.inactive ? " inactive":"");
 
     div.innerHTML = `
       <strong>${i.email}</strong>
       <span class="badge ${i.type==="main"?"main":"inactive"}">${i.type}</span>
-      ${realInactive ? `<span class="badge inactive">inactive</span>`:""}
+      ${i.inactive ? `<span class="badge inactive">inactive</span>`:""}
 
       <div class="meta">
-        Forward → ${i.forwardTo || "none"}<br>
-        Inactive Until → ${i.inactiveUntil || "not set"}
+        Forward → ${i.forwardTo || "none"}
       </div>
 
       <div class="button-row">
-        <button class="btn-secondary" data-del="${i.id}">Delete</button>
+        <button class="btn-secondary" data-toggle="${i.id}">
+          ${i.inactive ? "Reactivate" : "Deactivate"}
+        </button>
+        <button class="btn-danger" data-del="${i.id}">
+          Delete
+        </button>
       </div>
     `;
+
+    // click entire card toggles inactive
+    div.onclick = async (e)=>{
+      if(e.target.tagName === "BUTTON") return;
+
+      await updateDoc(doc(db,"emails",i.id),{
+        inactive: !i.inactive
+      });
+
+      load();
+    };
 
     list.appendChild(div);
   });
@@ -260,27 +254,39 @@ function bind(){
       load();
     };
   });
+
+  document.querySelectorAll("[data-toggle]").forEach(b=>{
+    b.onclick = async (e)=>{
+      e.stopPropagation();
+      const ref = doc(db,"emails",b.dataset.toggle);
+
+      const snap = await getDocs(collection(db,"emails"));
+      const item = snap.docs.find(d=>d.id===b.dataset.toggle).data();
+
+      await updateDoc(ref,{
+        inactive: !item.inactive
+      });
+
+      load();
+    };
+  });
 }
 
-/* ADD */
+/* ADD EMAIL */
 addBtn.onclick = async ()=>{
-  const e = norm(email.value);
-  const f = norm(forwardTo.value);
+  const emailVal = norm(email.value);
+  const forward = norm(forwardTo.value);
 
-  if(!isOutlook(e)) return alert("Only Outlook allowed");
+  if(!isOutlook(emailVal)) return alert("Only Outlook allowed");
 
-  if(type.value==="forwarder" && !f)
+  if(type.value==="forwarder" && !forward)
     return alert("Pick main email");
 
-  if(!inactiveUntil.value)
-    return alert("You must set inactive date + time");
-
   await addDoc(collection(db,"emails"),{
-    email: e,
+    email: emailVal,
     type: type.value,
-    forwardTo: type.value==="forwarder"?f:"",
-    inactiveUntil: inactiveUntil.value,
-    manualInactive: false,
+    forwardTo: type.value==="forwarder"?forward:"",
+    inactive:false,
     createdAt: serverTimestamp()
   });
 
