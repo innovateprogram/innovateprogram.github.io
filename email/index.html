@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Email Manager V4</title>
+  <title>Email Manager V3</title>
 
   <style>
     :root {
@@ -51,11 +51,6 @@
       border-radius: 14px;
       padding: 16px;
       cursor: pointer;
-      transition: 0.15s;
-    }
-
-    .email-item:hover {
-      transform: scale(1.01);
     }
 
     .email-item.inactive {
@@ -111,13 +106,13 @@
 <body>
 <div class="container">
 
-  <!-- STORED EMAILS FIRST -->
+  <!-- STORED FIRST -->
   <div class="card">
     <h2>Stored Emails</h2>
     <div id="list" class="email-list"></div>
   </div>
 
-  <!-- ADD EMAIL SECOND -->
+  <!-- ADD SECOND -->
   <div class="card">
     <h2>Add Email</h2>
 
@@ -137,6 +132,11 @@
     <div class="field">
       <label>Forward To</label>
       <select id="forwardTo"></select>
+    </div>
+
+    <div class="field">
+      <label>Inactive Until (required)</label>
+      <input id="inactiveUntil" type="datetime-local">
     </div>
 
     <div class="button-row">
@@ -172,6 +172,7 @@ const db = getFirestore(app);
 const email = document.getElementById("email");
 const type = document.getElementById("type");
 const forwardTo = document.getElementById("forwardTo");
+const inactiveUntil = document.getElementById("inactiveUntil");
 const list = document.getElementById("list");
 const addBtn = document.getElementById("addBtn");
 
@@ -181,16 +182,29 @@ function isOutlook(e){
   return e.endsWith("@outlook.com") || e.endsWith("@outlook.com.au");
 }
 
+function isPast(dt){
+  return dt && new Date(dt) <= new Date();
+}
+
 /* LOAD */
 async function load(){
   const snap = await getDocs(query(collection(db,"emails"), orderBy("createdAt","desc")));
 
   const items = [];
   snap.forEach(d=>{
-    items.push({id:d.id, ...d.data()});
+    const x = d.data();
+
+    // AUTO INACTIVE CHECK (based on date/time)
+    const autoInactive = x.inactiveUntil && isPast(x.inactiveUntil);
+
+    items.push({
+      id: d.id,
+      ...x,
+      autoInactive
+    });
   });
 
-  const activeMains = items.filter(i=>i.type==="main" && !i.inactive);
+  const activeMains = items.filter(i => i.type==="main" && !i.autoInactive);
 
   forwardTo.innerHTML = `<option value="">Select main email</option>`;
   activeMains.forEach(m=>{
@@ -203,12 +217,15 @@ async function load(){
   list.innerHTML = "";
 
   items.forEach(i=>{
+    const realInactive = i.autoInactive;
+
     const div = document.createElement("div");
-    div.className = "email-item" + (i.inactive ? " inactive":"");
+    div.className = "email-item" + (realInactive ? " inactive":"");
 
     div.onclick = async () => {
+      // manual override toggle (optional control)
       await updateDoc(doc(db,"emails",i.id), {
-        inactive: !i.inactive
+        manualInactive: !i.manualInactive
       });
       load();
     };
@@ -216,19 +233,15 @@ async function load(){
     div.innerHTML = `
       <strong>${i.email}</strong>
       <span class="badge ${i.type==="main"?"main":"inactive"}">${i.type}</span>
-      ${i.inactive ? `<span class="badge inactive">inactive</span>`:""}
+      ${realInactive ? `<span class="badge inactive">inactive</span>`:""}
 
       <div class="meta">
-        Forward → ${i.forwardTo || "none"}
+        Forward → ${i.forwardTo || "none"}<br>
+        Inactive Until → ${i.inactiveUntil || "not set"}
       </div>
 
       <div class="button-row">
-        <button class="btn-secondary" data-toggle="${i.id}">
-          Toggle
-        </button>
-        <button class="btn-danger" data-del="${i.id}">
-          Delete
-        </button>
+        <button class="btn-secondary" data-del="${i.id}">Delete</button>
       </div>
     `;
 
@@ -247,35 +260,27 @@ function bind(){
       load();
     };
   });
-
-  document.querySelectorAll("[data-toggle]").forEach(b=>{
-    b.onclick = async (e)=>{
-      e.stopPropagation();
-      const ref = doc(db,"emails",b.dataset.toggle);
-      const snap = await getDocs(collection(db,"emails"));
-      const item = snap.docs.find(d=>d.id===b.dataset.toggle).data();
-
-      await updateDoc(ref,{ inactive: !item.inactive });
-      load();
-    };
-  });
 }
 
 /* ADD */
 addBtn.onclick = async ()=>{
-  const emailVal = norm(email.value);
-  const forward = norm(forwardTo.value);
+  const e = norm(email.value);
+  const f = norm(forwardTo.value);
 
-  if(!isOutlook(emailVal)) return alert("Only Outlook allowed");
+  if(!isOutlook(e)) return alert("Only Outlook allowed");
 
-  if(type.value==="forwarder" && !forward)
+  if(type.value==="forwarder" && !f)
     return alert("Pick main email");
 
+  if(!inactiveUntil.value)
+    return alert("You must set inactive date + time");
+
   await addDoc(collection(db,"emails"),{
-    email: emailVal,
+    email: e,
     type: type.value,
-    forwardTo: type.value==="forwarder"?forward:"",
-    inactive:false,
+    forwardTo: type.value==="forwarder"?f:"",
+    inactiveUntil: inactiveUntil.value,
+    manualInactive: false,
     createdAt: serverTimestamp()
   });
 
