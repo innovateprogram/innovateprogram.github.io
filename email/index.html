@@ -460,16 +460,7 @@
               ${displayFields}
             </div>
 
-            <div class="button-row">
-              <button class="btn-secondary" data-toggle="${data.id}">
-                ${data.pwVisible ? "Hide Password" : "Show Password"}
-              </button>
-              <button class="btn-danger" data-delete="${data.id}">Delete</button>
-            </div>
-          </div>
-          <div class="pw ${data.pwVisible ? "" : "hidden"}" data-pw="${data.id}">
-            Password field is intentionally not included in this safer version.
-          </div>
+
         `;
 
         emailList.appendChild(item);
