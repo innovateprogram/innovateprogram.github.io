@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Email Manager V2</title>
+  <title>Email Manager V3</title>
+
   <style>
     :root {
       --bg: #f4f6f8;
@@ -40,33 +41,12 @@
 
     .card {
       background: var(--card);
-      border: 1px solid rgba(0,0,0,0.05);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 20px;
     }
 
-    h1, h2, h3 {
-      margin: 0 0 12px;
-    }
-
-    p.help {
-      margin: 0 0 16px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .top-grid {
-      display: grid;
-      grid-template-columns: 1.3fr 0.9fr;
-      gap: 20px;
-      align-items: start;
-    }
-
-    .email-list {
-      display: grid;
-      gap: 12px;
-    }
+    .email-list { display: grid; gap: 12px; }
 
     .email-item {
       border: 1px solid var(--border);
@@ -76,134 +56,8 @@
     }
 
     .email-item.inactive {
-      opacity: 0.95;
+      background: #fef2f2;
       border-color: #fca5a5;
-      background: linear-gradient(0deg, rgba(254,242,242,0.75), rgba(254,242,242,0.75)), #fff;
-    }
-
-    .item-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-
-    .badges {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 5px 10px;
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-
-    .badge.main {
-      background: var(--success-bg);
-      color: #166534;
-    }
-
-    .badge.inactive {
-      background: var(--danger-bg);
-      color: #991b1b;
-    }
-
-    .field {
-      margin-bottom: 14px;
-    }
-
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    input[type="email"],
-    input[type="text"],
-    input[type="datetime-local"],
-    select {
-      width: 100%;
-      padding: 12px 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 15px;
-      background: #fff;
-      color: var(--text);
-      outline: none;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-    }
-
-    .inline {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .checkbox {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .checkbox input {
-      width: 18px;
-      height: 18px;
-    }
-
-    .button-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    button {
-      border: 0;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-danger {
-      background: var(--danger);
-      color: white;
-    }
-
-    .btn-secondary {
-      background: #e5e7eb;
-      color: #111827;
-    }
-
-    .btn-secondary:hover {
-      background: #d1d5db;
     }
 
     .meta {
@@ -211,397 +65,265 @@
       font-size: 14px;
       line-height: 1.5;
       margin-top: 10px;
-      word-break: break-word;
     }
 
-    .pw {
-      margin-top: 8px;
-      font-family: Consolas, monospace;
-      background: #f9fafb;
-      border: 1px dashed var(--border);
-      padding: 10px 12px;
+    label { font-weight: 700; display:block; margin-bottom:6px; }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
       border-radius: 10px;
-      word-break: break-word;
+      font-size: 14px;
     }
 
-    .pw.hidden {
-      letter-spacing: 0.12em;
+    .field { margin-bottom: 14px; }
+
+    .button-row { display:flex; gap:10px; flex-wrap:wrap; }
+
+    button {
+      border: 0;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
     }
 
-    .small {
-      font-size: 13px;
-      color: var(--muted);
+    .btn-primary { background: var(--primary); color:#fff; }
+    .btn-danger { background: var(--danger); color:#fff; }
+    .btn-secondary { background:#e5e7eb; }
+
+    .badge {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      display:inline-block;
     }
 
-    .split {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    @media (max-width: 900px) {
-      .top-grid,
-      .split {
-        grid-template-columns: 1fr;
-      }
-    }
+    .badge-main { background: var(--success-bg); color:#166534; }
+    .badge-inactive { background: var(--danger-bg); color:#991b1b; }
   </style>
 </head>
-<body>
-  <div class="container">
 
-    <div class="card">
-      <h1>Email Manager</h1>
-      <p class="help">
-        This page manages team email records in Firestore. It validates Outlook addresses, supports main/forwarding email types, and tracks inactive-until dates.
-      </p>
-      <div id="statusLine" class="small"></div>
+<body>
+<div class="container">
+
+  <div class="card">
+    <h1>Email Manager</h1>
+    <div id="status"></div>
+  </div>
+
+  <div class="card">
+    <h2>Add Email</h2>
+
+    <div class="field">
+      <label>Email</label>
+      <input id="email" type="email" placeholder="name@outlook.com" />
     </div>
 
-    <div class="top-grid">
-      <div class="card">
-        <h2>Stored Emails</h2>
-        <p class="help">Active records are shown first. Inactive records are moved to the bottom.</p>
-        <div id="emailList" class="email-list"></div>
-      </div>
+    <div class="field">
+      <label>Type</label>
+      <select id="type">
+        <option value="main">Main Email</option>
+        <option value="forwarder">Forward Email</option>
+      </select>
+    </div>
 
-      <div class="card">
-        <h2>Add Email</h2>
+    <div class="field">
+      <label>Forward To (main emails only)</label>
+      <select id="forwardTo"></select>
+    </div>
 
-        <div class="field">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" placeholder="name@outlook.com" />
-        </div>
+    <div class="field">
+      <label>Inactive Until</label>
+      <input id="inactiveUntil" type="datetime-local" />
+    </div>
 
-        <div class="field">
-          <label for="type">Email Type</label>
-          <select id="type">
-            <option value="main">Main Email</option>
-            <option value="forwarder">Forwarding Email</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="forwardTo">Forward To</label>
-          <select id="forwardTo">
-            <option value="">Loading main emails...</option>
-          </select>
-          <div class="small" style="margin-top:6px;">Only active main emails can be selected.</div>
-        </div>
-
-        <div class="field">
-          <label class="checkbox">
-            <input type="checkbox" id="inactive" />
-            Mark as inactive
-          </label>
-        </div>
-
-        <div class="field">
-          <label for="inactiveUntil">Inactive Until</label>
-          <input type="datetime-local" id="inactiveUntil" />
-          <div class="small" style="margin-top:6px;">Defaults to now. You can change the date and time.</div>
-        </div>
-
-        <div class="button-row">
-          <button class="btn-primary" id="addBtn">Add Email</button>
-        </div>
-      </div>
+    <div class="button-row">
+      <button class="btn-primary" id="addBtn">Add</button>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs,
-      deleteDoc,
-      doc,
-      updateDoc,
-      serverTimestamp,
-      query,
-      orderBy
-    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+  <div class="card">
+    <h2>Stored Emails</h2>
+    <div id="list" class="email-list"></div>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDEsmdqWZ2lBU7MpnXCjD12aQViUDb4dqA",
-      authDomain: "innovateprogram-fd00c.firebaseapp.com",
-      projectId: "innovateprogram-fd00c",
-      storageBucket: "innovateprogram-fd00c.firebasestorage.app",
-      messagingSenderId: "1006945173823",
-      appId: "1:1006945173823:web:8cf8449b9836bab60b938a"
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  serverTimestamp,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDEsmdqWZ2lBU7MpnXCjD12aQViUDb4dqA",
+  authDomain: "innovateprogram-fd00c.firebaseapp.com",
+  projectId: "innovateprogram-fd00c",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ---------------- UI ---------------- */
+
+const emailInput = document.getElementById("email");
+const typeInput = document.getElementById("type");
+const forwardToInput = document.getElementById("forwardTo");
+const inactiveUntilInput = document.getElementById("inactiveUntil");
+const list = document.getElementById("list");
+const status = document.getElementById("status");
+const addBtn = document.getElementById("addBtn");
+
+function nowLocal() {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0,16);
+}
+
+inactiveUntilInput.value = nowLocal();
+
+function norm(e){ return (e||"").trim().toLowerCase(); }
+
+function isOutlook(e){
+  return e.endsWith("@outlook.com") || e.endsWith("@outlook.com.au");
+}
+
+function isPast(dt){
+  return dt && new Date(dt) <= new Date();
+}
+
+function setStatus(t){ status.textContent = t; }
+
+/* ---------------- LOAD ---------------- */
+
+async function load(){
+  const snap = await getDocs(query(collection(db,"emails"), orderBy("createdAt","desc")));
+
+  const items = [];
+  snap.forEach(d=>{
+    const x = d.data();
+    const inactiveNow = x.inactive && isPast(x.inactiveUntil);
+    items.push({id:d.id, ...x, inactiveNow});
+  });
+
+  list.innerHTML = "";
+
+  const mains = items.filter(i=>i.type==="main" && !i.inactiveNow);
+
+  populateForward(mains);
+
+  items.forEach(i=>{
+    const div = document.createElement("div");
+    div.className = "email-item" + (i.inactiveNow ? " inactive":"");
+
+    div.innerHTML = `
+      <div>
+        <strong>${i.email}</strong>
+        <span class="badge ${i.type==="main"?"badge-main":""}">${i.type}</span>
+        ${i.inactiveNow ? `<span class="badge badge-inactive">inactive</span>`:""}
+      </div>
+
+      <div class="meta">
+        Forward → ${i.forwardTo || "none"}<br>
+        Until → ${i.inactiveUntil || "none"}
+      </div>
+
+      <div class="button-row">
+        <button class="btn-secondary" data-toggle="${i.id}">
+          ${i.inactiveNow ? "Reactivate" : "Deactivate"}
+        </button>
+        <button class="btn-danger" data-del="${i.id}">Delete</button>
+      </div>
+    `;
+
+    list.appendChild(div);
+  });
+
+  bind();
+}
+
+/* ---------------- FORWARD OPTIONS ---------------- */
+
+function populateForward(mains){
+  forwardToInput.innerHTML = `<option value="">Select main email</option>`;
+  mains.forEach(m=>{
+    const o = document.createElement("option");
+    o.value = m.email;
+    o.textContent = m.email;
+    forwardToInput.appendChild(o);
+  });
+}
+
+/* ---------------- ACTIONS ---------------- */
+
+function bind(){
+  document.querySelectorAll("[data-del]").forEach(b=>{
+    b.onclick = async ()=>{
+      await deleteDoc(doc(db,"emails",b.dataset.del));
+      load();
     };
+  });
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  document.querySelectorAll("[data-toggle]").forEach(b=>{
+    b.onclick = async ()=>{
+      const ref = doc(db,"emails",b.dataset.toggle);
+      const snap = await getDocs(collection(db,"emails"));
+      const current = snap.docs.find(d=>d.id===b.dataset.toggle).data();
 
-    const emailInput = document.getElementById("email");
-    const typeInput = document.getElementById("type");
-    const forwardToInput = document.getElementById("forwardTo");
-    const inactiveInput = document.getElementById("inactive");
-    const inactiveUntilInput = document.getElementById("inactiveUntil");
-    const emailList = document.getElementById("emailList");
-    const addBtn = document.getElementById("addBtn");
-    const statusLine = document.getElementById("statusLine");
-
-    function toLocalDateTimeValue(date = new Date()) {
-      const local = new Date(date);
-      local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
-      return local.toISOString().slice(0, 16);
-    }
-
-    inactiveUntilInput.value = toLocalDateTimeValue();
-
-    function normalizeEmail(value) {
-      return String(value || "").trim().toLowerCase();
-    }
-
-    function isOutlookEmail(email) {
-      const e = normalizeEmail(email);
-      return e.endsWith("@outlook.com") || e.endsWith("@outlook.com.au");
-    }
-
-    function isPast(dateStr) {
-      if (!dateStr) return false;
-      const d = new Date(dateStr);
-      return Number.isFinite(d.getTime()) ? d <= new Date() : false;
-    }
-
-    function isCurrentlyInactive(data) {
-      return Boolean(data.inactive) && Boolean(data.inactiveUntil) && isPast(data.inactiveUntil);
-    }
-
-    function formatDateTime(value) {
-      const d = new Date(value);
-      if (!Number.isFinite(d.getTime())) return "Invalid date";
-      return d.toLocaleString();
-    }
-
-    function getCurrentStatusText(data) {
-      if (!data.inactive) return { text: "Active", active: true };
-      if (data.inactiveUntil && !isPast(data.inactiveUntil)) {
-        return { text: `Inactive until ${formatDateTime(data.inactiveUntil)}`, active: false };
-      }
-      return { text: "Active", active: true };
-    }
-
-    function setStatus(message) {
-      statusLine.textContent = message || "";
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    async function loadEmails() {
-      emailList.innerHTML = "<div class='small'>Loading...</div>";
-
-      const snapshot = await getDocs(query(collection(db, "emails"), orderBy("createdAt", "desc")));
-      const items = [];
-
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const status = getCurrentStatusText(data);
-        items.push({
-          id: docSnap.id,
-          ...data,
-          statusText: status.text,
-          activeNow: status.active
-        });
+      await updateDoc(ref,{
+        inactive: !current.inactive
       });
 
-      items.sort((a, b) => Number(b.activeNow) - Number(a.activeNow));
+      load();
+    };
+  });
+}
 
-      emailList.innerHTML = "";
+/* ---------------- ADD ---------------- */
 
-      if (items.length === 0) {
-        emailList.innerHTML = "<div class='small'>No emails saved yet.</div>";
-      }
+async function add(){
+  const email = norm(emailInput.value);
+  const type = typeInput.value;
+  const forwardTo = norm(forwardToInput.value);
 
-      const mainEmails = items.filter(item => item.type === "main" && item.activeNow);
+  if(!isOutlook(email)) return alert("Only Outlook emails allowed");
 
-      items.forEach((data) => {
-        const item = document.createElement("div");
-        item.className = "email-item" + (data.activeNow ? "" : " inactive");
+  if(type==="forwarder" && !forwardTo)
+    return alert("Select main email");
 
-        const mainBadge = data.type === "main"
-          ? `<span class="badge main">MAIN</span>`
-          : "";
+  await addDoc(collection(db,"emails"),{
+    email,
+    type,
+    forwardTo: type==="forwarder"?forwardTo:"",
+    inactive:false,
+    inactiveUntil: inactiveUntilInput.value,
+    createdAt: serverTimestamp()
+  });
 
-        const inactiveBadge = !data.activeNow
-          ? `<span class="badge inactive">INACTIVE</span>`
-          : "";
+  emailInput.value="";
+  typeInput.value="main";
+  forwardToInput.value="";
+  load();
+}
 
-        const typeLabel = data.type === "main" ? "Main email" : "Forwarding email";
+addBtn.onclick = add;
 
-        const displayFields = `
-          <div class="meta">
-            <strong>Email:</strong> ${escapeHtml(data.email || "")}<br>
-            <strong>Type:</strong> ${escapeHtml(typeLabel)}<br>
-            <strong>Status:</strong> ${escapeHtml(data.statusText)}<br>
-            <strong>Forward To:</strong> ${escapeHtml(data.forwardTo || "N/A")}<br>
-            <strong>Inactive Until:</strong> ${escapeHtml(data.inactiveUntil ? formatDateTime(data.inactiveUntil) : "N/A")}
-          </div>
-        `;
+load();
+setInterval(load,30000);
+setStatus("Connected");
+</script>
 
-        item.innerHTML = `
-          <div class="item-row">
-            <div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px;">
-                <strong style="font-size:16px;">${escapeHtml(data.email || "")}</strong>
-                <div class="badges">${mainBadge}${inactiveBadge}</div>
-              </div>
-              ${displayFields}
-            </div>
-
-
-        `;
-
-        emailList.appendChild(item);
-      });
-
-      populateForwardToOptions(items);
-      bindListButtons();
-    }
-
-    function populateForwardToOptions(items) {
-      const activeMainEmails = items
-        .filter(item => item.type === "main" && item.activeNow)
-        .map(item => item.email);
-
-      const current = forwardToInput.value;
-      forwardToInput.innerHTML = "";
-
-      const placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.textContent = activeMainEmails.length ? "Select a main email" : "No active main emails available";
-      forwardToInput.appendChild(placeholder);
-
-      activeMainEmails.forEach((email) => {
-        const opt = document.createElement("option");
-        opt.value = email;
-        opt.textContent = email;
-        forwardToInput.appendChild(opt);
-      });
-
-      if (activeMainEmails.includes(current)) {
-        forwardToInput.value = current;
-      }
-    }
-
-    function bindListButtons() {
-      document.querySelectorAll("[data-delete]").forEach((btn) => {
-        btn.onclick = async () => {
-          const id = btn.getAttribute("data-delete");
-          if (!confirm("Delete this email record?")) return;
-          await deleteDoc(doc(db, "emails", id));
-          await loadEmails();
-        };
-      });
-
-      document.querySelectorAll("[data-toggle]").forEach((btn) => {
-        btn.onclick = async () => {
-          const id = btn.getAttribute("data-toggle");
-          const pwEl = document.querySelector(`[data-pw="${CSS.escape(id)}"]`);
-          if (!pwEl) return;
-          const hidden = pwEl.classList.contains("hidden");
-          pwEl.classList.toggle("hidden");
-          btn.textContent = hidden ? "Hide Password" : "Show Password";
-        };
-      });
-    }
-
-    async function addEmail() {
-      const email = normalizeEmail(emailInput.value);
-      const type = typeInput.value;
-      const forwardTo = normalizeEmail(forwardToInput.value);
-      const inactive = inactiveInput.checked;
-      const inactiveUntil = inactiveUntilInput.value;
-
-      if (!isOutlookEmail(email)) {
-        alert("Only @outlook.com or @outlook.com.au addresses are allowed.");
-        return;
-      }
-
-      if (type === "forwarder" && !forwardTo) {
-        alert("Select a main email to forward to.");
-        return;
-      }
-
-      if (type === "forwarder" && !isOutlookEmail(forwardTo)) {
-        alert("Forward target must also be an Outlook address.");
-        return;
-      }
-
-      if (inactive && !inactiveUntil) {
-        alert("Set an inactive-until date and time.");
-        return;
-      }
-
-      addBtn.disabled = true;
-      addBtn.textContent = "Saving...";
-
-      try {
-        await addDoc(collection(db, "emails"), {
-          email,
-          type,
-          forwardTo: type === "forwarder" ? forwardTo : "",
-          inactive: Boolean(inactive),
-          inactiveUntil: inactive ? inactiveUntil : "",
-          createdAt: serverTimestamp(),
-          createdAtClient: Date.now()
-        });
-
-        emailInput.value = "";
-        typeInput.value = "main";
-        forwardToInput.value = "";
-        inactiveInput.checked = false;
-        inactiveUntilInput.value = toLocalDateTimeValue();
-
-        await loadEmails();
-      } catch (err) {
-        console.error(err);
-        alert(err?.message || "Failed to save.");
-      } finally {
-        addBtn.disabled = false;
-        addBtn.textContent = "Add Email";
-      }
-    }
-
-    function setInactiveUntilDefault() {
-      if (!inactiveUntilInput.value) {
-        inactiveUntilInput.value = toLocalDateTimeValue();
-      }
-    }
-
-    inactiveInput.addEventListener("change", () => {
-      setInactiveUntilDefault();
-    });
-
-    typeInput.addEventListener("change", () => {
-      if (typeInput.value === "main") {
-        forwardToInput.value = "";
-      }
-    });
-
-    addBtn.addEventListener("click", addEmail);
-
-    emailInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") addEmail();
-    });
-
-    setStatus("Connected to Firestore.");
-    loadEmails();
-
-    setInterval(() => {
-      loadEmails().catch(() => {});
-    }, 30000);
-  </script>
 </body>
 </html>
