@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Manager</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f5f5f5;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom:20px;
+}
+
+h1{
+    margin-top:0;
+}
+
+input, select{
+    width:100%;
+    padding:12px;
+    margin-top:5px;
+    margin-bottom:15px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    box-sizing:border-box;
+}
+
+button{
+    padding:12px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#0078d4;
+    color:white;
+}
+
+button:hover{
+    background:#005ea6;
+}
+
+.email-item{
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:10px;
+}
+
+.main-badge{
+    background:#28a745;
+    color:white;
+    padding:4px 8px;
+    border-radius:5px;
+    font-size:12px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="card">
+        <h1>Email Manager</h1>
+
+        <label>Email Address</label>
+        <input type="email" id="email">
+
+        <label>Password</label>
+        <input type="text" id="password">
+
+        <label>Email Type</label>
+        <select id="type">
+            <option value="main">Main Email</option>
+            <option value="forwarder">Forwarding Email</option>
+        </select>
+
+        <label>Forward To (only for forwarding emails)</label>
+        <input type="email" id="forwardTo">
+
+        <button onclick="addEmail()">Add Email</button>
+    </div>
+
+    <div class="card">
+        <h2>Stored Emails</h2>
+        <div id="emailList"></div>
+    </div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDEsmdqWZ2lBU7MpnXCjD12aQViUDb4dqA",
+    authDomain: "innovateprogram-fd00c.firebaseapp.com",
+    projectId: "innovateprogram-fd00c",
+    storageBucket: "innovateprogram-fd00c.firebasestorage.app",
+    messagingSenderId: "1006945173823",
+    appId: "1:1006945173823:web:8cf8449b9836bab60b938a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.addEmail = async function() {
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const type = document.getElementById("type").value;
+    const forwardTo = document.getElementById("forwardTo").value.trim();
+
+    const valid =
+        email.endsWith("@outlook.com") ||
+        email.endsWith("@outlook.com.au");
+
+    if(!valid){
+        alert("Only Outlook addresses are allowed.");
+        return;
+    }
+
+    if(type === "forwarder" && !forwardTo){
+        alert("Please select a main email to forward to.");
+        return;
+    }
+
+    try{
+
+        await addDoc(collection(db,"emails"),{
+            email,
+            password,
+            type,
+            forwardTo,
+            created: Date.now()
+        });
+
+        document.getElementById("email").value="";
+        document.getElementById("password").value="";
+        document.getElementById("forwardTo").value="";
+
+        loadEmails();
+
+    }catch(err){
+        alert(err.message);
+    }
+};
+
+async function loadEmails(){
+
+    const list = document.getElementById("emailList");
+    list.innerHTML="Loading...";
+
+    const snapshot = await getDocs(collection(db,"emails"));
+
+    list.innerHTML="";
+
+    snapshot.forEach((docSnap)=>{
+
+        const data = docSnap.data();
+
+        const div = document.createElement("div");
+        div.className = "email-item";
+
+        div.innerHTML = `
+            <strong>${data.email}</strong>
+            ${data.type==="main"
+                ? '<span class="main-badge">MAIN</span>'
+                : ''
+            }
+            <br><br>
+
+            Password: ${data.password}
+            <br>
+
+            Forward To:
+            ${data.forwardTo || "N/A"}
+            <br><br>
+
+            <button onclick="removeEmail('${docSnap.id}')">
+                Delete
+            </button>
+        `;
+
+        list.appendChild(div);
+    });
+
+}
+
+window.removeEmail = async function(id){
+
+    if(!confirm("Delete this email?")) return;
+
+    await deleteDoc(doc(db,"emails",id));
+
+    loadEmails();
+};
+
+loadEmails();
+
+</script>
+
+</body>
+</html>
