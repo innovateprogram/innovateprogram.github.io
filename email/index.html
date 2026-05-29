@@ -1,86 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Email Manager V6</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Email Manager V7</title>
 
-  <style>
-    body {
-      margin:0;
-      font-family:Arial;
-      background:#f4f6f8;
-    }
+<style>
+  body{
+    margin:0;
+    font-family:Arial;
+    background:#f4f6f8;
+  }
 
-    .container {
-      max-width:1100px;
-      margin:auto;
-      padding:24px;
-      display:grid;
-      gap:20px;
-    }
+  .container{
+    max-width:1100px;
+    margin:auto;
+    padding:24px;
+    display:grid;
+    gap:20px;
+  }
 
-    .card {
-      background:white;
-      padding:20px;
-      border-radius:16px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.08);
-    }
+  .card{
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  }
 
-    .email-list { display:grid; gap:12px; }
+  .email-list{ display:grid; gap:12px; }
 
-    .email-item {
-      border:1px solid #d1d5db;
-      border-radius:12px;
-      padding:14px;
-      cursor:pointer;
-    }
+  .email-item{
+    border:1px solid #d1d5db;
+    border-radius:12px;
+    padding:14px;
+    cursor:pointer;
+  }
 
-    .email-item.inactive {
-      background:#fee2e2;
-      border-color:#fca5a5;
-    }
+  .email-item.inactive{
+    background:#fee2e2;
+    border-color:#fca5a5;
+  }
 
-    .meta {
-      font-size:13px;
-      color:#6b7280;
-      margin-top:6px;
-    }
+  .meta{
+    font-size:13px;
+    color:#6b7280;
+    margin-top:6px;
+  }
 
-    input, select {
-      width:100%;
-      padding:10px;
-      margin-top:6px;
-      border-radius:10px;
-      border:1px solid #d1d5db;
-    }
+  input, select{
+    width:100%;
+    padding:10px;
+    margin-top:6px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+  }
 
-    button {
-      padding:10px 14px;
-      border:0;
-      border-radius:10px;
-      font-weight:700;
-      cursor:pointer;
-    }
+  button{
+    padding:10px 14px;
+    border:0;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+  }
 
-    .btn-primary { background:#2563eb; color:white; }
-    .btn-danger { background:#dc2626; color:white; }
-    .btn-secondary { background:#e5e7eb; }
+  .btn-primary{ background:#2563eb; color:white; }
+  .btn-danger{ background:#dc2626; color:white; }
+  .btn-secondary{ background:#e5e7eb; }
 
-    .row { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
-  </style>
+  .row{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+
+  /* MODAL */
+  .modal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .modal{
+    background:white;
+    width:420px;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.3);
+  }
+
+  .modal h3{ margin-top:0; }
+
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:12px;
+  }
+</style>
 </head>
 
 <body>
 <div class="container">
 
-  <!-- STORED EMAILS -->
   <div class="card">
     <h2>Stored Emails</h2>
     <div id="list" class="email-list"></div>
   </div>
 
-  <!-- ADD EMAIL -->
   <div class="card">
     <h2>Add Email</h2>
 
@@ -103,6 +128,21 @@
 
 </div>
 
+<!-- MODAL -->
+<div class="modal-backdrop" id="modalBg">
+  <div class="modal">
+    <h3>Deactivate Email</h3>
+
+    <label>Reactivate At</label>
+    <input type="datetime-local" id="deactivateUntil">
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="cancelModal">Cancel</button>
+      <button class="btn-danger" id="confirmDeactivate">Deactivate</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
@@ -119,18 +159,27 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey: "AIzaSyDEsmdqWZ2lBU7MpnXCjD12aQViUDb4dqA",
-  authDomain: "innovateprogram-fd00c.firebaseapp.com",
-  projectId: "innovateprogram-fd00c"
+  apiKey:"AIzaSyDEsmdqWZ2lBU7MpnXCjD12aQViUDb4dqA",
+  authDomain:"innovateprogram-fd00c.firebaseapp.com",
+  projectId:"innovateprogram-fd00c"
 });
 
 const db = getFirestore(app);
 
+/* UI */
 const email = document.getElementById("email");
 const type = document.getElementById("type");
 const forwardTo = document.getElementById("forwardTo");
 const list = document.getElementById("list");
 const addBtn = document.getElementById("addBtn");
+
+/* MODAL */
+const modalBg = document.getElementById("modalBg");
+const deactivateUntil = document.getElementById("deactivateUntil");
+const cancelModal = document.getElementById("cancelModal");
+const confirmDeactivate = document.getElementById("confirmDeactivate");
+
+let selectedId = null;
 
 const norm = e => (e||"").trim().toLowerCase();
 
@@ -142,10 +191,9 @@ function isPast(t){
   return t && new Date(t) <= new Date();
 }
 
-/* ACTIVE STATE LOGIC */
-function isActive(item){
-  if(!item.inactive) return true;
-  if(item.inactiveUntil && !isPast(item.inactiveUntil)) return false;
+function isActive(i){
+  if(!i.inactive) return true;
+  if(i.inactiveUntil && !isPast(i.inactiveUntil)) return false;
   return true;
 }
 
@@ -184,7 +232,7 @@ async function load(){
       </div>
 
       <div class="row">
-        <button class="btn-secondary" data-toggle="${i.id}">
+        <button class="btn-secondary" data-deactivate="${i.id}">
           ${active ? "Deactivate" : "Reactivate"}
         </button>
 
@@ -200,7 +248,7 @@ async function load(){
   bind();
 }
 
-/* ACTIONS */
+/* BIND */
 function bind(){
 
   document.querySelectorAll("[data-del]").forEach(b=>{
@@ -211,40 +259,51 @@ function bind(){
     };
   });
 
-  document.querySelectorAll("[data-toggle]").forEach(b=>{
-    b.onclick = async (e)=>{
+  document.querySelectorAll("[data-deactivate]").forEach(b=>{
+    b.onclick = (e)=>{
       e.stopPropagation();
-
-      const ref = doc(db,"emails",b.dataset.toggle);
-
-      const snap = await getDocs(collection(db,"emails"));
-      const item = snap.docs.find(d=>d.id===b.dataset.toggle).data();
-
-      const active = isActive(item);
-
-      if(active){
-        const until = prompt("Set reactivation date/time (YYYY-MM-DD HH:MM):");
-
-        if(!until) return;
-
-        const parsed = new Date(until.replace(" ", "T"));
-
-        await updateDoc(ref,{
-          inactive:true,
-          inactiveUntil: parsed.toISOString()
-        });
-
-      } else {
-        await updateDoc(ref,{
-          inactive:false,
-          inactiveUntil:""
-        });
-      }
-
-      load();
+      selectedId = b.dataset.deactivate;
+      deactivateUntil.value = "";
+      modalBg.style.display = "flex";
     };
   });
 }
+
+/* MODAL ACTIONS */
+cancelModal.onclick = ()=>{
+  modalBg.style.display = "none";
+  selectedId = null;
+};
+
+confirmDeactivate.onclick = async ()=>{
+  if(!selectedId) return;
+
+  const ref = doc(db,"emails",selectedId);
+
+  const until = deactivateUntil.value;
+  const snap = await getDocs(collection(db,"emails"));
+  const item = snap.docs.find(d=>d.id===selectedId).data();
+
+  const active = isActive(item);
+
+  if(active){
+    if(!until) return alert("Select a reactivation time");
+
+    await updateDoc(ref,{
+      inactive:true,
+      inactiveUntil:new Date(until).toISOString()
+    });
+  } else {
+    await updateDoc(ref,{
+      inactive:false,
+      inactiveUntil:""
+    });
+  }
+
+  modalBg.style.display = "none";
+  selectedId = null;
+  load();
+};
 
 /* ADD */
 addBtn.onclick = async ()=>{
@@ -254,7 +313,7 @@ addBtn.onclick = async ()=>{
   if(!isOutlook(e)) return alert("Outlook only");
 
   if(type.value==="forwarder" && !f)
-    return alert("Select main email");
+    return alert("Pick main email");
 
   await addDoc(collection(db,"emails"),{
     email:e,
