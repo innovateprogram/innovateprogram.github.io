@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DEADZONE V10</title>
+<title>DEADZONE V11</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; user-select: none; }
@@ -128,7 +128,8 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 .go-btns { display: flex; gap: 12px; }
 
 #lock-prompt { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.35); font-size: 11px; letter-spacing: 3px; z-index: 50; pointer-events: none; text-align: center; }
-</style>
+#interact-prompt { position: absolute; bottom: 115px; left: 50%; transform: translateX(-50%); display: none; background: rgba(0,0,0,0.72); border: 1px solid rgba(255,255,255,0.18); padding: 7px 18px; color: #fff; font-size: 11px; letter-spacing: 3px; white-space: nowrap; z-index: 20; pointer-events: none; }
+#interact-prompt .key { color: #ff8800; font-weight: bold; }</style>
 </head>
 <body>
 <canvas id="gameCanvas"></canvas>
@@ -162,6 +163,7 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
     </div>
   </div>
   <div id="lock-prompt">MOVE MOUSE OVER WINDOW TO AIM &nbsp;|&nbsp; CLICK TO LOCK</div>
+  <div id="interact-prompt"><span class="key">[E]</span> <span id="interact-text">Pick up</span></div>
 </div>
 
 <div class="user-bar" id="user-bar" style="display:none">
@@ -202,7 +204,7 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
   <div class="controls-hint">
     WASD — Move &nbsp;|&nbsp; Mouse — Look &amp; Aim &nbsp;|&nbsp; Click — Shoot<br>
     R — Reload &nbsp;|&nbsp; Shift — Sprint &nbsp;|&nbsp; 1/2/3 — Switch Weapon<br>
-    ESC — Pause
+    E — Pick Up Gun &nbsp;|&nbsp; G / Q — Drop Weapon &nbsp;|&nbsp; ESC — Pause
   </div>
 </div>
 
@@ -588,7 +590,8 @@ function mkPlayer() {
   return {
     x: 2.5, y: 2.5,
     angle: 0,
-    moveSpeed: 3.5,   // FIX #1: World-units per second (was 0.1/frame, framerate-dependent)
+    pitch: 0,          // vertical look offset in pixels (raycaster horizon shift)
+    moveSpeed: 3.5,
     health: 100, maxHealth: 100,
     weapons: [{ ...WEAPONS.pistol, mag: WEAPONS.pistol.magSize, reserve: WEAPONS.pistol.reserveMax }],
     currentWeapon: 0,
@@ -597,11 +600,12 @@ function mkPlayer() {
 }
 
 const keys = {};
-const mouse = { dx: 0, justDown: false, down: false };
+const mouse = { dx: 0, dy: 0, justDown: false, down: false };
 let pointerLocked = false;
 // Fallback non-pointer-lock tracking (works on file://)
 let _lastMouseX = null;
-let _mouseActive = false; // true once the player has moved the mouse over the canvas
+let _lastMouseY = null;
+let _mouseActive = false;
 
 function handleKeyDown(e) {
   keys[e.code] = true;
@@ -611,6 +615,9 @@ function handleKeyDown(e) {
   if (e.code === 'Digit1') { switchWeapon(0); e.preventDefault(); return; }
   if (e.code === 'Digit2') { switchWeapon(1); e.preventDefault(); return; }
   if (e.code === 'Digit3') { switchWeapon(2); e.preventDefault(); return; }
+  if (e.code === 'KeyG')   { dropWeapon();    e.preventDefault(); return; }
+  if (e.code === 'KeyQ')   { dropWeapon();    e.preventDefault(); return; }
+  if (e.code === 'KeyE')   { interactPickup(); e.preventDefault(); return; }
   if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight',
        'Space','ShiftLeft','ShiftRight'].includes(e.code)) {
     e.preventDefault();
@@ -645,25 +652,26 @@ document.addEventListener('mousemove', e => {
   if (pointerLocked) {
     // Pointer-lock path: browser gives us perfect raw delta
     mouse.dx += e.movementX;
+    mouse.dy += e.movementY;
   } else {
-    // Fallback path: compute delta from clientX ourselves
-    // Works on file://, http without HTTPS, and any context where pointer lock is denied
+    // Fallback path: compute delta from clientX/Y ourselves
     if (_lastMouseX === null) {
       _lastMouseX = e.clientX;
-      return; // first event after entering — no delta yet
+      _lastMouseY = e.clientY;
+      return;
     }
     const dx = e.clientX - _lastMouseX;
+    const dy = e.clientY - _lastMouseY;
     _lastMouseX = e.clientX;
-    // Scale by a sensitivity factor that feels similar to pointer-lock mode.
-    // Pointer lock sens = 0.0025; at typical 1920px screen a full swipe (~1000px)
-    // should rotate ~2.5 rad, so per-px factor ≈ 0.0025 is identical here.
+    _lastMouseY = e.clientY;
     mouse.dx += dx;
+    mouse.dy += dy;
   }
 });
 
-// Reset fallback X reference when mouse re-enters canvas to avoid a jump
-canvas.addEventListener('mouseenter', () => { _lastMouseX = null; });
-canvas.addEventListener('mouseleave', () => { _lastMouseX = null; });
+// Reset fallback X/Y reference when mouse re-enters canvas to avoid a jump
+canvas.addEventListener('mouseenter', () => { _lastMouseX = null; _lastMouseY = null; });
+canvas.addEventListener('mouseleave', () => { _lastMouseX = null; _lastMouseY = null; });
 
 // Shoot on both canvas and document so click always registers even without pointer lock
 document.addEventListener('mousedown', e => {
@@ -749,14 +757,18 @@ function gameLoop(now) {
 function update(dt, now) {
   const p = G.player;
 
-  // Mouse look (requires pointer lock)
+  // Mouse look
   const sens = 0.0025;
   p.angle += mouse.dx * sens;
+  // Vertical look — pitch is a pixel horizon shift; clamp so you can't flip upside down
+  const pitchSens = 0.4;
+  p.pitch = Math.max(-80, Math.min(80, p.pitch - mouse.dy * pitchSens));
   mouse.dx = 0;
+  mouse.dy = 0;
 
-  // Keyboard turning fallback
-  if (keys['KeyQ'] || keys['Comma'])  p.angle -= 2.0 * dt;
-  if (keys['KeyE'] || keys['Period']) p.angle += 2.0 * dt;
+  // Keyboard turning fallback (Q/E now used for delete/interact)
+  if (keys['Comma'])  p.angle -= 2.0 * dt;
+  if (keys['Period']) p.angle += 2.0 * dt;
 
   // FIX #1: Movement multiplied by dt — frame-rate independent
   let moveX = 0, moveY = 0;
@@ -855,14 +867,38 @@ function update(dt, now) {
     }
   }
 
-  // Pickups
+  // Pickups — TTL expiry, ammo auto-collects, guns need [E]
+  const PICKUP_RANGE = 1.2;
+  const PICKUP_TTL   = 10; // seconds before a pickup disappears
+  let nearestGun = null, nearestGunDist = Infinity;
   for (let i = G.pickups.length - 1; i >= 0; i--) {
     const pk = G.pickups[i];
     pk.pulse += dt * 3;
-    if (Math.hypot(p.x - pk.x, p.y - pk.y) < 0.65) {
-      pickupItem(pk);
-      G.pickups.splice(i, 1);
+    // Tick down TTL (only for timed pickups — ttl undefined means no expiry)
+    if (pk.ttl !== undefined) {
+      pk.ttl -= dt;
+      if (pk.ttl <= 0) { G.pickups.splice(i, 1); continue; }
     }
+    const d = Math.hypot(p.x - pk.x, p.y - pk.y);
+    if (d < PICKUP_RANGE) {
+      if (pk.isAmmo) {
+        // Ammo auto-collects on proximity
+        pickupItem(pk);
+        G.pickups.splice(i, 1);
+      } else {
+        // Guns need E — track nearest
+        if (d < nearestGunDist) { nearestGunDist = d; nearestGun = pk; }
+      }
+    }
+  }
+  G._nearPickup = nearestGun;
+  const promptEl = document.getElementById('interact-prompt');
+  const textEl   = document.getElementById('interact-text');
+  if (nearestGun) {
+    textEl.textContent = 'Pick up ' + nearestGun.name;
+    promptEl.style.display = 'block';
+  } else {
+    promptEl.style.display = 'none';
   }
 
   // Health regen
@@ -950,9 +986,9 @@ function spawnDrop(e) {
   const types = Object.keys(WEAPONS);
   const wtype = types[Math.floor(Math.random() * types.length)];
   if (roll < 0.55) {
-    G.pickups.push({ x: e.x, y: e.y, type: 'ammo', weaponType: wtype, name: '+AMMO ' + WEAPONS[wtype].name, color: WEAPONS[wtype].color, dropColor: WEAPONS[wtype].dropColor, pulse: 0, isAmmo: true });
+    G.pickups.push({ x: e.x, y: e.y, type: 'ammo', weaponType: wtype, name: '+AMMO ' + WEAPONS[wtype].name, color: WEAPONS[wtype].color, dropColor: WEAPONS[wtype].dropColor, pulse: 0, isAmmo: true,  ttl: 10 });
   } else {
-    G.pickups.push({ x: e.x, y: e.y, type: 'weapon', weaponType: wtype, name: WEAPONS[wtype].name, color: WEAPONS[wtype].color, dropColor: WEAPONS[wtype].dropColor, pulse: 0, isAmmo: false });
+    G.pickups.push({ x: e.x, y: e.y, type: 'weapon', weaponType: wtype, name: WEAPONS[wtype].name, color: WEAPONS[wtype].color, dropColor: WEAPONS[wtype].dropColor, pulse: 0, isAmmo: false, ttl: 10 });
   }
 }
 
@@ -980,6 +1016,57 @@ function switchWeapon(idx) {
   updateHUD();
 }
 
+function dropWeapon() {
+  const p = G.player;
+  if (p.weapons.length <= 1) { addFeed('Cannot drop last weapon', 'kill'); return; }
+  const wep = p.weapons[p.currentWeapon];
+  // Drop as a pickup at the player's feet with current ammo preserved
+  G.pickups.push({
+    x: p.x + Math.cos(p.angle) * 0.6,
+    y: p.y + Math.sin(p.angle) * 0.6,
+    type: 'weapon',
+    weaponType: Object.keys(WEAPONS).find(k => WEAPONS[k].name === wep.name),
+    name: wep.name,
+    color: wep.color,
+    dropColor: wep.dropColor,
+    pulse: 0,
+    isAmmo: false,
+    droppedMag: wep.mag,
+    droppedReserve: wep.reserve,
+    ttl: 10,
+  });
+  // Remove the weapon from inventory
+  p.weapons.splice(p.currentWeapon, 1);
+  // Clamp currentWeapon index in case it was the last slot
+  if (p.currentWeapon >= p.weapons.length) p.currentWeapon = p.weapons.length - 1;
+  G.reloading = false;
+  document.getElementById('reload-bar').style.opacity = '0';
+  addFeed('Dropped ' + wep.name, 'kill');
+  updateHUD();
+}
+
+function deleteWeapon() {
+  const p = G.player;
+  if (p.weapons.length <= 1) { addFeed('Cannot delete last weapon', 'kill'); return; }
+  const wep = p.weapons[p.currentWeapon];
+  p.weapons.splice(p.currentWeapon, 1);
+  if (p.currentWeapon >= p.weapons.length) p.currentWeapon = p.weapons.length - 1;
+  G.reloading = false;
+  document.getElementById('reload-bar').style.opacity = '0';
+  addFeed('Discarded ' + wep.name, 'kill');
+  updateHUD();
+}
+
+function interactPickup() {
+  if (!G._nearPickup) return;
+  const idx = G.pickups.indexOf(G._nearPickup);
+  if (idx === -1) return;
+  pickupItem(G._nearPickup);
+  G.pickups.splice(idx, 1);
+  G._nearPickup = null;
+  document.getElementById('interact-prompt').style.display = 'none';
+}
+
 function pickupItem(pk) {
   const wepDef = WEAPONS[pk.weaponType];
   if (pk.isAmmo) {
@@ -990,14 +1077,17 @@ function pickupItem(pk) {
     addFeed('+ Ammo: ' + wepDef.name, 'pickup');
   } else {
     const existing = G.player.weapons.find(w => w.name === wepDef.name);
+    // Use preserved ammo if this was a player-dropped weapon, else full ammo
+    const pickupMag     = pk.droppedMag     !== undefined ? pk.droppedMag     : wepDef.magSize;
+    const pickupReserve = pk.droppedReserve !== undefined ? pk.droppedReserve : wepDef.reserveMax;
     if (existing) {
       existing.reserve = Math.min(existing.reserveMax, existing.reserve + Math.floor(wepDef.magSize * 1.5));
       addFeed('+ Ammo: ' + wepDef.name, 'pickup');
     } else if (G.player.weapons.length < 3) {
-      G.player.weapons.push({ ...wepDef, mag: wepDef.magSize, reserve: wepDef.reserveMax });
+      G.player.weapons.push({ ...wepDef, mag: pickupMag, reserve: pickupReserve });
       addFeed('+ Picked up: ' + wepDef.name, 'pickup');
     } else {
-      G.player.weapons[G.player.currentWeapon] = { ...wepDef, mag: wepDef.magSize, reserve: wepDef.reserveMax };
+      G.player.weapons[G.player.currentWeapon] = { ...wepDef, mag: pickupMag, reserve: pickupReserve };
       addFeed('+ Swapped: ' + wepDef.name, 'pickup');
     }
   }
@@ -1009,17 +1099,17 @@ function pickupItem(pk) {
 function render3D() {
   const p   = G.player;
   const W   = RES_W, H = RES_H;
-  const HH  = H / 2;
   const bob = Math.sin(p.bobPhase) * 7;
+  const HH  = H / 2 + Math.floor(p.pitch) + bob;   // horizon shifted by pitch + bob
   const FOV = Math.PI / 3;
   const halfFOV = FOV / 2;
 
   G.zBuffer.fill(Infinity);
 
   ctx.fillStyle = CEILING_COLOR;
-  ctx.fillRect(0, 0, W, HH + bob);
+  ctx.fillRect(0, 0, W, HH);
   ctx.fillStyle = FLOOR_COLOR;
-  ctx.fillRect(0, HH + bob, W, HH - bob);
+  ctx.fillRect(0, HH, W, H - HH);
 
   const imgData = ctx.getImageData(0, 0, W, H);
   const data    = imgData.data;
@@ -1029,9 +1119,9 @@ function render3D() {
     const { dist, wallType, side } = castRay(p.x, p.y, rayAngle);
     G.zBuffer[col] = dist;
 
-    const wallH   = Math.min(H, Math.floor(H / (dist * Math.cos(rayAngle - p.angle))));
-    const wallTop    = Math.max(0, Math.floor(HH - wallH / 2 + bob));
-    const wallBottom = Math.min(H, Math.floor(HH + wallH / 2 + bob));
+    const wallH      = Math.min(H * 3, Math.floor(H / (dist * Math.cos(rayAngle - p.angle))));
+    const wallTop    = Math.max(0, Math.floor(HH - wallH / 2));
+    const wallBottom = Math.min(H, Math.floor(HH + wallH / 2));
 
     const wc        = WALL_COLORS[wallType] || WALL_COLORS[1];
     const baseColor = side === 1 ? wc.dark : wc.light;
@@ -1054,7 +1144,7 @@ function render3D() {
   for (const pk of G.pickups)  sprites.push({ x: pk.x, y: pk.y, type: 'pickup', data: pk });
   for (const b  of G.bullets)  sprites.push({ x: b.x,  y: b.y,  type: 'bullet', data: b  });
   sprites.sort((a, b) => Math.hypot(b.x - p.x, b.y - p.y) - Math.hypot(a.x - p.x, a.y - p.y));
-  for (const sp of sprites) drawSprite(sp, p, FOV, HH, bob);
+  for (const sp of sprites) drawSprite(sp, p, FOV, HH);
 
   drawGun(p, HH);
 }
@@ -1080,7 +1170,7 @@ function castRay(ox, oy, angle) {
   return { dist: Math.max(0.01, dist), wallType, side };
 }
 
-function drawSprite(sp, p, FOV, HH, bob) {
+function drawSprite(sp, p, FOV, HH) {
   const dx = sp.x - p.x, dy = sp.y - p.y;
   const dist = Math.hypot(dx, dy);
   if (dist < 0.1) return;
@@ -1091,13 +1181,12 @@ function drawSprite(sp, p, FOV, HH, bob) {
   if (Math.abs(angle) > FOV * 0.6) return;
 
   const W       = RES_W, H = RES_H;
-  const halfFOV = FOV / 2;
   const screenX = Math.floor((0.5 + angle / FOV) * W);
   const spriteH = Math.min(H, Math.floor(H / dist));
   const spriteW = spriteH;
 
-  const drawTop    = Math.floor(HH - spriteH / 2 + bob);
-  const drawBottom = Math.floor(HH + spriteH / 2 + bob);
+  const drawTop    = Math.floor(HH - spriteH / 2);
+  const drawBottom = Math.floor(HH + spriteH / 2);
   const drawLeft   = Math.max(0, screenX - spriteW / 2);
   const drawRight  = Math.min(W, screenX + spriteW / 2);
   if (drawLeft >= drawRight) return;
@@ -1229,61 +1318,106 @@ function drawEnemySprite(e, cx, top, bottom, left, right, sh, sw, shade, dist) {
 function drawPickupSprite(pk, cx, top, bottom, left, right, sh, sw, shade, dist) {
   const h = bottom - top;
   const w = right - left;
-  if (h <= 2 || w <= 2) return;
+  if (h <= 4 || w <= 4) return;
+
+  // Blink when expiring (< 3 seconds left): skip every other ~0.25s
+  if (pk.ttl !== undefined && pk.ttl < 3) {
+    if (Math.floor(pk.ttl * 4) % 2 === 0) return;
+  }
 
   const bob    = Math.sin(pk.pulse) * h * 0.06;
-  const adjTop = top + Math.floor(bob);
+  const adjTop = top  + Math.floor(bob);
   const adjBot = bottom + Math.floor(bob);
+  const adjH   = adjBot - adjTop;
 
-  for (let col = left; col < right; col++) {
+  // --- Box bounds (centred, occupies middle 70% of sprite height) ---
+  const boxTop  = Math.floor(adjTop + adjH * 0.15);
+  const boxBot  = Math.floor(adjBot - adjH * 0.15);
+  const boxH    = boxBot - boxTop;
+  const boxLeft = left;
+  const boxRight = right;
+  if (boxH <= 0) return;
+
+  // Pick accent colours from the weapon definition
+  const accentHex  = pk.isAmmo ? pk.color     : pk.color;
+  const bgHex      = pk.isAmmo ? pk.dropColor : pk.dropColor;
+  const [ar,ag,ab] = hexToRgb(accentHex);
+  const [br,bg,bb] = hexToRgb(bgHex);
+
+  // -- Render column-by-column so z-buffer occlusion works --
+  for (let col = boxLeft; col < boxRight; col++) {
     if (dist >= G.zBuffer[col]) continue;
-    const u = (col - left) / w;
+    const u = (col - boxLeft) / Math.max(1, boxRight - boxLeft);
 
-    if (pk.isAmmo) {
-      if (u >= 0.15 && u <= 0.85) {
-        const boxTop = Math.floor(adjTop + h * 0.3);
-        const boxBot = Math.floor(adjBot - h * 0.1);
-        ctx.fillStyle = pk.dropColor;
-        ctx.fillRect(col, boxTop, 1, boxBot - boxTop);
-        if (u >= 0.4 && u <= 0.6) {
-          ctx.fillStyle = '#ffff00';
-          ctx.fillRect(col, boxTop + 1, 1, Math.max(1, Math.floor((boxBot - boxTop) * 0.15)));
-        }
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
-        ctx.fillRect(col, boxTop, 1, Math.max(1, Math.floor(h * 0.05)));
-      }
-    } else {
-      if (u >= 0.1 && u <= 0.55) {
-        const barrelMid = Math.floor((adjTop + adjBot) * 0.5);
-        ctx.fillStyle = pk.dropColor;
-        ctx.fillRect(col, barrelMid - Math.floor(h * 0.04), 1, Math.floor(h * 0.08));
-      }
-      if (u >= 0.45 && u <= 0.88) {
-        const bodyTop = Math.floor(adjTop + h * 0.35);
-        const bodyBot = Math.floor(adjBot - h * 0.2);
-        ctx.fillStyle = pk.dropColor;
-        ctx.fillRect(col, bodyTop, 1, bodyBot - bodyTop);
-        if (u >= 0.6 && u <= 0.75) {
-          ctx.fillStyle = pk.dropColor;
-          ctx.fillRect(col, bodyBot, 1, Math.floor(h * 0.15));
-        }
-        ctx.fillStyle = pk.color;
-        ctx.fillRect(col, bodyTop, 1, Math.max(1, Math.floor(h * 0.04)));
-      }
-      if (u >= 0.55 && u <= 0.68) {
-        const tgY = Math.floor(adjTop + h * 0.55);
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.fillRect(col, tgY, 1, Math.max(1, Math.floor(h * 0.04)));
-      }
+    // Dark background fill
+    ctx.fillStyle = `rgba(${Math.floor(br*0.25)},${Math.floor(bg*0.25)},${Math.floor(bb*0.25)},0.92)`;
+    ctx.fillRect(col, boxTop, 1, boxH);
+
+    // Accent stripe along top (4px tall scaled)
+    const stripeH = Math.max(1, Math.floor(boxH * 0.13));
+    ctx.fillStyle = `rgb(${Math.floor(ar*shade)},${Math.floor(ag*shade)},${Math.floor(ab*shade)})`;
+    ctx.fillRect(col, boxTop, 1, stripeH);
+
+    // Accent stripe along bottom
+    ctx.fillRect(col, boxBot - stripeH, 1, stripeH);
+
+    // Left/right border columns
+    if (col === boxLeft || col === boxLeft + 1 || col === boxRight - 1 || col === boxRight - 2) {
+      ctx.fillStyle = `rgb(${Math.floor(ar*shade)},${Math.floor(ag*shade)},${Math.floor(ab*shade)})`;
+      ctx.fillRect(col, boxTop, 1, boxH);
     }
   }
 
-  const glowSize = Math.max(2, Math.floor(h * 0.08));
-  const glowY    = adjTop - glowSize - 2;
+  // -- Text label drawn with ctx.fillText (only if the box is wide enough to read) --
+  if (w >= 20) {
+    const label    = pk.isAmmo ? 'AMMO' : pk.name;
+    const subLabel = pk.isAmmo ? pk.name : null;
+
+    // Scale font to box size, clamp to readable range
+    const fontSize = Math.max(4, Math.min(10, Math.floor(boxH * 0.32)));
+    ctx.font = `bold ${fontSize}px "Courier New", monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Shadow / outline for readability
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    const textCX = cx;
+    const textCY = subLabel
+      ? Math.floor(boxTop + boxH * 0.38)
+      : Math.floor(boxTop + boxH * 0.5);
+
+    // Draw shadow offsets
+    for (const [ox, oy] of [[-1,-1],[1,-1],[-1,1],[1,1]]) {
+      ctx.fillText(label, textCX + ox, textCY + oy);
+    }
+    // Main label
+    ctx.fillStyle = `rgb(${Math.floor(ar*Math.max(shade,0.6))},${Math.floor(ag*Math.max(shade,0.6))},${Math.floor(ab*Math.max(shade,0.6))})`;
+    ctx.fillText(label, textCX, textCY);
+
+    if (subLabel) {
+      const subFontSize = Math.max(3, Math.min(8, Math.floor(fontSize * 0.75)));
+      ctx.font = `${subFontSize}px "Courier New", monospace`;
+      const subCY = Math.floor(boxTop + boxH * 0.68);
+      ctx.fillStyle = 'rgba(0,0,0,0.85)';
+      for (const [ox, oy] of [[-1,-1],[1,-1],[-1,1],[1,1]]) {
+        ctx.fillText(subLabel, textCX + ox, subCY + oy);
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.fillText(subLabel, textCX, subCY);
+    }
+
+    // Reset alignment
+    ctx.textAlign    = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  // Small pulsing glow dot above the box
+  const glowR = Math.max(2, Math.floor(h * 0.06));
+  const glowY = adjTop - glowR - 1;
   if (glowY > 0) {
-    ctx.fillStyle = pk.color;
+    ctx.fillStyle = `rgba(${ar},${ag},${ab},${0.6 * shade})`;
     ctx.beginPath();
-    ctx.arc(cx, glowY, glowSize, 0, Math.PI * 2);
+    ctx.arc(cx, glowY, glowR, 0, Math.PI * 2);
     ctx.fill();
   }
 }
@@ -1519,7 +1653,8 @@ function resumeGame() {
   G.lastTime = performance.now();
   showScreen(null);
   G.animId = requestAnimationFrame(gameLoop);
-  // Pointer lock re-acquired on next canvas mousedown
+  // Resume button click IS a valid user gesture — re-acquire pointer lock immediately
+  try { canvas.requestPointerLock(); } catch(e) {}
 }
 
 document.getElementById('start-btn').addEventListener('click',   () => { initGame(); showScreen(null); });
