@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>DEADZONE V12</title>
+<title>DEADZONE V12.5</title>
   <link rel="icon" type="image/x-icon" href="https://innovateprogram.github.io/game/logo.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -498,12 +498,15 @@ async function renderLeaderboard() {
 }
 
 document.getElementById('lb-refresh-btn').addEventListener('click', renderLeaderboard);
-document.getElementById('lb-back-btn').addEventListener('click', () => showScreen(G.state==='playing'?'pause-screen':'start-screen'));
+
+// ── FIX 2: Back buttons correctly return to pause-screen when game is paused ──
+document.getElementById('lb-back-btn').addEventListener('click', () => showScreen((G.state==='playing'||G.state==='paused')?'pause-screen':'start-screen'));
 document.getElementById('lb-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('lb-screen'); });
 document.getElementById('p-lb-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('lb-screen'); });
 document.getElementById('go-lb-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('lb-screen'); });
 
-function backFromFb() { showScreen(G.state==='playing'?'pause-screen':(window._currentUser||window._isGuest)?'start-screen':'auth-screen'); }
+// ── FIX 2: backFromFb also returns to pause-screen when game is paused ──
+function backFromFb() { showScreen((G.state==='playing'||G.state==='paused')?'pause-screen':(window._currentUser||window._isGuest)?'start-screen':'auth-screen'); }
 document.getElementById('fb-btn').addEventListener('click', () => { document.getElementById('fb-ok').style.display='none'; showScreen('fb-screen'); });
 document.getElementById('p-fb-btn').addEventListener('click', () => { document.getElementById('fb-ok').style.display='none'; showScreen('fb-screen'); });
 document.getElementById('go-fb-btn').addEventListener('click', () => { document.getElementById('fb-ok').style.display='none'; showScreen('fb-screen'); });
@@ -628,17 +631,16 @@ function readGamepad() {
   PAD.leftY  = Math.abs(gp.axes[1]) > dead ? gp.axes[1] : 0;
   PAD.rightX = Math.abs(gp.axes[2]) > dead ? gp.axes[2] : 0;
   PAD.rightY = Math.abs(gp.axes[3]) > dead ? gp.axes[3] : 0;
-  // Buttons: 0=X/A, 1=Circle/B, 2=Square/X, 3=Triangle/Y, 4=L1, 5=R1, 6=L2, 7=R2
   PAD.firePrev    = PAD.fire;
   PAD.reloadPrev  = PAD.reload;
   PAD.shopPrev    = PAD.shop;
   PAD.interactPrev= PAD.interact;
   PAD.pausePrev   = PAD.pause;
-  PAD.fire     = gp.buttons[7].pressed || gp.buttons[0].pressed; // RT / A
-  PAD.reload   = gp.buttons[5].pressed || gp.buttons[2].pressed; // RB / X
-  PAD.shop     = gp.buttons[3].pressed; // Y / Triangle
-  PAD.interact = gp.buttons[4].pressed; // L1
-  PAD.pause    = gp.buttons[9].pressed || gp.buttons[8].pressed; // Start/Options
+  PAD.fire     = gp.buttons[7].pressed || gp.buttons[0].pressed;
+  PAD.reload   = gp.buttons[5].pressed || gp.buttons[2].pressed;
+  PAD.shop     = gp.buttons[3].pressed;
+  PAD.interact = gp.buttons[4].pressed;
+  PAD.pause    = gp.buttons[9].pressed || gp.buttons[8].pressed;
 }
 
 // ── Mobile touch joystick ─────────────────────────────────
@@ -768,7 +770,6 @@ function buildShopUI() {
   grid.innerHTML = '';
   document.getElementById('shop-balance').textContent = '⬟ ' + G.score.toLocaleString() + ' POINTS';
 
-  // Weapon items
   const shopWeapons = ['sniper','minigun','plasma','launcher'];
   shopWeapons.forEach(wKey => {
     const wDef = WEAPONS[wKey];
@@ -776,7 +777,6 @@ function buildShopUI() {
     const affordable = G.score >= wDef.cost;
     const div = document.createElement('div');
     div.className = 'shop-item' + (owned ? ' owned' : (!affordable ? ' unaffordable' : ''));
-    // Draw gun preview
     const previewCanvas = document.createElement('canvas');
     previewCanvas.width = 80; previewCanvas.height = 36;
     drawGunPreview(previewCanvas.getContext('2d'), wKey, 80, 36);
@@ -789,7 +789,6 @@ function buildShopUI() {
     grid.appendChild(div);
   });
 
-  // Upgrade items
   Object.values(SHOP_UPGRADES).forEach(upg => {
     const owned = G.purchasedUpgrades.has(upg.id);
     const affordable = G.score >= upg.cost;
@@ -840,7 +839,6 @@ function openShop() {
   if (pointerLocked) try { document.exitPointerLock(); } catch(e) {}
   buildShopUI();
   document.getElementById('shop-screen').classList.add('open');
-  // Pause the loop while shop is open
   cancelAnimationFrame(G.animId);
 }
 function closeShop() {
@@ -874,10 +872,24 @@ function initGame() {
   G.animId = requestAnimationFrame(gameLoop);
 }
 
+// ── FIX 1: Save score to leaderboard every time a new wave starts ─────────────
+// We save the COMPLETED wave count (wave - 1) when a new wave begins.
+// On wave 1 start there's nothing to save yet (player hasn't cleared anything),
+// so we save starting from wave 2 onward (meaning wave 1 was cleared).
 function nextWave() {
   G.wave++; G.waveActive=false; G.waveTimer=4; G.enemiesLeft=0;
   document.getElementById('wave-text').textContent = 'WAVE ' + G.wave;
   announceWave();
+  // Save the just-completed wave (wave-1) to the leaderboard if it's a new personal best.
+  // G.wave is already incremented, so G.wave-1 = the wave the player just survived.
+  if (G.wave > 1 && window._currentUser) {
+    const completedWave = G.wave - 1;
+    window.submitScore(completedWave, G.score).then(res => {
+      if (res && res.beatPersonal) {
+        addFeed('★ New best: Wave ' + completedWave + ' saved!', 'record');
+      }
+    }).catch(() => {});
+  }
 }
 
 function spawnWave() {
@@ -926,38 +938,31 @@ function gameLoop(now) {
 function update(dt, now) {
   const p = G.player;
 
-  // Gamepad — shop / pause
   if (PAD.shop && !PAD.shopPrev) toggleShop();
   if (PAD.pause && !PAD.pausePrev) pauseGame();
   if (PAD.interact && !PAD.interactPrev) interactPickup();
   if (PAD.reload && !PAD.reloadPrev) startReload();
 
   const sens = 0.0025, padRotSens = 2.5, pitchSens = 0.4;
-  // Mouse look
   p.angle += mouse.dx * sens;
   p.pitch = Math.max(-80, Math.min(80, p.pitch - mouse.dy * pitchSens));
   mouse.dx = 0; mouse.dy = 0;
-  // Gamepad right stick
   p.angle += PAD.rightX * padRotSens * dt;
   p.pitch = Math.max(-80, Math.min(80, p.pitch - PAD.rightY * 60 * dt));
 
-  // Movement
   let moveX=0, moveY=0;
   const sprint = (keys['ShiftLeft']||keys['ShiftRight']) ? 1.8 : 1.0;
   const spd = p.moveSpeed * sprint * dt;
 
-  // Keyboard
   if (keys['KeyW']||keys['ArrowUp'])    { moveX += Math.cos(p.angle)*spd; moveY += Math.sin(p.angle)*spd; }
   if (keys['KeyS']||keys['ArrowDown'])  { moveX -= Math.cos(p.angle)*spd; moveY -= Math.sin(p.angle)*spd; }
   if (keys['KeyA']||keys['ArrowLeft'])  { moveX += Math.cos(p.angle-Math.PI/2)*spd; moveY += Math.sin(p.angle-Math.PI/2)*spd; }
   if (keys['KeyD']||keys['ArrowRight']) { moveX += Math.cos(p.angle+Math.PI/2)*spd; moveY += Math.sin(p.angle+Math.PI/2)*spd; }
-  // Gamepad left stick
   if (PAD.leftX!==0||PAD.leftY!==0) {
     const padSpd = p.moveSpeed * dt;
     moveX += (Math.cos(p.angle)*PAD.leftY + Math.cos(p.angle+Math.PI/2)*PAD.leftX) * -padSpd;
     moveY += (Math.sin(p.angle)*PAD.leftY + Math.sin(p.angle+Math.PI/2)*PAD.leftX) * -padSpd;
   }
-  // Mobile joystick
   if (mobileState.joyActive && (mobileState.joyDX!==0||mobileState.joyDY!==0)) {
     const mobSpd = p.moveSpeed * dt;
     moveX += (Math.cos(p.angle)*(-mobileState.joyDY) + Math.cos(p.angle+Math.PI/2)*mobileState.joyDX) * mobSpd;
@@ -972,7 +977,6 @@ function update(dt, now) {
   const moving = moveX!==0||moveY!==0;
   if (moving) p.bobPhase += dt*8;
 
-  // Shooting — keyboard/mouse + gamepad + mobile
   const wep = p.weapons[p.currentWeapon];
   const isFiring = mouse.down || mobileState.firing || PAD.fire;
   const isJustDown = mouse.justDown || (PAD.fire && !PAD.firePrev);
@@ -981,7 +985,6 @@ function update(dt, now) {
   }
   mouse.justDown = false;
 
-  // Reload progress
   if (G.reloading) {
     const pct = Math.min((now-G.reloadStart)/G.reloadDur, 1);
     document.getElementById('reload-fill').style.width = (pct*100)+'%';
@@ -1032,7 +1035,6 @@ function update(dt, now) {
     }
   }
 
-  // Pickups — gun pickups only (no ammo drops)
   const PICKUP_RANGE=1.2;
   let nearestGun=null, nearestGunDist=Infinity;
   for (let i=G.pickups.length-1;i>=0;i--) {
@@ -1056,7 +1058,6 @@ function update(dt, now) {
     interactBtnM.style.display='none';
   }
 
-  // Health regen
   if (p.health>0&&p.health<p.maxHealth) {
     G.regenTimer-=dt;
     if (G.regenTimer<=0) { p.health=Math.min(p.maxHealth,p.health+12*dt); document.getElementById('regen-text').textContent='+ REGENERATING'; }
@@ -1096,7 +1097,6 @@ function bulletRaycast(ox,oy,angle,dmg,splash) {
       const e=G.enemies[i];
       if (Math.hypot(x-e.x,y-e.y)<e.radius+0.25) {
         if (splash) {
-          // Area damage
           for (let j=G.enemies.length-1;j>=0;j--) {
             if (Math.hypot(x-G.enemies[j].x,y-G.enemies[j].y)<2.5) {
               G.enemies[j].health-=dmg;
@@ -1131,7 +1131,7 @@ function killEnemy(idx) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// DROPS — guns only; ammo auto-given on kill
+// DROPS
 // ═══════════════════════════════════════════════════════════
 function getLowestAmmoWeapon() {
   const p=G.player;
@@ -1146,7 +1146,6 @@ function getLowestAmmoWeapon() {
 function giveAutoAmmo() {
   const p=G.player;
   if (!p||!p.weapons) return;
-  // Give ammo to each weapon (scaled by ammoGain)
   for (const w of p.weapons) {
     const def = Object.values(WEAPONS).find(d=>d.name===w.name);
     if (!def) continue;
@@ -1156,17 +1155,14 @@ function giveAutoAmmo() {
 
 function spawnDrop(ex, ey) {
   const p=G.player;
-  // Check if any weapon is low ammo — if so, only give extra ammo to that gun (no gun drop)
   const lowWep=getLowestAmmoWeapon();
   if (lowWep) {
     lowWep.reserve = Math.min(lowWep.reserveMax, lowWep.reserve + lowWep.magSize);
     addFeed('+ Emergency ammo: '+lowWep.name, 'pickup');
-    giveAutoAmmo(); // still give small auto-ammo
+    giveAutoAmmo();
     return;
   }
-  // Auto ammo gain (no drop item)
   giveAutoAmmo();
-  // 40% chance to drop a gun pickup
   if (Math.random()<0.40) {
     const types=Object.keys(WEAPONS).filter(k=>!WEAPONS[k].shopOnly);
     const wtype=types[Math.floor(Math.random()*types.length)];
@@ -1281,7 +1277,6 @@ function render3D() {
   }
   ctx.putImageData(imgData,0,0);
 
-  // Sprites
   const sprites=[];
   for (const e  of G.enemies)  sprites.push({x:e.x, y:e.y, type:'enemy',  data:e});
   for (const pk of G.pickups)  sprites.push({x:pk.x,y:pk.y,type:'pickup', data:pk});
@@ -1292,8 +1287,6 @@ function render3D() {
   drawGun(p,HH);
 }
 
-// ── Wall visibility check for enemies ─────────────────────
-// Returns true if at least one ray from player to enemy can reach without hitting a wall
 function isEnemyVisible(ex, ey) {
   const p=G.player;
   const dx=ex-p.x, dy=ey-p.y;
@@ -1354,7 +1347,6 @@ function drawSprite(sp,p,FOV,HH) {
     if (visible) {
       drawEnemySprite(sp.data,screenX,drawTop,drawBottom,drawLeft,drawRight,spriteH,spriteW,shade,dist);
     } else {
-      // Only draw health bar tag through wall — NOT the body
       drawEnemyWallTag(sp.data,screenX,drawTop,drawLeft,drawRight,dist,shade);
     }
   } else if (sp.type==='pickup') {
@@ -1369,21 +1361,18 @@ function drawSprite(sp,p,FOV,HH) {
   }
 }
 
-// Draw just a name/health tag when enemy is behind wall
 function drawEnemyWallTag(e, screenX, drawTop, drawLeft, drawRight, dist, shade) {
-  if (dist > 16) return; // only show if reasonably close
+  if (dist > 16) return;
   const hpPct=e.health/e.maxHealth;
   const barW=Math.max(12, drawRight-drawLeft);
   const barX=screenX-barW/2;
   const barY=Math.max(2, drawTop-2);
-  // Semi-transparent health bar only — no body drawn
   ctx.save();
   ctx.globalAlpha=0.55*Math.max(0.2,1-dist/16);
   ctx.fillStyle='rgba(0,0,0,0.5)';
   ctx.fillRect(barX, barY, barW, 3);
   ctx.fillStyle=hpPct>0.6?'#44ff88':hpPct>0.3?'#ffaa00':'#ff2222';
   ctx.fillRect(barX, barY, Math.floor(barW*hpPct), 3);
-  // Enemy type label
   const label = e.type==='heavy'?'▲ HEAVY':e.type==='elite'?'★ ELITE':'● ENEMY';
   ctx.font='5px "Courier New"';
   ctx.fillStyle='rgba(255,80,80,0.8)';
@@ -1441,7 +1430,7 @@ function drawEnemySprite(e,cx,top,bottom,left,right,sh,sw,shade,dist) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// GUN PIXEL-ART SPRITES (drawn on canvas, used for both world pickups and shop preview)
+// GUN PIXEL-ART SPRITES
 // ═══════════════════════════════════════════════════════════
 function drawGunSprite(sctx, weaponType, scale, bright) {
   const s=scale||1;
@@ -1458,107 +1447,61 @@ function drawGunSprite(sctx, weaponType, scale, bright) {
   }
 
   if (weaponType==='pistol') {
-    // Body
     px(2,4,tint(dc,b),8,4); px(1,5,tint(dc,b*0.8),2,3);
-    // Barrel
     px(10,5,tint(c,b*0.9),5,2); px(14,4,'#aaa',1,1);
-    // Trigger guard
     px(3,8,'#333',4,1); px(2,7,'#222',1,2);
-    // Grip
     px(2,6,tint(dc,b*0.6),3,4);
-    // Highlights
     px(3,4,'rgba(255,255,255,0.3)',6,1);
-    // Dot sight
     px(8,3,tint(c,b*1.2),2,2);
   } else if (weaponType==='shotgun') {
-    // Stock
     px(0,5,tint(dc,b*0.7),4,4); px(1,5,tint(dc,b*0.85),2,3);
-    // Body
     px(4,5,tint(dc,b),8,3);
-    // Pump
     px(5,8,'#555',5,2);
-    // Barrel (double)
     px(12,4,'#888',7,2); px(12,6,'#888',7,2);
     px(18,4,'#aaa',2,1); px(18,6,'#aaa',2,1);
-    // Guard
     px(4,8,tint(dc,b*0.5),2,2);
   } else if (weaponType==='rifle') {
-    // Stock
     px(0,6,tint(dc,b*0.6),3,3);
-    // Body
     px(3,5,tint(dc,b),12,3);
-    // Hand guard
     px(4,8,'#444',6,2);
-    // Barrel
     px(15,5,'#666',8,2); px(22,5,'#aaa',2,1);
-    // Mag
     px(7,8,tint(c,b*0.7),3,3);
-    // Scope
     px(9,3,tint(c,b*0.8),5,2); px(10,2,'#333',3,1);
-    // Rail
     px(3,4,tint(dc,b*1.1),12,1);
   } else if (weaponType==='smg') {
-    // Body
     px(1,5,tint(dc,b),10,3);
-    // Barrel (compact)
     px(11,5,'#888',6,2); px(16,5,'#aaa',1,2);
-    // Mag (side-insert style)
     px(3,8,tint(c,b*0.7),3,4);
-    // Fore grip
     px(8,7,'#333',3,3);
-    // Stock (folded)
     px(0,4,'#555',2,4);
-    // Dot
     px(7,4,tint(c,b),2,2);
   } else if (weaponType==='sniper') {
-    // Stock
     px(0,6,tint(dc,b*0.6),3,3);
-    // Body (long)
     px(3,5,tint(dc,b),14,3);
-    // Long barrel
     px(17,5,'#888',10,2); px(26,5,'#bbb',2,1);
-    // Bipod
     px(14,8,'#555',2,3); px(17,8,'#555',2,3);
-    // Big scope
     px(7,2,tint(c,b*0.9),8,4); px(8,1,'#222',6,2);
     px(7,3,'rgba(100,200,255,0.5)',8,2);
-    // Mag
     px(9,8,tint(c,b*0.5),3,3);
   } else if (weaponType==='minigun') {
-    // Body (thick)
     px(0,4,tint(dc,b),8,5);
-    // Barrel cluster (6 barrels)
     for (let i=0;i<3;i++) { px(8,3+i*2,'#888',14,1); px(8,3+i*2,'#aaa',12,1); }
-    // Front ring
     px(20,3,'#666',2,7); px(21,4,tint(c,b*0.6),1,5);
-    // Handle
     px(1,9,tint(dc,b*0.5),3,3);
-    // Belt feed
     px(3,7,tint(c,b*0.8),4,2);
   } else if (weaponType==='plasma') {
-    // Body (futuristic)
     px(1,5,tint(dc,b),11,3);
-    // Energy cell (glowing)
     px(3,4,tint(c,b*1.3),5,5);
     px(4,4,'rgba(200,150,255,0.7)',3,5);
-    // Barrel
     px(12,5,'#444',7,2); px(18,5,tint(c,b*1.5),2,2);
-    // Emitter glow
     px(18,4,tint(c,b),2,4);
-    // Fins
     px(6,3,'#333',1,6); px(9,3,'#333',1,6);
   } else if (weaponType==='launcher') {
-    // Tube body
     px(1,4,tint(dc,b),14,5);
-    // Barrel opening (large)
     px(14,3,'#666',5,7); px(18,4,'#444',3,5);
-    // Trigger group
     px(3,9,tint(dc,b*0.5),5,2);
-    // Sights
     px(5,3,tint(c,b),2,2); px(12,3,tint(c,b),2,2);
-    // Exhaust port
     px(1,4,'#333',3,5);
-    // Warning stripe
     px(8,4,'rgba(255,200,0,0.6)',1,5); px(10,4,'rgba(255,200,0,0.6)',1,5);
   }
   sctx.restore();
@@ -1568,7 +1511,6 @@ function drawGunPreview(sctx, weaponType, w, h) {
   sctx.clearRect(0,0,w,h);
   sctx.fillStyle='rgba(0,0,0,0.4)';
   sctx.fillRect(0,0,w,h);
-  // Scale so gun fits
   const sc=Math.floor(Math.min(w/24, h/12));
   sctx.save();
   sctx.translate(Math.floor(w*0.05), Math.floor(h*0.25));
@@ -1586,23 +1528,15 @@ function drawPickupSprite(pk, cx, top, bottom, left, right, sh, sw, shade, dist)
   const adjBot=bottom+Math.floor(bob);
   const adjH=adjBot-adjTop;
 
-  // Draw the gun sprite scaled to the pickup's screen size
   if (w>6&&adjH>6) {
-    // Off-screen canvas for the gun sprite so we can scale+tint it
     const sc=Math.max(1, Math.floor(Math.min(w/24, adjH/12)));
     const tmpW=24*sc, tmpH=12*sc;
     const tmp=document.createElement('canvas');
     tmp.width=tmpW; tmp.height=tmpH;
     drawGunSprite(tmp.getContext('2d'), pk.weaponType, sc, shade*1.2);
 
-    // Draw with z-buffer check column-by-column
     ctx.save();
     ctx.globalAlpha=0.92;
-    // Only draw columns that pass z-buffer
-    // We clip to columns where dist < zBuffer
-    let startCol=left, endCol=right;
-    // Simplified: check midpoint for occlusion, draw as block
-    const midCol=cx;
     let blocked=false;
     for (let col=drawingLeft(left,right); col<drawingRight(left,right); col+=4) {
       if (dist>=G.zBuffer[col]) { blocked=true; break; }
@@ -1615,7 +1549,6 @@ function drawPickupSprite(pk, cx, top, bottom, left, right, sh, sw, shade, dist)
     ctx.restore();
   }
 
-  // Name label hovering above
   if (w>=16) {
     const labelY=adjTop-4;
     const label=pk.name;
@@ -1633,7 +1566,6 @@ function drawPickupSprite(pk, cx, top, bottom, left, right, sh, sw, shade, dist)
     ctx.restore();
   }
 
-  // Glow dot
   const glowR=Math.max(2,Math.floor(h*0.06));
   const glowY=adjTop-glowR-6;
   if (glowY>0) {
@@ -1659,7 +1591,6 @@ function drawGun(p,HH) {
   const gY=Math.floor(H-H*0.12+bob);
   ctx.save();
   ctx.translate(gX,gY);
-  const wKey=Object.keys(WEAPONS).find(k=>WEAPONS[k].name===wep.name);
 
   if (wep.name==='PISTOL') {
     ctx.fillStyle='#2a2a3a'; ctx.fillRect(-14,-28,28,20);
@@ -1706,18 +1637,17 @@ function drawGun(p,HH) {
     ctx.fillStyle='#44ff88'; ctx.fillRect(6,-16,2,2);
     if (isFiring) { ctx.fillStyle='rgba(255,220,80,0.9)'; ctx.beginPath();ctx.arc(39,-15,5,0,Math.PI*2);ctx.fill(); }
   } else if (wep.name==='SNIPER') {
-    ctx.fillStyle='#111'; ctx.fillRect(-30,-12,60,8); // long barrel
-    ctx.fillStyle='#222'; ctx.fillRect(-28,-10,24,6); // stock
-    ctx.fillStyle='#333'; ctx.fillRect(-10,-18,28,10); // scope mount
-    ctx.fillStyle=wep.color; ctx.fillRect(-8,-20,24,8); // scope tube
-    ctx.fillStyle='rgba(100,220,255,0.4)'; ctx.fillRect(-6,-19,20,6); // lens
-    ctx.fillStyle='#555'; ctx.fillRect(-30,-8,6,4); // stock detail
-    ctx.fillStyle='#111'; ctx.fillRect(-6,-8,14,16); // grip
-    ctx.fillStyle='#444'; ctx.fillRect(14,-6,4,10); // bipod leg1
+    ctx.fillStyle='#111'; ctx.fillRect(-30,-12,60,8);
+    ctx.fillStyle='#222'; ctx.fillRect(-28,-10,24,6);
+    ctx.fillStyle='#333'; ctx.fillRect(-10,-18,28,10);
+    ctx.fillStyle=wep.color; ctx.fillRect(-8,-20,24,8);
+    ctx.fillStyle='rgba(100,220,255,0.4)'; ctx.fillRect(-6,-19,20,6);
+    ctx.fillStyle='#555'; ctx.fillRect(-30,-8,6,4);
+    ctx.fillStyle='#111'; ctx.fillRect(-6,-8,14,16);
+    ctx.fillStyle='#444'; ctx.fillRect(14,-6,4,10);
     ctx.fillStyle='#444'; ctx.fillRect(18,-6,4,10);
     if (isFiring) { ctx.fillStyle='rgba(100,240,255,0.95)'; ctx.beginPath();ctx.arc(30,-8,5,0,Math.PI*2);ctx.fill(); }
   } else if (wep.name==='MINIGUN') {
-    // 6 rotating barrels
     const rotOffset=G.lastShot>performance.now()-200?(performance.now()-G.lastShot)*0.01:0;
     for (let i=0;i<6;i++) {
       const ba=(i/6)*Math.PI*2+rotOffset;
@@ -1726,29 +1656,29 @@ function drawGun(p,HH) {
       ctx.fillStyle='#555';
       ctx.fillRect(-2+Math.cos(ba)*4,-8+Math.sin(ba)*4,40,2);
     }
-    ctx.fillStyle='#333'; ctx.fillRect(-20,-14,22,12); // body
+    ctx.fillStyle='#333'; ctx.fillRect(-20,-14,22,12);
     ctx.fillStyle='#222'; ctx.fillRect(-18,-12,18,8);
-    ctx.fillStyle=wep.color; ctx.fillRect(-14,-10,10,4); // ammo belt hint
-    ctx.fillStyle='#111'; ctx.fillRect(-16,-8,8,16); // grip
+    ctx.fillStyle=wep.color; ctx.fillRect(-14,-10,10,4);
+    ctx.fillStyle='#111'; ctx.fillRect(-16,-8,8,16);
     if (isFiring) { ctx.fillStyle='rgba(255,100,50,0.9)'; ctx.beginPath();ctx.arc(40,-8,8,0,Math.PI*2);ctx.fill(); }
   } else if (wep.name==='PLASMA') {
     ctx.fillStyle='#1a0a2a'; ctx.fillRect(-22,-14,40,10);
     ctx.fillStyle='#2a0a3a'; ctx.fillRect(-20,-12,36,8);
-    ctx.fillStyle=wep.color; ctx.fillRect(-10,-16,18,4); // energy cells
+    ctx.fillStyle=wep.color; ctx.fillRect(-10,-16,18,4);
     ctx.fillStyle='rgba(180,100,255,0.5)'; ctx.fillRect(-8,-15,14,3);
-    ctx.fillStyle='#555'; ctx.fillRect(18,-10,12,4); // barrel
+    ctx.fillStyle='#555'; ctx.fillRect(18,-10,12,4);
     const glow=Math.sin(performance.now()*0.01)*0.3+0.7;
     ctx.fillStyle=`rgba(180,80,255,${glow})`; ctx.beginPath();ctx.arc(30,-8,4,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#111'; ctx.fillRect(-12,-8,6,16);
     if (isFiring) { ctx.fillStyle='rgba(200,100,255,0.95)'; ctx.beginPath();ctx.arc(32,-8,6,0,Math.PI*2);ctx.fill(); ctx.fillStyle='rgba(255,200,255,0.6)';ctx.fillRect(26,-14,8,12); }
   } else if (wep.name==='LAUNCHER') {
-    ctx.fillStyle='#1a1a0a'; ctx.fillRect(-24,-10,40,10); // main tube
+    ctx.fillStyle='#1a1a0a'; ctx.fillRect(-24,-10,40,10);
     ctx.fillStyle='#2a2a0a'; ctx.fillRect(-22,-8,36,6);
-    ctx.fillStyle='#444'; ctx.fillRect(16,-12,12,14); // muzzle bell
+    ctx.fillStyle='#444'; ctx.fillRect(16,-12,12,14);
     ctx.fillStyle='#333'; ctx.fillRect(17,-10,10,10);
-    ctx.fillStyle='rgba(255,200,0,0.4)'; ctx.fillRect(-8,-6,4,4); ctx.fillRect(-2,-6,4,4); // warning stripes
-    ctx.fillStyle=wep.color; ctx.fillRect(-14,-8,6,4); // sight
-    ctx.fillStyle='#111'; ctx.fillRect(-10,-8,6,16); // grip
+    ctx.fillStyle='rgba(255,200,0,0.4)'; ctx.fillRect(-8,-6,4,4); ctx.fillRect(-2,-6,4,4);
+    ctx.fillStyle=wep.color; ctx.fillRect(-14,-8,6,4);
+    ctx.fillStyle='#111'; ctx.fillRect(-10,-8,6,16);
     if (isFiring) { ctx.fillStyle='rgba(255,120,0,0.95)'; ctx.beginPath();ctx.arc(28,-5,10,0,Math.PI*2);ctx.fill(); ctx.fillStyle='rgba(255,220,100,0.6)';ctx.fillRect(20,-14,10,18); }
   }
 
@@ -1808,10 +1738,10 @@ function updateHUD() {
 function addFeed(msg, type='kill') {
   const feed=document.getElementById('kill-feed');
   const div=document.createElement('div');
-  div.className=type==='pickup'?'pickup-msg':type==='shop'?'shop-msg':'kill-msg';
+  div.className=type==='pickup'?'pickup-msg':type==='shop'?'shop-msg':type==='record'?'record-msg':'kill-msg';
   div.textContent=msg;
   feed.appendChild(div);
-  setTimeout(()=>div.remove(),2500);
+  setTimeout(()=>div.remove(), type==='record'?4000:2500);
 }
 
 function announceWave() {
