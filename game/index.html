@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>DEADZONE V12.5</title>
+<title>DEADZONE V12</title>
   <link rel="icon" type="image/x-icon" href="https://innovateprogram.github.io/game/logo.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -132,8 +132,7 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 .auth-input::placeholder { color: rgba(255,255,255,0.18); }
 .auth-error { color: #ff4444; font-size: 11px; letter-spacing: 2px; min-height: 16px; }
 .auth-or { color: rgba(255,255,255,0.18); text-align: center; font-size: 10px; letter-spacing: 3px; margin: 8px 0; }
-.play-guest { background: none; border: none; color: rgba(255,255,255,0.25); font-family: 'Courier New',monospace; font-size: 11px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; text-decoration: underline; transition: color .2s; pointer-events: all; }
-.play-guest:hover { color: rgba(255,255,255,0.6); }
+
 .user-bar { position: fixed; top: 14px; left: 20px; z-index: 200; display: flex; align-items: center; gap: 10px; pointer-events: all; }
 .username-el { color: rgba(255,255,255,0.35); font-size: 10px; letter-spacing: 2px; }
 .signout-btn { background: none; border: none; color: rgba(255,50,50,0.45); font-family: 'Courier New',monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
@@ -267,8 +266,7 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
       <div class="auth-error" id="a-err"></div>
       <button class="btn btn-primary" id="a-submit">LOGIN</button>
     </div>
-    <div class="auth-or">or</div>
-    <button class="play-guest" id="guest-btn">Continue as Guest</button>
+
   </div>
 </div>
 
@@ -459,7 +457,7 @@ aSubmit.addEventListener('click', async () => {
   aSubmit.disabled = false;
 });
 
-document.getElementById('guest-btn').addEventListener('click', () => { window._isGuest=true; window._currentUser=null; document.getElementById('user-bar').style.display='none'; showScreen('start-screen'); });
+
 
 function setUserBar(name) { document.getElementById('ui-uname').textContent = name; document.getElementById('user-bar').style.display = 'flex'; }
 
@@ -506,7 +504,7 @@ document.getElementById('p-lb-btn').addEventListener('click', () => { renderLead
 document.getElementById('go-lb-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('lb-screen'); });
 
 // ── FIX 2: backFromFb also returns to pause-screen when game is paused ──
-function backFromFb() { showScreen((G.state==='playing'||G.state==='paused')?'pause-screen':(window._currentUser||window._isGuest)?'start-screen':'auth-screen'); }
+function backFromFb() { showScreen((G.state==='playing'||G.state==='paused')?'pause-screen':window._currentUser?'start-screen':'auth-screen'); }
 document.getElementById('fb-btn').addEventListener('click', () => { document.getElementById('fb-ok').style.display='none'; showScreen('fb-screen'); });
 document.getElementById('p-fb-btn').addEventListener('click', () => { document.getElementById('fb-ok').style.display='none'; showScreen('fb-screen'); });
 document.getElementById('go-fb-btn').addEventListener('click', () => { document.getElementById('fb-ok').style.display='none'; showScreen('fb-screen'); });
