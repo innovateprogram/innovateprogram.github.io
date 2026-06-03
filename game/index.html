@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>DEADZONE V12.5</title>
+<title>DEADZONE V13</title>
   <link rel="icon" type="image/x-icon" href="https://innovateprogram.github.io/game/logo.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -314,7 +314,7 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 <div id="lb-screen" class="screen">
   <div class="lb-wrap">
     <div class="lb-title">LEADERBOARD</div>
-    <div class="lb-sub">Top Survivors — By Wave Reached</div>
+    <div class="lb-sub" id="lb-sub">All Scores — By Wave Reached</div>
     <table class="lb-table">
       <thead><tr><th>#</th><th>Player</th><th>Wave</th><th>Score</th></tr></thead>
       <tbody id="lb-body"><tr><td colspan="4" class="lb-empty">Loading...</td></tr></tbody>
@@ -389,31 +389,87 @@ async function fetchPersonalBest(uid) {
     if (snap.exists) { const d = snap.data(); window._personalBestWave = d.bestWave||0; window._personalBestScore = d.bestScore||0; }
   } catch(e) {}
 }
+function isBetterRun(wave, score, bestWave, bestScore) {
+  return wave > bestWave || (wave === bestWave && score > bestScore);
+}
 window.submitScore = async function(wave, score) {
   const uid = window._currentUser ? window._currentUser.uid : null;
   const name = window._currentUser ? (window._currentUser.displayName || window._currentUser.email) : 'Guest';
   let beatPersonal = false, beatGlobal = false;
   if (!uid) return { beatPersonal, beatGlobal };
   try {
-    const isBetter = wave > window._personalBestWave || (wave === window._personalBestWave && score > window._personalBestScore);
-    if (isBetter) {
-      beatPersonal = true; window._personalBestWave = wave; window._personalBestScore = score;
-      await db.collection('users').doc(uid).set({ bestWave: wave, bestScore: score, username: name, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-      await db.collection('leaderboard').doc(uid).set({ username: name, wave, score, uid, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    const ts = firebase.firestore.FieldValue.serverTimestamp();
+    const betterPersonal = isBetterRun(wave, score, window._personalBestWave, window._personalBestScore);
+    if (betterPersonal) {
+      beatPersonal = true;
+      window._personalBestWave = wave;
+      window._personalBestScore = score;
     }
-    if (wave > window._globalBestWave || (wave === window._globalBestWave && score > window._globalBestScore)) {
-      beatGlobal = true; window._globalBestWave = wave; window._globalBestScore = score;
+    const userPayload = {
+      username: name,
+      lastWave: wave,
+      lastScore: score,
+      updatedAt: ts,
+    };
+    if (betterPersonal) {
+      userPayload.bestWave = wave;
+      userPayload.bestScore = score;
+    }
+    await db.collection('users').doc(uid).set(userPayload, { merge: true });
+
+    await db.collection('waveScores').add({
+      uid,
+      username: name,
+      wave,
+      score,
+      createdAt: ts,
+    });
+
+    const lbRef = db.collection('leaderboard').doc(uid);
+    const lbSnap = await lbRef.get();
+    const lb = lbSnap.exists ? lbSnap.data() : { wave: 0, score: 0 };
+    if (isBetterRun(wave, score, lb.wave || 0, lb.score || 0)) {
+      await lbRef.set({ username: name, wave, score, uid, updatedAt: ts });
+    }
+
+    if (isBetterRun(wave, score, window._globalBestWave, window._globalBestScore)) {
+      beatGlobal = true;
+      window._globalBestWave = wave;
+      window._globalBestScore = score;
     }
   } catch(e) {}
   return { beatPersonal, beatGlobal };
 };
 async function loadLeaderboard() {
+  const rows = [];
+  const batchSize = 100;
   try {
-    const snap = await db.collection('leaderboard').orderBy('wave','desc').limit(20).get();
-    const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    rows.sort((a, b) => b.wave - a.wave || (b.score||0) - (a.score||0));
-    return rows;
-  } catch(e) { return []; }
+    let lastDoc = null;
+    for (;;) {
+      let q = db.collection('waveScores').orderBy('wave', 'desc').orderBy('score', 'desc').limit(batchSize);
+      if (lastDoc) q = q.startAfter(lastDoc);
+      const snap = await q.get();
+      if (snap.empty) break;
+      snap.docs.forEach(d => rows.push({ id: d.id, ...d.data() }));
+      lastDoc = snap.docs[snap.docs.length - 1];
+      if (snap.docs.length < batchSize) break;
+    }
+    if (rows.length) return rows;
+  } catch(e) {}
+  try {
+    let lastDoc = null;
+    for (;;) {
+      let q = db.collection('leaderboard').orderBy('wave', 'desc').limit(batchSize);
+      if (lastDoc) q = q.startAfter(lastDoc);
+      const snap = await q.get();
+      if (snap.empty) break;
+      snap.docs.forEach(d => rows.push({ id: d.id, ...d.data() }));
+      lastDoc = snap.docs[snap.docs.length - 1];
+      if (snap.docs.length < batchSize) break;
+    }
+    rows.sort((a, b) => b.wave - a.wave || (b.score || 0) - (a.score || 0));
+  } catch(e) {}
+  return rows;
 }
 window.submitFeedback = async function(category, message) {
   const uid = window._currentUser ? window._currentUser.uid : 'guest';
@@ -480,8 +536,10 @@ auth.onAuthStateChanged(async user => {
 
 async function renderLeaderboard() {
   const tbody = document.getElementById('lb-body');
+  const lbSub = document.getElementById('lb-sub');
   tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">Loading...</td></tr>';
   const rows = await loadLeaderboard();
+  if (lbSub) lbSub.textContent = rows.length ? `All Scores — ${rows.length} entries` : 'All Scores — By Wave Reached';
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">No scores yet. Be the first!</td></tr>'; return; }
   tbody.innerHTML = '';
   rows.forEach((r, i) => {
@@ -870,21 +928,14 @@ function initGame() {
   G.animId = requestAnimationFrame(gameLoop);
 }
 
-// ── FIX 1: Save score to leaderboard every time a new wave starts ─────────────
-// We save the COMPLETED wave count (wave - 1) when a new wave begins.
-// On wave 1 start there's nothing to save yet (player hasn't cleared anything),
-// so we save starting from wave 2 onward (meaning wave 1 was cleared).
 function nextWave() {
   G.wave++; G.waveActive=false; G.waveTimer=4; G.enemiesLeft=0;
   document.getElementById('wave-text').textContent = 'WAVE ' + G.wave;
   announceWave();
-  // Save the just-completed wave (wave-1) to the leaderboard if it's a new personal best.
-  // G.wave is already incremented, so G.wave-1 = the wave the player just survived.
-  if (G.wave > 1 && window._currentUser) {
-    const completedWave = G.wave - 1;
-    window.submitScore(completedWave, G.score).then(res => {
+  if (window._currentUser) {
+    window.submitScore(G.wave, G.score).then(res => {
       if (res && res.beatPersonal) {
-        addFeed('★ New best: Wave ' + completedWave + ' saved!', 'record');
+        addFeed('★ New best: Wave ' + G.wave + ' saved!', 'record');
       }
     }).catch(() => {});
   }
@@ -1516,6 +1567,21 @@ function drawGunPreview(sctx, weaponType, w, h) {
   sctx.restore();
 }
 
+function buildGunBillboardCanvas(weaponType, sc, bright) {
+  const tmpW = 24 * sc, tmpH = 12 * sc;
+  const tmp = document.createElement('canvas');
+  tmp.width = tmpW; tmp.height = tmpH;
+  drawGunSprite(tmp.getContext('2d'), weaponType, sc, bright);
+  const rot = document.createElement('canvas');
+  rot.width = tmpH; rot.height = tmpW;
+  const rctx = rot.getContext('2d');
+  rctx.imageSmoothingEnabled = false;
+  rctx.translate(rot.width / 2, rot.height / 2);
+  rctx.rotate(-Math.PI / 2);
+  rctx.drawImage(tmp, -tmpW / 2, -tmpH / 2, tmpW, tmpH);
+  return { canvas: rot, w: tmpH, h: tmpW };
+}
+
 function drawPickupSprite(pk, cx, top, bottom, left, right, sh, sw, shade, dist) {
   const h=bottom-top, w=right-left;
   if (h<=4||w<=4) return;
@@ -1528,10 +1594,7 @@ function drawPickupSprite(pk, cx, top, bottom, left, right, sh, sw, shade, dist)
 
   if (w>6&&adjH>6) {
     const sc=Math.max(1, Math.floor(Math.min(w/24, adjH/12)));
-    const tmpW=24*sc, tmpH=12*sc;
-    const tmp=document.createElement('canvas');
-    tmp.width=tmpW; tmp.height=tmpH;
-    drawGunSprite(tmp.getContext('2d'), pk.weaponType, sc, shade*1.2);
+    const gun = buildGunBillboardCanvas(pk.weaponType, sc, shade * 1.2);
 
     ctx.save();
     ctx.globalAlpha=0.92;
@@ -1540,9 +1603,9 @@ function drawPickupSprite(pk, cx, top, bottom, left, right, sh, sw, shade, dist)
       if (dist>=G.zBuffer[col]) { blocked=true; break; }
     }
     if (!blocked) {
-      const drawX=cx-Math.floor(tmpW/2);
-      const drawY=adjTop+Math.floor((adjH-tmpH)/2);
-      ctx.drawImage(tmp, drawX, drawY, tmpW, tmpH);
+      const drawX=cx-Math.floor(gun.w/2);
+      const drawY=adjTop+Math.floor((adjH-gun.h)/2);
+      ctx.drawImage(gun.canvas, drawX, drawY, gun.w, gun.h);
     }
     ctx.restore();
   }
