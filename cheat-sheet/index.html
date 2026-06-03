@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Revision Cheat Sheet | Student Resource Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #0d1f3c;
+    --gold:   #c9a84c;
+    --gold-lt:#f0d898;
+    --cream:  #faf8f3;
+    --white:  #ffffff;
+    --muted:  #6b7a90;
+    --border: #dce3ee;
+    --green:  #1a6b4a;
+    --green-lt:#e8f5ef;
+    --rust:   #8b3a2a;
+    --rust-lt:#faeee9;
+    --slate:  #2c4a7c;
+    --slate-lt:#edf1f9;
+    --teal:   #1a5c6b;
+    --teal-lt:#e8f4f7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 0;
+    border-bottom: 4px solid var(--gold);
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 22px 32px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .school-brand { display: flex; align-items: center; gap: 14px; }
+  .brand-icon {
+    width: 44px; height: 44px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .brand-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    line-height: 1.2;
+  }
+  .brand-text p { font-size: 11px; color: var(--gold-lt); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+  .doc-meta { text-align: right; }
+  .doc-meta .badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .doc-meta p { font-size: 11px; color: #9fafc5; }
+
+  /* ── SUBTITLE BAND ── */
+  .subtitle-band {
+    background: var(--gold);
+    padding: 8px 32px;
+    max-width: 100%;
+  }
+  .subtitle-band-inner {
+    max-width: 960px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .subtitle-band h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px; font-weight: 700;
+    color: var(--navy);
+  }
+  .subtitle-band span { font-size: 11px; color: var(--navy); opacity: 0.7; }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 960px;
+    margin: 28px auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--white);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(13,31,60,0.06);
+  }
+  .card.full-width { grid-column: 1 / -1; }
+
+  .card-header {
+    padding: 12px 18px 10px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-header .icon {
+    width: 30px; height: 30px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .card-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px; font-weight: 700;
+    line-height: 1.2;
+  }
+  .card-header .topic-tag {
+    margin-left: auto;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 12px;
+  }
+
+  .card-body { padding: 14px 18px 16px; }
+
+  /* Colour themes */
+  .theme-green .card-header { background: var(--green-lt); }
+  .theme-green .icon { background: var(--green); color: #fff; }
+  .theme-green h3 { color: var(--green); }
+  .theme-green .topic-tag { background: var(--green-lt); color: var(--green); border: 1px solid #a8d8c4; }
+
+  .theme-rust .card-header { background: var(--rust-lt); }
+  .theme-rust .icon { background: var(--rust); color: #fff; }
+  .theme-rust h3 { color: var(--rust); }
+  .theme-rust .topic-tag { background: var(--rust-lt); color: var(--rust); border: 1px solid #e5bfb5; }
+
+  .theme-slate .card-header { background: var(--slate-lt); }
+  .theme-slate .icon { background: var(--slate); color: #fff; }
+  .theme-slate h3 { color: var(--slate); }
+  .theme-slate .topic-tag { background: var(--slate-lt); color: var(--slate); border: 1px solid #c0ceea; }
+
+  .theme-teal .card-header { background: var(--teal-lt); }
+  .theme-teal .icon { background: var(--teal); color: #fff; }
+  .theme-teal h3 { color: var(--teal); }
+  .theme-teal .topic-tag { background: var(--teal-lt); color: var(--teal); border: 1px solid #a8d4dd; }
+
+  /* ── CONTENT ELEMENTS ── */
+  .kv-row {
+    display: flex; gap: 8px; align-items: baseline;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-label {
+    font-weight: 700; font-size: 12px;
+    min-width: 110px; flex-shrink: 0;
+    color: var(--navy);
+  }
+  .kv-val { font-size: 12.5px; color: #344058; }
+
+  .pill-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .pill {
+    font-size: 11.5px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+    background: var(--cream); border: 1px solid var(--border);
+    color: var(--navy);
+  }
+
+  .highlight-box {
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  .highlight-box strong { display: block; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .econ-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px; }
+  .econ-term {
+    background: var(--slate-lt);
+    border: 1px solid #c0ceea;
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .econ-term .term { font-size: 11.5px; font-weight: 700; color: var(--slate); }
+  .econ-term .def { font-size: 11px; color: #344058; margin-top: 2px; line-height: 1.4; }
+
+  /* ── FOOTER ── */
+  footer {
+    max-width: 960px; margin: 8px auto 28px;
+    padding: 0 24px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  footer p { font-size: 11px; color: var(--muted); }
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 12px; color: var(--navy); font-weight: 700;
+    opacity: 0.4;
+  }
+
+  @media print {
+    body { background: #fff; }
+    main { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="school-brand">
+      <div class="brand-icon">📚</div>
+      <div class="brand-text">
+        <h1>Student Resource Centre</h1>
+        <p>Exam Preparation Series</p>
+      </div>
+    </div>
+    <div class="doc-meta">
+      <div class="badge">Cheat Sheet</div>
+      <p>Year-Level Humanities &amp; Economics</p>
+      <p>Prepared by the Academic Support Team</p>
+    </div>
+  </div>
+  <div class="subtitle-band">
+    <div class="subtitle-band-inner">
+      <h2>Key Concepts Quick Reference</h2>
+      <span>— Biomes &amp; Food Security · Australian History · Economics</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- BIOMES & FOOD SECURITY -->
+  <div class="card theme-green full-width">
+    <div class="card-header">
+      <div class="icon">🌿</div>
+      <h3>Biomes &amp; Food Security</h3>
+      <span class="topic-tag">Geography</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div>
+          <div class="kv-row"><span class="kv-label">Biome</span><span class="kv-val">Large region sharing similar climate, vegetation &amp; wildlife.</span></div>
+          <div class="kv-row"><span class="kv-label">Key Biomes</span><span class="kv-val">Tropical rainforest, grassland, desert, tundra, temperate forest.</span></div>
+          <div class="kv-row"><span class="kv-label">Food Security</span><span class="kv-val">Reliable access to sufficient, nutritious food for all people.</span></div>
+          <div class="kv-row"><span class="kv-label">4 Pillars</span><span class="kv-val">Availability · Access · Utilisation · Stability</span></div>
+        </div>
+        <div>
+          <div class="highlight-box" style="background:#e8f5ef; border:1px solid #a8d8c4;">
+            <strong>⚠ Threats to Food Security</strong>
+            Climate change, deforestation, overpopulation, water scarcity, soil degradation.
+          </div>
+          <div class="highlight-box" style="background:#fff8e8; border:1px solid #e0cc88; margin-top:8px;">
+            <strong>✅ Solutions</strong>
+            Sustainable farming, crop rotation, irrigation technology, reducing food waste.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIRST FLEET -->
+  <div class="card theme-rust">
+    <div class="card-header">
+      <div class="icon">⚓</div>
+      <h3>First Fleet (1788)</h3>
+      <span class="topic-tag">History</span>
+    </div>
+    <div class="card-body">
+      <div class="kv-row"><span class="kv-label">What</span><span class="kv-val">11 ships from Britain, ~1,400 people including 759 convicts.</span></div>
+      <div class="kv-row"><span class="kv-label">Who Led</span><span class="kv-val">Governor Arthur Phillip</span></div>
+      <div class="kv-row"><span class="kv-label">Landed</span><span class="kv-val">Sydney Cove (Port Jackson), 26 Jan 1788</span></div>
+      <div class="kv-row"><span class="kv-label">Purpose</span><span class="kv-val">Establish NSW as a British penal colony</span></div>
+      <div class="kv-row"><span class="kv-label">Impact</span><span class="kv-val">Land dispossession, disease &amp; cultural disruption for Aboriginal Australians</span></div>
+    </div>
+  </div>
+
+  <!-- GOLD RUSH -->
+  <div class="card theme-rust">
+    <div class="card-header">
+      <div class="icon">⛏</div>
+      <h3>Gold Rush (1851)</h3>
+      <span class="topic-tag">History</span>
+    </div>
+    <div class="card-body">
+      <div class="kv-row"><span class="kv-label">Discovered</span><span class="kv-val">Bathurst (NSW) &amp; Ballarat (VIC)</span></div>
+      <div class="kv-row"><span class="kv-label">Population</span><span class="kv-val">430,000 → over 1 million within a decade</span></div>
+      <div class="kv-row"><span class="kv-label">Discrimination</span><span class="kv-val">Chinese migrants faced racism &amp; immigration restriction acts</span></div>
+      <div class="kv-row"><span class="kv-label">Eureka (1854)</span><span class="kv-val">Miners rebelled over licensing fees — symbol of Australian democracy</span></div>
+    </div>
+  </div>
+
+  <!-- FEDERATION -->
+  <div class="card theme-teal">
+    <div class="card-header">
+      <div class="icon">🏛</div>
+      <h3>Federation (1901)</h3>
+      <span class="topic-tag">History</span>
+    </div>
+    <div class="card-body">
+      <div class="kv-row"><span class="kv-label">Date</span><span class="kv-val">1 January 1901 — six colonies united as the Commonwealth of Australia</span></div>
+      <div class="kv-row"><span class="kv-label">Parliament</span><span class="kv-val">Two houses: Senate &amp; House of Representatives</span></div>
+      <div class="kv-row"><span class="kv-label">1st PM</span><span class="kv-val">Edmund Barton</span></div>
+      <div class="kv-row"><span class="kv-label">Key Policy</span><span class="kv-val">White Australia Policy (Immigration Restriction Act 1901)</span></div>
+    </div>
+  </div>
+
+  <!-- ECONOMICS -->
+  <div class="card theme-slate full-width">
+    <div class="card-header">
+      <div class="icon">📈</div>
+      <h3>Economics — Key Terms</h3>
+      <span class="topic-tag">Economics</span>
+    </div>
+    <div class="card-body">
+      <div class="econ-grid">
+        <div class="econ-term"><div class="term">Demand</div><div class="def">Consumer willingness &amp; ability to buy at various prices.</div></div>
+        <div class="econ-term"><div class="term">Supply</div><div class="def">Producer willingness &amp; ability to sell at various prices.</div></div>
+        <div class="econ-term"><div class="term">Equilibrium</div><div class="def">Price where quantity supplied equals quantity demanded.</div></div>
+        <div class="econ-term"><div class="term">Inflation</div><div class="def">General rise in prices over time, reducing purchasing power.</div></div>
+        <div class="econ-term"><div class="term">GDP</div><div class="def">Total value of all goods &amp; services produced in a country.</div></div>
+        <div class="econ-term"><div class="term">Opportunity Cost</div><div class="def">Value of the next best alternative that is given up.</div></div>
+        <div class="econ-term"><div class="term">Scarcity</div><div class="def">Limited resources vs unlimited human wants — the core problem.</div></div>
+        <div class="econ-term"><div class="term">Mixed Economy</div><div class="def">Free market combined with government intervention (e.g. Australia).</div></div>
+        <div class="econ-term"><div class="term">Fiscal Policy</div><div class="def">Government use of spending &amp; taxation to influence the economy.</div></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>© Student Resource Centre &nbsp;|&nbsp; For personal study use only &nbsp;|&nbsp; Not for commercial distribution</p>
+  <div class="footer-logo">SRC</div>
+</footer>
+
+</body>
+</html>
