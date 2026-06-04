@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>DEADZONE V13</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEADZONE V13.1</title>
   <link rel="icon" type="image/x-icon" href="https://innovateprogram.github.io/game/logo.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; user-select: none; touch-action: none; }
+body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; user-select: none; }
 #gameCanvas { display: block; cursor: none; image-rendering: pixelated; }
 
 #hud { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
@@ -83,22 +83,6 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 .shop-close { margin-top: 24px; background: none; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 3px; padding: 10px 28px; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
 .shop-close:hover { border-color: #ff4444; color: #ff4444; }
 
-/* MOBILE CONTROLS */
-#mobile-controls { position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; display: none; }
-.mobile-btn { pointer-events: all; position: absolute; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; user-select: none; -webkit-tap-highlight-color: transparent; transition: background 0.1s; }
-.mobile-btn:active, .mobile-btn.pressed { background: rgba(255,255,255,0.22); }
-#joy-zone { position: absolute; bottom: 30px; left: 20px; width: 130px; height: 130px; pointer-events: all; }
-#joy-outer { width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); position: relative; pointer-events: all; }
-#joy-knob { position: absolute; width: 52px; height: 52px; background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.35); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
-#fire-btn { pointer-events: all; position: absolute; bottom: 40px; right: 30px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,50,50,0.18); border: 2px solid rgba(255,50,50,0.5); display: flex; align-items: center; justify-content: center; color: rgba(255,80,80,0.8); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
-#reload-btn-m { pointer-events: all; position: absolute; bottom: 140px; right: 40px; width: 52px; height: 52px; border-radius: 50%; background: rgba(255,136,0,0.12); border: 1px solid rgba(255,136,0,0.4); display: flex; align-items: center; justify-content: center; color: rgba(255,136,0,0.7); font-size: 9px; letter-spacing: 1px; }
-#shop-btn-m { pointer-events: all; position: absolute; bottom: 205px; right: 42px; width: 48px; height: 48px; border-radius: 50%; background: rgba(255,170,0,0.12); border: 1px solid rgba(255,170,0,0.35); display: flex; align-items: center; justify-content: center; color: rgba(255,170,0,0.7); font-size: 9px; letter-spacing: 1px; }
-#interact-btn-m { pointer-events: all; position: absolute; bottom: 50px; right: 130px; width: 54px; height: 54px; border-radius: 50%; background: rgba(0,200,100,0.1); border: 1px solid rgba(0,200,100,0.35); display: flex; align-items: center; justify-content: center; color: rgba(0,255,136,0.7); font-size: 9px; letter-spacing: 1px; display: none; }
-#look-zone { position: absolute; bottom: 0; right: 0; width: 55%; height: 100%; pointer-events: all; background: transparent; }
-
-/* CONTROLLER INDICATOR */
-#ctrl-indicator { position: absolute; top: 55px; right: 30px; color: rgba(255,255,255,0.3); font-size: 9px; letter-spacing: 2px; }
-
 .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: #fff; }
 .screen.active { display: flex; }
 #auth-screen { background: #000; }
@@ -172,19 +156,6 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
 #lock-prompt { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.35); font-size: 11px; letter-spacing: 3px; z-index: 50; pointer-events: none; text-align: center; }
 #interact-prompt { position: absolute; bottom: 115px; left: 50%; transform: translateX(-50%); display: none; background: rgba(0,0,0,0.72); border: 1px solid rgba(255,255,255,0.18); padding: 7px 18px; color: #fff; font-size: 11px; letter-spacing: 3px; white-space: nowrap; z-index: 20; pointer-events: none; }
 #interact-prompt .key { color: #ff8800; font-weight: bold; }
-
-@media (max-width: 768px) {
-  #mobile-controls { display: block; }
-  #lock-prompt { display: none; }
-  #weapon-slots { bottom: 170px; right: 10px; }
-  #shop-btn { bottom: 170px; left: 10px; }
-  #minimap { top: 8px; right: 8px; width: 100px; height: 100px; }
-  #minimap canvas { width: 100px; height: 100px; }
-  #hud-bar { padding: 0 16px; height: 70px; }
-  #ammo-mag { font-size: 32px; }
-  .wslot { font-size: 9px; min-width: 90px; }
-  .shop-grid { grid-template-columns: repeat(2, 1fr); }
-}
 </style>
 </head>
 <body>
@@ -196,7 +167,6 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
   <div id="kill-feed"></div>
   <div id="minimap"><canvas id="mm" width="130" height="130"></canvas></div>
   <div id="wave-announce"></div>
-  <div id="ctrl-indicator"></div>
   <div id="reload-bar">
     <div id="reload-text-el">RELOADING</div>
     <div id="reload-track"><div id="reload-fill"></div></div>
@@ -233,18 +203,6 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
   <button class="shop-close" id="shop-close-btn">CLOSE [B/ESC]</button>
 </div>
 
-<!-- MOBILE CONTROLS -->
-<div id="mobile-controls">
-  <div id="joy-zone">
-    <div id="joy-outer"><div id="joy-knob"></div></div>
-  </div>
-  <div id="fire-btn">FIRE</div>
-  <div id="reload-btn-m">RELOAD</div>
-  <div id="shop-btn-m">SHOP</div>
-  <div id="interact-btn-m">PICK UP</div>
-  <div id="look-zone"></div>
-</div>
-
 <div class="user-bar" id="user-bar" style="display:none">
   <span class="username-el" id="ui-uname"></span>
   <button class="signout-btn" id="signout-btn">Sign Out</button>
@@ -266,7 +224,6 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
       <div class="auth-error" id="a-err"></div>
       <button class="btn btn-primary" id="a-submit">LOGIN</button>
     </div>
-
   </div>
 </div>
 
@@ -282,8 +239,7 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
   <div class="controls-hint">
     WASD — Move &nbsp;|&nbsp; Mouse — Aim &nbsp;|&nbsp; Click — Shoot<br>
     R — Reload &nbsp;|&nbsp; Shift — Sprint &nbsp;|&nbsp; 1/2/3 — Switch<br>
-    E — Pick Up Gun &nbsp;|&nbsp; G/Q — Drop &nbsp;|&nbsp; B — Shop &nbsp;|&nbsp; ESC — Pause<br>
-    <span style="color:rgba(255,170,0,0.5)">Controller: Left stick — Move · Right stick — Aim · RT — Fire · RB — Reload · Y/▲ — Shop</span>
+    E — Pick Up Gun &nbsp;|&nbsp; G/Q — Drop &nbsp;|&nbsp; B — Shop &nbsp;|&nbsp; ESC — Pause
   </div>
 </div>
 
@@ -513,8 +469,6 @@ aSubmit.addEventListener('click', async () => {
   aSubmit.disabled = false;
 });
 
-
-
 function setUserBar(name) { document.getElementById('ui-uname').textContent = name; document.getElementById('user-bar').style.display = 'flex'; }
 
 document.getElementById('signout-btn').addEventListener('click', async () => {
@@ -554,14 +508,11 @@ async function renderLeaderboard() {
 }
 
 document.getElementById('lb-refresh-btn').addEventListener('click', renderLeaderboard);
-
-// ── FIX 2: Back buttons correctly return to pause-screen when game is paused ──
 document.getElementById('lb-back-btn').addEventListener('click', () => showScreen((G.state==='playing'||G.state==='paused')?'pause-screen':'start-screen'));
 document.getElementById('lb-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('lb-screen'); });
 document.getElementById('p-lb-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('lb-screen'); });
 document.getElementById('go-lb-btn').addEventListener('click', () => { renderLeaderboard(); showScreen('lb-screen'); });
 
-// ── FIX 2: backFromFb also returns to pause-screen when game is paused ──
 function backFromFb() { showScreen((G.state==='playing'||G.state==='paused')?'pause-screen':window._currentUser?'start-screen':'auth-screen'); }
 document.getElementById('fb-btn').addEventListener('click', () => { document.getElementById('fb-ok').style.display='none'; showScreen('fb-screen'); });
 document.getElementById('p-fb-btn').addEventListener('click', () => { document.getElementById('fb-ok').style.display='none'; showScreen('fb-screen'); });
@@ -604,21 +555,19 @@ const WALL_COLORS = [null, { light:'#8b4513', dark:'#5c2d0a' }, { light:'#4a5568
 const FLOOR_COLOR = '#1a1008', CEILING_COLOR = '#050505';
 
 // ═══════════════════════════════════════════════════════════
-// WEAPON DEFINITIONS (base + premium shop weapons)
+// WEAPON DEFINITIONS
 // ═══════════════════════════════════════════════════════════
 const WEAPONS = {
   pistol:   { name:'PISTOL',    damage:30,  fireRate:350, reload:1000, magSize:12, reserveMax:60,  auto:false, color:'#88aaff', dropColor:'#4466cc', ammoGain:8 },
   shotgun:  { name:'SHOTGUN',   damage:22,  fireRate:700, reload:1600, magSize:8,  reserveMax:40,  auto:false, pellets:6, spread:0.16, color:'#ff8844', dropColor:'#cc5511', ammoGain:6 },
   rifle:    { name:'RIFLE',     damage:40,  fireRate:120, reload:1800, magSize:30, reserveMax:120, auto:true,  color:'#44ff88', dropColor:'#11aa44', ammoGain:12 },
   smg:      { name:'SMG',       damage:18,  fireRate:90,  reload:1300, magSize:25, reserveMax:100, auto:true,  color:'#ffdd44', dropColor:'#ccaa00', ammoGain:15 },
-  // SHOP-ONLY WEAPONS
   sniper:   { name:'SNIPER',    damage:120, fireRate:900, reload:2200, magSize:5,  reserveMax:25,  auto:false, color:'#00ffff', dropColor:'#007799', ammoGain:3,  shopOnly:true, cost:600,  desc:'One-shot most enemies. Extreme range.' },
   minigun:  { name:'MINIGUN',   damage:14,  fireRate:60,  reload:2500, magSize:80, reserveMax:200, auto:true,  color:'#ff4444', dropColor:'#aa0000', ammoGain:25, shopOnly:true, cost:1200, desc:'Endless stream of pain. Slow to start.' },
   plasma:   { name:'PLASMA',    damage:55,  fireRate:250, reload:1400, magSize:20, reserveMax:80,  auto:true,  color:'#aa44ff', dropColor:'#660099', ammoGain:10, shopOnly:true, cost:900,  desc:'Pierces armor. Elite killer.' },
   launcher: { name:'LAUNCHER',  damage:80,  fireRate:1200,reload:2800, magSize:4,  reserveMax:16,  auto:false, pellets:1, splash:true, color:'#ff8800', dropColor:'#994400', ammoGain:2, shopOnly:true, cost:1500, desc:'Area damage. One shot, big boom.' },
 };
 
-// Shop items (non-weapon upgrades)
 const SHOP_UPGRADES = {
   hp_boost:    { name:'MAX HP +25',      cost:300,  desc:'Permanently increase max health.',       icon:'❤️',  type:'upgrade', id:'hp_boost' },
   regen_boost: { name:'FAST REGEN',      cost:400,  desc:'Halves regen delay. Recover faster.',    icon:'💚',  type:'upgrade', id:'regen_boost' },
@@ -651,133 +600,12 @@ function mkPlayer() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// INPUT
+// INPUT — keyboard + mouse only
 // ═══════════════════════════════════════════════════════════
 const keys = {};
 const mouse = { dx:0, dy:0, justDown:false, down:false };
 let pointerLocked = false;
 let _lastMouseX = null, _lastMouseY = null;
-
-// ── Gamepad ──────────────────────────────────────────────
-const PAD = {
-  connected: false, index: -1,
-  leftX:0, leftY:0, rightX:0, rightY:0,
-  fire:false, firePrev:false,
-  reload:false, reloadPrev:false,
-  shop:false, shopPrev:false,
-  interact:false, interactPrev:false,
-  pause:false, pausePrev:false,
-};
-window.addEventListener('gamepadconnected', e => {
-  PAD.connected = true; PAD.index = e.gamepad.index;
-  document.getElementById('ctrl-indicator').textContent = '🎮 ' + (e.gamepad.id.toLowerCase().includes('dualsense') || e.gamepad.id.toLowerCase().includes('sony') ? 'PS5' : 'CONTROLLER') + ' CONNECTED';
-  console.log('Gamepad connected:', e.gamepad.id);
-});
-window.addEventListener('gamepaddisconnected', e => {
-  if (e.gamepad.index === PAD.index) { PAD.connected = false; PAD.index = -1; document.getElementById('ctrl-indicator').textContent = ''; }
-});
-
-function readGamepad() {
-  if (!PAD.connected) return;
-  const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-  const gp = gamepads[PAD.index];
-  if (!gp) return;
-  const dead = 0.12;
-  PAD.leftX  = Math.abs(gp.axes[0]) > dead ? gp.axes[0] : 0;
-  PAD.leftY  = Math.abs(gp.axes[1]) > dead ? gp.axes[1] : 0;
-  PAD.rightX = Math.abs(gp.axes[2]) > dead ? gp.axes[2] : 0;
-  PAD.rightY = Math.abs(gp.axes[3]) > dead ? gp.axes[3] : 0;
-  PAD.firePrev    = PAD.fire;
-  PAD.reloadPrev  = PAD.reload;
-  PAD.shopPrev    = PAD.shop;
-  PAD.interactPrev= PAD.interact;
-  PAD.pausePrev   = PAD.pause;
-  PAD.fire     = gp.buttons[7].pressed || gp.buttons[0].pressed;
-  PAD.reload   = gp.buttons[5].pressed || gp.buttons[2].pressed;
-  PAD.shop     = gp.buttons[3].pressed;
-  PAD.interact = gp.buttons[4].pressed;
-  PAD.pause    = gp.buttons[9].pressed || gp.buttons[8].pressed;
-}
-
-// ── Mobile touch joystick ─────────────────────────────────
-const mobileState = {
-  joyId: null, joyActive: false, joyDX: 0, joyDY: 0,
-  lookId: null, lookLastX: 0, lookLastY: 0,
-  firing: false,
-};
-
-function initMobileControls() {
-  const joyZone = document.getElementById('joy-zone');
-  const joyKnob = document.getElementById('joy-knob');
-  const joyOuter = document.getElementById('joy-outer');
-  const fireBtn = document.getElementById('fire-btn');
-  const lookZone = document.getElementById('look-zone');
-  const reloadBtnM = document.getElementById('reload-btn-m');
-  const shopBtnM = document.getElementById('shop-btn-m');
-  const interactBtnM = document.getElementById('interact-btn-m');
-
-  const JOY_R = 39;
-  function getJoyCenter() {
-    const r = joyOuter.getBoundingClientRect();
-    return { cx: r.left + r.width/2, cy: r.top + r.height/2 };
-  }
-
-  joyZone.addEventListener('touchstart', e => {
-    e.preventDefault();
-    for (const t of e.changedTouches) {
-      if (mobileState.joyId === null) {
-        mobileState.joyId = t.identifier; mobileState.joyActive = true;
-      }
-    }
-  }, { passive:false });
-
-  document.addEventListener('touchmove', e => {
-    e.preventDefault();
-    for (const t of e.changedTouches) {
-      if (t.identifier === mobileState.joyId) {
-        const { cx, cy } = getJoyCenter();
-        let dx = t.clientX - cx, dy = t.clientY - cy;
-        const len = Math.sqrt(dx*dx + dy*dy);
-        if (len > JOY_R) { dx = dx/len*JOY_R; dy = dy/len*JOY_R; }
-        mobileState.joyDX = dx/JOY_R; mobileState.joyDY = dy/JOY_R;
-        joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-      }
-      if (t.identifier === mobileState.lookId) {
-        mouse.dx += (t.clientX - mobileState.lookLastX) * 0.8;
-        mouse.dy += (t.clientY - mobileState.lookLastY) * 0.8;
-        mobileState.lookLastX = t.clientX; mobileState.lookLastY = t.clientY;
-      }
-    }
-  }, { passive:false });
-
-  document.addEventListener('touchend', e => {
-    for (const t of e.changedTouches) {
-      if (t.identifier === mobileState.joyId) {
-        mobileState.joyId = null; mobileState.joyActive = false;
-        mobileState.joyDX = 0; mobileState.joyDY = 0;
-        joyKnob.style.transform = 'translate(-50%,-50%)';
-      }
-      if (t.identifier === mobileState.lookId) { mobileState.lookId = null; }
-    }
-  });
-
-  lookZone.addEventListener('touchstart', e => {
-    e.preventDefault();
-    for (const t of e.changedTouches) {
-      if (mobileState.lookId === null && t.identifier !== mobileState.joyId) {
-        mobileState.lookId = t.identifier;
-        mobileState.lookLastX = t.clientX; mobileState.lookLastY = t.clientY;
-      }
-    }
-  }, { passive:false });
-
-  fireBtn.addEventListener('touchstart', e => { e.preventDefault(); mobileState.firing = true; mouse.justDown = true; }, { passive:false });
-  fireBtn.addEventListener('touchend',   e => { e.preventDefault(); mobileState.firing = false; }, { passive:false });
-  reloadBtnM.addEventListener('touchstart', e => { e.preventDefault(); startReload(); }, { passive:false });
-  shopBtnM.addEventListener('touchstart', e => { e.preventDefault(); toggleShop(); }, { passive:false });
-  interactBtnM.addEventListener('touchstart', e => { e.preventDefault(); interactPickup(); }, { passive:false });
-}
-initMobileControls();
 
 function handleKeyDown(e) {
   keys[e.code] = true;
@@ -972,7 +800,6 @@ function spawnEnemy() {
 
 function gameLoop(now) {
   if (G.state !== 'playing') return;
-  readGamepad();
   const dt = Math.min((now - G.lastTime)/1000, 0.05);
   G.lastTime = now;
   update(dt, now);
@@ -987,17 +814,10 @@ function gameLoop(now) {
 function update(dt, now) {
   const p = G.player;
 
-  if (PAD.shop && !PAD.shopPrev) toggleShop();
-  if (PAD.pause && !PAD.pausePrev) pauseGame();
-  if (PAD.interact && !PAD.interactPrev) interactPickup();
-  if (PAD.reload && !PAD.reloadPrev) startReload();
-
-  const sens = 0.0025, padRotSens = 2.5, pitchSens = 0.4;
+  const sens = 0.0025, pitchSens = 0.4;
   p.angle += mouse.dx * sens;
   p.pitch = Math.max(-80, Math.min(80, p.pitch - mouse.dy * pitchSens));
   mouse.dx = 0; mouse.dy = 0;
-  p.angle += PAD.rightX * padRotSens * dt;
-  p.pitch = Math.max(-80, Math.min(80, p.pitch - PAD.rightY * 60 * dt));
 
   let moveX=0, moveY=0;
   const sprint = (keys['ShiftLeft']||keys['ShiftRight']) ? 1.8 : 1.0;
@@ -1007,16 +827,6 @@ function update(dt, now) {
   if (keys['KeyS']||keys['ArrowDown'])  { moveX -= Math.cos(p.angle)*spd; moveY -= Math.sin(p.angle)*spd; }
   if (keys['KeyA']||keys['ArrowLeft'])  { moveX += Math.cos(p.angle-Math.PI/2)*spd; moveY += Math.sin(p.angle-Math.PI/2)*spd; }
   if (keys['KeyD']||keys['ArrowRight']) { moveX += Math.cos(p.angle+Math.PI/2)*spd; moveY += Math.sin(p.angle+Math.PI/2)*spd; }
-  if (PAD.leftX!==0||PAD.leftY!==0) {
-    const padSpd = p.moveSpeed * dt;
-    moveX += (Math.cos(p.angle)*PAD.leftY + Math.cos(p.angle+Math.PI/2)*PAD.leftX) * -padSpd;
-    moveY += (Math.sin(p.angle)*PAD.leftY + Math.sin(p.angle+Math.PI/2)*PAD.leftX) * -padSpd;
-  }
-  if (mobileState.joyActive && (mobileState.joyDX!==0||mobileState.joyDY!==0)) {
-    const mobSpd = p.moveSpeed * dt;
-    moveX += (Math.cos(p.angle)*(-mobileState.joyDY) + Math.cos(p.angle+Math.PI/2)*mobileState.joyDX) * mobSpd;
-    moveY += (Math.sin(p.angle)*(-mobileState.joyDY) + Math.sin(p.angle+Math.PI/2)*mobileState.joyDX) * mobSpd;
-  }
 
   const newX=p.x+moveX, newY=p.y+moveY, margin=0.25;
   if (mapAt(newX,newY)===0&&mapAt(newX+margin,newY)===0&&mapAt(newX-margin,newY)===0&&mapAt(newX,newY+margin)===0&&mapAt(newX,newY-margin)===0) { p.x=newX; p.y=newY; }
@@ -1027,8 +837,8 @@ function update(dt, now) {
   if (moving) p.bobPhase += dt*8;
 
   const wep = p.weapons[p.currentWeapon];
-  const isFiring = mouse.down || mobileState.firing || PAD.fire;
-  const isJustDown = mouse.justDown || (PAD.fire && !PAD.firePrev);
+  const isFiring = mouse.down;
+  const isJustDown = mouse.justDown;
   if (isFiring && !G.reloading && wep.mag>0) {
     if ((wep.auto && now-G.lastShot>wep.fireRate) || (!wep.auto && isJustDown)) shoot(now);
   }
@@ -1097,14 +907,11 @@ function update(dt, now) {
   G._nearPickup = nearestGun;
   const promptEl=document.getElementById('interact-prompt');
   const textEl=document.getElementById('interact-text');
-  const interactBtnM=document.getElementById('interact-btn-m');
   if (nearestGun) {
     textEl.textContent='Pick up '+nearestGun.name;
     promptEl.style.display='block';
-    interactBtnM.style.display='flex';
   } else {
     promptEl.style.display='none';
-    interactBtnM.style.display='none';
   }
 
   if (p.health>0&&p.health<p.maxHealth) {
