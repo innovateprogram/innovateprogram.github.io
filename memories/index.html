@@ -6,190 +6,138 @@
   <title>Anna &amp; Kai</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #f2f2f7;
-      --surface: rgba(255,255,255,0.72);
-      --surface-solid: #ffffff;
-      --text: #000000;
-      --text2: #3c3c43;
-      --text3: #8e8e93;
-      --blue: #007aff;
-      --red: #ff3b30;
-      --orange: #ff9500;
-      --border: rgba(60,60,67,0.12);
-      --radius: 12px;
-      --radius-lg: 20px;
+      --bg: #f2f2f7; --surface-solid: #ffffff; --text: #000; --text2: #3c3c43;
+      --text3: #8e8e93; --blue: #007aff; --red: #ff3b30; --green: #34c759;
+      --border: rgba(60,60,67,0.12); --radius: 12px; --radius-lg: 20px;
     }
-
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
 
-    /* ── User Picker ── */
     #userPicker { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 8px; }
-    #userPicker .picker-icon { width: 72px; height: 72px; border-radius: 22px; background: linear-gradient(145deg, #ff9500, #ff3b30); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    #userPicker .picker-icon { width: 72px; height: 72px; border-radius: 22px; background: linear-gradient(145deg,#ff9500,#ff3b30); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
     #userPicker .picker-icon svg { width: 36px; height: 36px; fill: white; }
     #userPicker h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 4px; }
     #userPicker p { font-size: 15px; color: var(--text3); margin-bottom: 28px; }
     #userPicker .picker-btns { display: flex; flex-direction: column; gap: 10px; width: 260px; }
-    #userPicker button { width: 100%; padding: 14px; font-size: 17px; font-weight: 500; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; background: var(--blue); color: #fff; transition: opacity 0.15s; }
-    #userPicker button:active { opacity: 0.75; }
+    #userPicker button { width: 100%; padding: 14px; font-size: 17px; font-weight: 500; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; background: var(--blue); color: #fff; }
 
-    /* ── App Shell ── */
-    #app { display: flex; flex-direction: column; min-height: 100vh; }
-
-    /* ── Header ── */
     header { position: sticky; top: 0; z-index: 50; background: rgba(242,242,247,0.85); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 0.5px solid var(--border); padding: 12px 20px 0; }
     .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
     header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
     .header-actions { display: flex; align-items: center; gap: 8px; }
-    .icon-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-solid); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--blue); transition: background 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-    .icon-btn:active { background: #e5e5ea; }
+    .icon-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-solid); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--blue); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
     .icon-btn svg { width: 16px; height: 16px; }
     .header-sub { font-size: 13px; color: var(--text3); margin-bottom: 2px; }
-
-    /* ── Tab Bar ── */
     .tab-bar { display: flex; border-bottom: 0.5px solid var(--border); }
-    .tab { flex: 1; padding: 10px 0 8px; font-size: 14px; font-weight: 500; font-family: inherit; color: var(--text3); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+    .tab { flex: 1; padding: 10px 0 8px; font-size: 14px; font-weight: 500; font-family: inherit; color: var(--text3); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; }
     .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 
-    /* ── Status ── */
-    #status { font-size: 12px; color: var(--text3); text-align: center; padding: 6px 0; min-height: 24px; }
-
-    /* ── Gallery ── */
+    #galleryWrap { padding-bottom: 40px; }
+    #galleryWrap.hidden { display: none; }
     .grid-section { padding: 20px 16px 0; }
     .section-label { font-size: 13px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px; }
-    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
-    @media (min-width: 600px) { .photo-grid { grid-template-columns: repeat(4, 1fr); } }
-    @media (min-width: 900px) { .photo-grid { grid-template-columns: repeat(5, 1fr); } }
-
+    .photo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 3px; }
+    @media(min-width:600px){ .photo-grid { grid-template-columns: repeat(4,1fr); } }
     .grid-thumb { aspect-ratio: 1; overflow: hidden; cursor: pointer; position: relative; background: #e1e1e6; user-select: none; -webkit-user-select: none; }
-    .grid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s ease; }
-    .grid-thumb:active img { transform: scale(0.96); }
-    .grid-thumb .has-desc { position: absolute; bottom: 5px; left: 5px; width: 18px; height: 18px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-    .grid-thumb .has-desc svg { width: 10px; height: 10px; fill: white; }
-    /* album badge on thumbnails */
-    .grid-thumb .album-badge { position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.55); border-radius: 8px; padding: 2px 5px; font-size: 9px; color: #fff; font-weight: 600; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; gap: 8px; color: var(--text3); }
+    .grid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .has-desc { position: absolute; bottom: 5px; left: 5px; width: 18px; height: 18px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .has-desc svg { width: 10px; height: 10px; fill: white; }
+    .album-badge { position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.55); border-radius: 8px; padding: 2px 5px; font-size: 9px; color: #fff; font-weight: 600; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cover-badge { position: absolute; top: 5px; right: 5px; background: rgba(52,199,89,0.9); border-radius: 8px; padding: 2px 6px; font-size: 9px; color: #fff; font-weight: 700; }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; gap: 8px; color: var(--text3); }
     .empty-state svg { width: 48px; height: 48px; opacity: 0.3; }
     .empty-state p { font-size: 15px; }
 
-    /* ── Albums View ── */
     #albumsView { display: none; padding: 20px 16px 40px; }
-    #albumsView.active { display: block; }
-    #galleryWrap.hidden { display: none; }
-
-    .albums-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-    @media (min-width: 600px) { .albums-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (min-width: 900px) { .albums-grid { grid-template-columns: repeat(4, 1fr); } }
-
+    .albums-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+    @media(min-width:600px){ .albums-grid { grid-template-columns: repeat(3,1fr); } }
     .album-card { cursor: pointer; border-radius: var(--radius); overflow: hidden; background: var(--surface-solid); box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.15s; }
     .album-card:active { transform: scale(0.97); }
     .album-cover { aspect-ratio: 1; background: #e1e1e6; position: relative; overflow: hidden; }
     .album-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .album-cover-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
     .album-cover-empty svg { width: 40px; height: 40px; opacity: 0.25; fill: currentColor; }
+    .album-cover-mosaic { width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1px; }
+    .album-cover-mosaic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .album-cover-mosaic.mosaic-3 img:first-child { grid-row: 1 / 3; }
+    .album-cover-mosaic.mosaic-2 { grid-template-rows: 1fr; }
     .album-info { padding: 8px 10px 10px; }
-    .album-name { font-size: 14px; font-weight: 600; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .album-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .album-count { font-size: 12px; color: var(--text3); margin-top: 2px; }
-
-    /* New album card */
     .album-card-new { border: 1.5px dashed var(--border); background: transparent; box-shadow: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 140px; color: var(--blue); }
     .album-card-new svg { width: 28px; height: 28px; }
     .album-card-new span { font-size: 14px; font-weight: 500; }
-
-    /* ── Album Detail Header ── */
     .album-detail-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
     .album-detail-back { background: none; border: none; color: var(--blue); font-size: 17px; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; }
     .album-detail-back svg { width: 18px; height: 18px; }
     .album-detail-title { font-size: 17px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .album-detail-actions { display: flex; gap: 8px; }
 
-    /* ── Sheets ── */
     .sheet-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.4); align-items: flex-end; justify-content: center; }
     .sheet-overlay.open { display: flex; }
-    @media (min-width: 600px) { .sheet-overlay { align-items: center; } }
+    @media(min-width:600px){ .sheet-overlay { align-items: center; } }
     .sheet { background: var(--surface-solid); border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 20px 20px 36px; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; }
-    @media (min-width: 600px) { .sheet { border-radius: var(--radius-lg); padding-bottom: 20px; } }
+    @media(min-width:600px){ .sheet { border-radius: var(--radius-lg); padding-bottom: 20px; } }
     .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
-    @media (min-width: 600px) { .sheet-handle { display: none; } }
-    .sheet h2 { font-size: 17px; font-weight: 600; margin-bottom: 16px; letter-spacing: -0.2px; }
-
-    .drop-zone { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 28px 16px; text-align: center; font-size: 15px; color: var(--text3); cursor: pointer; position: relative; margin-bottom: 12px; background: var(--bg); transition: background 0.15s; }
+    @media(min-width:600px){ .sheet-handle { display: none; } }
+    .sheet h2 { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+    .drop-zone { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 28px 16px; text-align: center; font-size: 15px; color: var(--text3); cursor: pointer; position: relative; margin-bottom: 12px; background: var(--bg); }
     .drop-zone.dragover { background: #e5f0ff; border-color: var(--blue); }
     .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
     .drop-zone span { color: var(--blue); font-weight: 500; }
-
     .preview-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
     .preview-strip img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; }
-
+    .upload-msg { font-size: 13px; color: var(--text3); margin-bottom: 12px; min-height: 18px; text-align: center; }
     .field-label { font-size: 13px; font-weight: 500; color: var(--text3); margin-bottom: 6px; display: block; }
-
     textarea { width: 100%; font-family: inherit; font-size: 15px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); resize: none; margin-bottom: 16px; outline: none; }
     textarea:focus { border-color: var(--blue); }
-
-    /* Album picker in upload sheet */
     .album-picker-wrap { margin-bottom: 16px; }
     .album-picker-label { font-size: 13px; font-weight: 500; color: var(--text3); margin-bottom: 6px; display: block; }
     .album-pills { display: flex; flex-wrap: wrap; gap: 6px; }
-    .album-pill { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; font-family: inherit; background: var(--bg); border: 1px solid var(--border); color: var(--text2); cursor: pointer; transition: background 0.12s, color 0.12s; }
+    .album-pill { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; font-family: inherit; background: var(--bg); border: 1px solid var(--border); color: var(--text2); cursor: pointer; }
     .album-pill.selected { background: var(--blue); border-color: var(--blue); color: #fff; }
     .album-pill-none { color: var(--text3); }
-
     .sheet-actions { display: flex; gap: 10px; }
-    .btn { flex: 1; padding: 12px; border-radius: var(--radius); font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; border: none; transition: opacity 0.15s; }
-    .btn:active { opacity: 0.7; }
+    .btn { flex: 1; padding: 12px; border-radius: var(--radius); font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; border: none; }
     .btn-ghost { background: var(--bg); color: var(--blue); }
     .btn-primary { background: var(--blue); color: #fff; }
     .btn-primary:disabled { opacity: 0.4; cursor: default; }
     .btn-danger { background: var(--bg); color: var(--red); }
-
-    /* Text input in sheet */
     .text-input { width: 100%; font-family: inherit; font-size: 15px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); margin-bottom: 16px; outline: none; }
     .text-input:focus { border-color: var(--blue); }
 
-    /* ── Lightbox ── */
     .lightbox { display: none; position: fixed; inset: 0; z-index: 200; background: #000; flex-direction: column; }
     .lightbox.open { display: flex; }
-    .lb-header { position: absolute; top: 0; left: 0; right: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 16px; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); }
+    .lb-header { position: absolute; top: 0; left: 0; right: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 16px; background: linear-gradient(to bottom,rgba(0,0,0,0.6),transparent); }
     .lb-header-btn { background: none; border: none; color: #fff; font-family: inherit; font-size: 17px; cursor: pointer; padding: 4px 0; display: flex; align-items: center; gap: 4px; }
     .lb-header-btn svg { width: 18px; height: 18px; }
     .lb-header-actions { display: flex; gap: 16px; }
     .lb-img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    .lb-img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
-    .lb-footer { background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); padding: 40px 20px 32px; color: #fff; }
+    .lb-img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .lb-footer { background: linear-gradient(to top,rgba(0,0,0,0.7),transparent); padding: 40px 20px 32px; color: #fff; }
     .lb-footer-date { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
     .lb-footer-desc { font-size: 16px; line-height: 1.4; }
     .lb-nav-row { position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 8px; pointer-events: none; }
     .lb-nav { pointer-events: all; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); border: none; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .lb-nav:active { background: rgba(255,255,255,0.3); }
 
-    /* ── Context Menu ── */
     .context-menu { display: none; position: fixed; z-index: 300; background: rgba(44,44,46,0.94); backdrop-filter: blur(20px); border-radius: 14px; overflow: hidden; min-width: 200px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
     .context-menu.open { display: block; }
     .context-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; font-size: 15px; color: #fff; cursor: pointer; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
     .context-item:last-child { border-bottom: none; }
     .context-item:active { background: rgba(255,255,255,0.1); }
-    .context-item.danger { color: var(--red); }
     .context-item svg { width: 18px; height: 18px; opacity: 0.7; }
   </style>
 </head>
 <body>
 
-<!-- User Picker -->
 <div id="userPicker">
-  <div class="picker-icon">
-    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-  </div>
-  <h2>Anna &amp; Kai</h2>
-  <p>Who are you?</p>
+  <div class="picker-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></div>
+  <h2>Anna &amp; Kai</h2><p>Who are you?</p>
   <div class="picker-btns">
     <button id="pickAnna">Anna</button>
     <button id="pickKai">Kai</button>
   </div>
 </div>
 
-<!-- Main App -->
 <div id="app">
   <header>
     <div class="header-top">
@@ -204,26 +152,13 @@
       </div>
     </div>
     <div class="header-sub" id="headerSub"></div>
-    <div class="tab-bar" id="tabBar">
+    <div class="tab-bar">
       <button class="tab active" data-tab="photos">All Photos</button>
       <button class="tab" data-tab="albums">Albums</button>
     </div>
   </header>
-
-  <p id="status"></p>
-
-  <!-- All Photos View -->
-  <div id="galleryWrap" style="padding-bottom: 40px;"></div>
-
-  <!-- Albums View -->
-  <div id="albumsView">
-    <!-- Album list or album detail rendered here -->
-  </div>
-
-  <div class="empty-state" id="emptyState" style="display:none;">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-    <p>No photos yet</p>
-  </div>
+  <div id="galleryWrap"></div>
+  <div id="albumsView"></div>
 </div>
 
 <!-- Upload Sheet -->
@@ -236,12 +171,12 @@
       <span>Choose photos</span> or drag here
     </div>
     <div class="preview-strip" id="previewStrip"></div>
-    <!-- Album assignment -->
+    <div class="upload-msg" id="uploadMsg"></div>
     <div class="album-picker-wrap">
       <label class="album-picker-label">Album <span style="color:var(--text3);font-weight:400">(optional)</span></label>
       <div class="album-pills" id="albumPills"></div>
     </div>
-    <label class="field-label" for="descInput">Caption</label>
+    <label class="field-label">Caption</label>
     <textarea id="descInput" rows="3" placeholder="Add a caption…"></textarea>
     <div class="sheet-actions">
       <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
@@ -255,7 +190,7 @@
   <div class="sheet">
     <div class="sheet-handle"></div>
     <h2>Edit Caption</h2>
-    <label class="field-label" for="editDescInput">Caption</label>
+    <label class="field-label">Caption</label>
     <textarea id="editDescInput" rows="4"></textarea>
     <div class="sheet-actions">
       <button class="btn btn-ghost" id="cancelEditBtn">Cancel</button>
@@ -269,7 +204,7 @@
   <div class="sheet">
     <div class="sheet-handle"></div>
     <h2>New Album</h2>
-    <label class="field-label" for="albumNameInput">Album Name</label>
+    <label class="field-label">Album Name</label>
     <input class="text-input" type="text" id="albumNameInput" placeholder="e.g. Summer 2025" maxlength="40" />
     <div class="sheet-actions">
       <button class="btn btn-ghost" id="cancelNewAlbumBtn">Cancel</button>
@@ -283,8 +218,8 @@
   <div class="sheet">
     <div class="sheet-handle"></div>
     <h2>Edit Album</h2>
-    <label class="field-label" for="editAlbumNameInput">Album Name</label>
-    <input class="text-input" type="text" id="editAlbumNameInput" placeholder="Album name" maxlength="40" />
+    <label class="field-label">Album Name</label>
+    <input class="text-input" type="text" id="editAlbumNameInput" maxlength="40" />
     <div class="sheet-actions">
       <button class="btn btn-danger" id="deleteAlbumBtn">Delete Album</button>
       <button class="btn btn-primary" id="saveEditAlbumBtn">Save</button>
@@ -296,16 +231,11 @@
 <div class="lightbox" id="lightbox">
   <div class="lb-header">
     <button class="lb-header-btn" id="lbClose">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      Back
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back
     </button>
     <div class="lb-header-actions">
-      <button class="lb-header-btn" id="lbEditBtn" title="Edit caption">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      </button>
-      <button class="lb-header-btn" id="lbDeleteBtn" title="Delete photo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-      </button>
+      <button class="lb-header-btn" id="lbEditBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      <button class="lb-header-btn" id="lbDeleteBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
     </div>
   </div>
   <div class="lb-nav-row">
@@ -323,710 +253,535 @@
 <div class="context-menu" id="contextMenu">
   <div class="context-item" id="ctxView">View<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
   <div class="context-item" id="ctxEdit">Edit Caption<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+  <div class="context-item" id="ctxSetCover" style="display:none;">Set as Cover<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
   <div class="context-item" id="ctxDelete" style="color:var(--red)">Delete<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc,
+  addDoc, setDoc, updateDoc, deleteDoc,
+  onSnapshot, query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // ── State ──────────────────────────────────────────────────────────────
-  let currentUser = localStorage.getItem("ak_user");
-  let photos = [];       // [{id, url, desc, ts, uploadedBy, albumId}]
-  let albums = [];       // [{id, name, createdBy, ts}]
-  let pendingFiles = [];
-  let lbPhotos = [];     // the current lightbox photo pool (may be album-filtered)
-  let lbIndex = 0;
-  let editingId = null;  // photo id being caption-edited
-  let editingAlbumId = null;
-  let contextId = null;
-  let activeTab = "photos";
-  let viewingAlbumId = null;   // null = album list, string = viewing that album
-  let uploadAlbumId = null;    // album selected in upload sheet
+const firebaseApp = initializeApp({
+  apiKey: "AIzaSyByKwzFa9sEtBrPtqWlYc5gZvz0MfsWlOM",
+  authDomain: "memories-bbef7.firebaseapp.com",
+  projectId: "memories-bbef7",
+  storageBucket: "memories-bbef7.firebasestorage.app",
+  messagingSenderId: "862304681371",
+  appId: "1:862304681371:web:d2c348e8e0a96e035cf53e"
+});
+const db = getFirestore(firebaseApp);
 
-  // ── Firebase ───────────────────────────────────────────────────────────
-  const app = initializeApp({
-    apiKey: "AIzaSyByKwzFa9sEtBrPtqWlYc5gZvz0MfsWlOM",
-    authDomain: "memories-bbef7.firebaseapp.com",
-    databaseURL: "https://memories-bbef7-default-rtdb.firebaseio.com",
-    projectId: "memories-bbef7",
-    storageBucket: "memories-bbef7.firebasestorage.app",
-    messagingSenderId: "862304681371",
-    appId: "1:862304681371:web:d2c348e8e0a96e035cf53e"
-  });
-  const db = getDatabase(app);
-  const photosRef = ref(db, "photos");
-  const albumsRef = ref(db, "albums");
+const CLOUD_NAME   = "dyzjztnym";
+const UPLOAD_PRESET = "memories";
 
-  const CLOUD_NAME = "dyzjztnym";
-  const UPLOAD_PRESET = "memories";
+// ── State ──────────────────────────────────────────────────────────────
+let currentUser  = localStorage.getItem("ak_user") || "";
+let photos       = [];   // {id, url, desc, ts, uploadedBy, albumId}
+let albums       = [];   // {id, name, createdBy, ts, coverId}
+let activeTab    = "photos";
+let viewingAlbumId  = null;
+let uploadAlbumId   = null;
+let pendingFiles    = [];
+let isUploading     = false;
+let lbPhotos = [], lbIndex = 0;
+let editingPhotoId = null, editingAlbumId = null, contextPhotoId = null;
 
-  // ── Helpers ────────────────────────────────────────────────────────────
-  function formatDateLong(ts) {
-    return new Date(ts).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+const $ = id => document.getElementById(id);
+
+// ── User ───────────────────────────────────────────────────────────────
+function setUser(name) {
+  currentUser = name;
+  localStorage.setItem("ak_user", name);
+  $("userPicker").style.display = "none";
+  $("headerSub").textContent = "Signed in as " + name;
+}
+if (currentUser) setUser(currentUser);
+$("pickAnna").onclick = () => setUser("Anna");
+$("pickKai").onclick  = () => setUser("Kai");
+$("switchUserBtn").onclick = () => {
+  localStorage.removeItem("ak_user"); currentUser = "";
+  $("userPicker").style.display = "flex";
+};
+
+// ── Tabs ───────────────────────────────────────────────────────────────
+document.querySelectorAll(".tab").forEach(btn => {
+  btn.onclick = () => {
+    activeTab = btn.dataset.tab;
+    document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t === btn));
+    render();
+  };
+});
+
+// ── Firestore listeners ────────────────────────────────────────────────
+// Photos — ordered by ts descending so newest arrive first
+onSnapshot(
+  query(collection(db, "photos"), orderBy("ts", "desc")),
+  snap => {
+    photos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  },
+  err => console.error("photos listener error:", err)
+);
+
+// Albums
+onSnapshot(
+  collection(db, "albums"),
+  snap => {
+    albums = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+    if ($("uploadOverlay").classList.contains("open")) renderAlbumPills();
+  },
+  err => console.error("albums listener error:", err)
+);
+
+// ── Render ─────────────────────────────────────────────────────────────
+function render() {
+  if (activeTab === "photos") {
+    $("galleryWrap").classList.remove("hidden");
+    $("albumsView").style.display = "none";
+    $("headerTitle").textContent = "Photos";
+    renderGallery();
+  } else {
+    $("galleryWrap").classList.add("hidden");
+    $("albumsView").style.display = "block";
+    if (viewingAlbumId) renderAlbumDetail(viewingAlbumId);
+    else renderAlbumList();
+  }
+}
+
+// ── Gallery ────────────────────────────────────────────────────────────
+function renderGallery() {
+  const wrap = $("galleryWrap");
+  wrap.innerHTML = "";
+
+  if (!photos.length) {
+    wrap.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><p>No photos yet</p></div>`;
+    return;
   }
 
-  function getSorted(pool) {
-    return [...(pool || photos)].sort((a, b) => b.ts - a.ts);
-  }
-
-  function groupByMonth(sorted) {
-    const groups = {};
-    sorted.forEach(p => {
-      const key = new Date(p.ts).toLocaleDateString("en-AU", { month: "long", year: "numeric" });
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(p);
-    });
-    return groups;
-  }
-
-  // ── User Auth ──────────────────────────────────────────────────────────
-  function applyUser(name) {
-    currentUser = name;
-    localStorage.setItem("ak_user", name);
-    document.getElementById("userPicker").style.display = "none";
-    document.getElementById("headerSub").textContent = "Signed in as " + name;
-  }
-
-  if (currentUser) {
-    document.getElementById("userPicker").style.display = "none";
-    document.getElementById("headerSub").textContent = "Signed in as " + currentUser;
-  }
-
-  document.getElementById("pickAnna").addEventListener("click", () => applyUser("Anna"));
-  document.getElementById("pickKai").addEventListener("click", () => applyUser("Kai"));
-  document.getElementById("switchUserBtn").addEventListener("click", () => {
-    localStorage.removeItem("ak_user");
-    currentUser = null;
-    document.getElementById("userPicker").style.display = "flex";
-  });
-
-  // ── Tab Bar ────────────────────────────────────────────────────────────
-  document.querySelectorAll(".tab").forEach(btn => {
-    btn.addEventListener("click", () => {
-      activeTab = btn.dataset.tab;
-      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t === btn));
-      switchView();
-    });
-  });
-
-  function switchView() {
-    const galleryWrap = document.getElementById("galleryWrap");
-    const albumsView = document.getElementById("albumsView");
-    const emptyState = document.getElementById("emptyState");
-    const headerTitle = document.getElementById("headerTitle");
-
-    if (activeTab === "photos") {
-      galleryWrap.classList.remove("hidden");
-      albumsView.style.display = "none";
-      viewingAlbumId = null;
-      headerTitle.textContent = "Photos";
-      renderGallery(photos);
-    } else {
-      galleryWrap.classList.add("hidden");
-      emptyState.style.display = "none";
-      albumsView.style.display = "block";
-      if (viewingAlbumId !== null) {
-        renderAlbumDetail(viewingAlbumId);
-      } else {
-        renderAlbumList();
-      }
-    }
-  }
-
-  // ── Firebase Listeners ─────────────────────────────────────────────────
-  onValue(photosRef, (snapshot) => {
-    photos = [];
-    snapshot.forEach(child => photos.push({ id: child.key, ...child.val() }));
-    if (activeTab === "photos") renderGallery(photos);
-    else if (activeTab === "albums" && viewingAlbumId !== null) renderAlbumDetail(viewingAlbumId);
-  });
-
-  onValue(albumsRef, (snapshot) => {
-    albums = [];
-    snapshot.forEach(child => albums.push({ id: child.key, ...child.val() }));
-    if (activeTab === "albums" && viewingAlbumId === null) renderAlbumList();
-    // Refresh album pills if upload sheet is open
-    if (document.getElementById("uploadOverlay").classList.contains("open")) renderAlbumPills();
+  // photos is already sorted desc by ts from Firestore query
+  const groups = {};
+  photos.forEach(p => {
+    // ts may be a Firestore Timestamp object or a plain number
+    const ms = p.ts?.toMillis ? p.ts.toMillis() : (p.ts || Date.now());
+    const key = new Date(ms).toLocaleDateString("en-AU", { month:"long", year:"numeric" });
+    (groups[key] = groups[key] || []).push({ ...p, _ms: ms });
   });
 
-  // ── Gallery Render ─────────────────────────────────────────────────────
-  function renderGallery(pool) {
-    const wrap = document.getElementById("galleryWrap");
-    const empty = document.getElementById("emptyState");
-    wrap.innerHTML = "";
-    const sorted = getSorted(pool);
-
-    if (!sorted.length) { empty.style.display = "flex"; return; }
-    empty.style.display = "none";
-
-    const groups = groupByMonth(sorted);
-    Object.entries(groups).forEach(([month, items]) => {
-      const section = document.createElement("div");
-      section.className = "grid-section";
-
-      const label = document.createElement("div");
-      label.className = "section-label";
-      label.textContent = month;
-      section.appendChild(label);
-
-      const grid = document.createElement("div");
-      grid.className = "photo-grid";
-
-      items.forEach(photo => {
-        const thumb = document.createElement("div");
-        thumb.className = "grid-thumb";
-        thumb.dataset.id = photo.id;
-
-        const img = document.createElement("img");
-        img.src = photo.url;
-        img.loading = "lazy";
-        thumb.appendChild(img);
-
-        if (photo.desc) {
-          const badge = document.createElement("div");
-          badge.className = "has-desc";
-          badge.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>`;
-          thumb.appendChild(badge);
-        }
-
-        // Show album badge in "All Photos" tab
-        if (activeTab === "photos" && photo.albumId) {
-          const album = albums.find(a => a.id === photo.albumId);
-          if (album) {
-            const ab = document.createElement("div");
-            ab.className = "album-badge";
-            ab.textContent = album.name;
-            thumb.appendChild(ab);
-          }
-        }
-
-        // FIX: separate long-press from tap to prevent double-firing
-        let pressTimer = null;
-        let didLongPress = false;
-
-        thumb.addEventListener("touchstart", () => {
-          didLongPress = false;
-          pressTimer = setTimeout(() => {
-            didLongPress = true;
-            openContextMenu(null, photo.id, thumb);
-          }, 500);
-        }, { passive: true });
-
-        thumb.addEventListener("touchend", () => {
-          clearTimeout(pressTimer);
-        }, { passive: true });
-
-        thumb.addEventListener("touchmove", () => {
-          clearTimeout(pressTimer);
-        }, { passive: true });
-
-        thumb.addEventListener("click", () => {
-          if (didLongPress) { didLongPress = false; return; } // swallow tap after long-press
-          openLightbox(photo.id, getSorted(pool));
-        });
-
-        thumb.addEventListener("contextmenu", e => {
-          e.preventDefault();
-          openContextMenu(e, photo.id, null);
-        });
-
-        grid.appendChild(thumb);
-      });
-
-      section.appendChild(grid);
-      wrap.appendChild(section);
-    });
-  }
-
-  // ── Albums ─────────────────────────────────────────────────────────────
-  function renderAlbumList() {
-    const albumsView = document.getElementById("albumsView");
-    document.getElementById("headerTitle").textContent = "Albums";
-    albumsView.innerHTML = "";
-
-    const grid = document.createElement("div");
-    grid.className = "albums-grid";
-
-    // Existing albums
-    albums.forEach(album => {
-      const albumPhotos = photos.filter(p => p.albumId === album.id);
-      const coverPhoto = getSorted(albumPhotos)[0];
-
-      const card = document.createElement("div");
-      card.className = "album-card";
-
-      const cover = document.createElement("div");
-      cover.className = "album-cover";
-      if (coverPhoto) {
-        const img = document.createElement("img");
-        img.src = coverPhoto.url;
-        img.loading = "lazy";
-        cover.appendChild(img);
-      } else {
-        cover.innerHTML = `<div class="album-cover-empty"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>`;
-      }
-
-      const info = document.createElement("div");
-      info.className = "album-info";
-      info.innerHTML = `<div class="album-name">${album.name}</div><div class="album-count">${albumPhotos.length} photo${albumPhotos.length !== 1 ? "s" : ""}</div>`;
-
-      card.appendChild(cover);
-      card.appendChild(info);
-
-      card.addEventListener("click", () => {
-        viewingAlbumId = album.id;
-        renderAlbumDetail(album.id);
-      });
-
-      grid.appendChild(card);
-    });
-
-    // "New Album" card
-    const newCard = document.createElement("div");
-    newCard.className = "album-card album-card-new";
-    newCard.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>New Album</span>`;
-    newCard.addEventListener("click", openNewAlbumSheet);
-    grid.appendChild(newCard);
-
-    albumsView.appendChild(grid);
-  }
-
-  function renderAlbumDetail(albumId) {
-    const album = albums.find(a => a.id === albumId);
-    const albumsView = document.getElementById("albumsView");
-    document.getElementById("headerTitle").textContent = ""; // title shown inline
-
-    if (!album) { viewingAlbumId = null; renderAlbumList(); return; }
-
-    const albumPhotos = photos.filter(p => p.albumId === albumId);
-
-    albumsView.innerHTML = "";
-
-    // Detail header (back + title + edit)
-    const detailHeader = document.createElement("div");
-    detailHeader.className = "album-detail-header";
-
-    const backBtn = document.createElement("button");
-    backBtn.className = "album-detail-back";
-    backBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Albums`;
-    backBtn.addEventListener("click", () => {
-      viewingAlbumId = null;
-      renderAlbumList();
-    });
-
-    const titleEl = document.createElement("div");
-    titleEl.className = "album-detail-title";
-    titleEl.textContent = album.name;
-
-    const actionsEl = document.createElement("div");
-    actionsEl.className = "album-detail-actions";
-
-    const editAlbumBtn = document.createElement("button");
-    editAlbumBtn.className = "icon-btn";
-    editAlbumBtn.title = "Edit album";
-    editAlbumBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
-    editAlbumBtn.addEventListener("click", () => openEditAlbumSheet(albumId));
-    actionsEl.appendChild(editAlbumBtn);
-
-    detailHeader.appendChild(backBtn);
-    detailHeader.appendChild(titleEl);
-    detailHeader.appendChild(actionsEl);
-    albumsView.appendChild(detailHeader);
-
-    // Photo grid for this album
-    if (!albumPhotos.length) {
-      const emptyMsg = document.createElement("div");
-      emptyMsg.className = "empty-state";
-      emptyMsg.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><p>No photos in this album yet</p>`;
-      albumsView.appendChild(emptyMsg);
-      return;
-    }
-
-    const sorted = getSorted(albumPhotos);
-    const section = document.createElement("div");
-    section.className = "grid-section";
+  Object.entries(groups).forEach(([month, items]) => {
+    const sec = document.createElement("div");
+    sec.className = "grid-section";
+    sec.innerHTML = `<div class="section-label">${month}</div>`;
     const grid = document.createElement("div");
     grid.className = "photo-grid";
-
-    sorted.forEach(photo => {
-      const thumb = document.createElement("div");
-      thumb.className = "grid-thumb";
-      thumb.dataset.id = photo.id;
-
-      const img = document.createElement("img");
-      img.src = photo.url;
-      img.loading = "lazy";
-      thumb.appendChild(img);
-
-      if (photo.desc) {
-        const badge = document.createElement("div");
-        badge.className = "has-desc";
-        badge.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>`;
-        thumb.appendChild(badge);
-      }
-
-      // FIX: separate long-press from tap
-      let pressTimer = null;
-      let didLongPress = false;
-
-      thumb.addEventListener("touchstart", () => {
-        didLongPress = false;
-        pressTimer = setTimeout(() => {
-          didLongPress = true;
-          openContextMenu(null, photo.id, thumb);
-        }, 500);
-      }, { passive: true });
-      thumb.addEventListener("touchend", () => clearTimeout(pressTimer), { passive: true });
-      thumb.addEventListener("touchmove", () => clearTimeout(pressTimer), { passive: true });
-
-      thumb.addEventListener("click", () => {
-        if (didLongPress) { didLongPress = false; return; }
-        openLightbox(photo.id, sorted);
-      });
-
-      thumb.addEventListener("contextmenu", e => {
-        e.preventDefault();
-        openContextMenu(e, photo.id, null);
-      });
-
-      grid.appendChild(thumb);
-    });
-
-    section.appendChild(grid);
-    albumsView.appendChild(section);
-  }
-
-  // ── New Album Sheet ────────────────────────────────────────────────────
-  function openNewAlbumSheet() {
-    document.getElementById("albumNameInput").value = "";
-    document.getElementById("newAlbumOverlay").classList.add("open");
-    setTimeout(() => document.getElementById("albumNameInput").focus(), 80);
-  }
-
-  function closeNewAlbumSheet() {
-    document.getElementById("newAlbumOverlay").classList.remove("open");
-    document.getElementById("albumNameInput").value = "";
-  }
-
-  document.getElementById("cancelNewAlbumBtn").addEventListener("click", closeNewAlbumSheet);
-  document.getElementById("newAlbumOverlay").addEventListener("click", e => {
-    if (e.target === document.getElementById("newAlbumOverlay")) closeNewAlbumSheet();
+    // Pass the full sorted photos array as the lightbox pool
+    items.forEach(p => grid.appendChild(makeThumb(p, photos.map(x => ({...x, _ms: x.ts?.toMillis ? x.ts.toMillis() : x.ts})))));
+    sec.appendChild(grid);
+    wrap.appendChild(sec);
   });
+}
 
-  document.getElementById("saveNewAlbumBtn").addEventListener("click", async () => {
-    const name = document.getElementById("albumNameInput").value.trim();
-    if (!name) return;
-    await push(albumsRef, { name, createdBy: currentUser || "", ts: Date.now() });
-    closeNewAlbumSheet();
-  });
+function tsMs(p) {
+  return p.ts?.toMillis ? p.ts.toMillis() : (p.ts || 0);
+}
 
-  // ── Edit Album Sheet ───────────────────────────────────────────────────
-  function openEditAlbumSheet(albumId) {
-    editingAlbumId = albumId;
-    const album = albums.find(a => a.id === albumId);
-    if (!album) return;
-    document.getElementById("editAlbumNameInput").value = album.name;
-    document.getElementById("editAlbumOverlay").classList.add("open");
-    setTimeout(() => document.getElementById("editAlbumNameInput").focus(), 80);
+// ── Thumb ──────────────────────────────────────────────────────────────
+function makeThumb(photo, pool) {
+  const div = document.createElement("div");
+  div.className = "grid-thumb";
+
+  const img = document.createElement("img");
+  img.src = photo.url;
+  img.loading = "lazy";
+  div.appendChild(img);
+
+  if (photo.desc) {
+    div.insertAdjacentHTML("beforeend",
+      `<div class="has-desc"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>`);
   }
-
-  function closeEditAlbumSheet() {
-    document.getElementById("editAlbumOverlay").classList.remove("open");
-    editingAlbumId = null;
+  if (activeTab === "photos" && photo.albumId) {
+    const al = albums.find(a => a.id === photo.albumId);
+    if (al) div.insertAdjacentHTML("beforeend", `<div class="album-badge">${al.name}</div>`);
   }
-
-  document.getElementById("editAlbumOverlay").addEventListener("click", e => {
-    if (e.target === document.getElementById("editAlbumOverlay")) closeEditAlbumSheet();
-  });
-
-  document.getElementById("saveEditAlbumBtn").addEventListener("click", async () => {
-    const name = document.getElementById("editAlbumNameInput").value.trim();
-    if (!name || !editingAlbumId) return;
-    await update(ref(db, `albums/${editingAlbumId}`), { name });
-    closeEditAlbumSheet();
-  });
-
-  document.getElementById("deleteAlbumBtn").addEventListener("click", async () => {
-    if (!confirm("Delete this album? Photos will not be deleted, but they'll be removed from the album.")) return;
-    // Remove albumId from all photos in this album
-    const affected = photos.filter(p => p.albumId === editingAlbumId);
-    for (const p of affected) {
-      await update(ref(db, `photos/${p.id}`), { albumId: null });
+  if (viewingAlbumId) {
+    const al = albums.find(a => a.id === viewingAlbumId);
+    if (al?.coverId === photo.id) {
+      div.insertAdjacentHTML("beforeend", `<div class="cover-badge">Cover</div>`);
     }
-    await remove(ref(db, `albums/${editingAlbumId}`));
-    closeEditAlbumSheet();
-    viewingAlbumId = null;
-    renderAlbumList();
-  });
-
-  // ── Upload Sheet ───────────────────────────────────────────────────────
-  const uploadOverlay = document.getElementById("uploadOverlay");
-  const fileInput = document.getElementById("fileInput");
-  const previewStrip = document.getElementById("previewStrip");
-  const descInput = document.getElementById("descInput");
-  const saveBtn = document.getElementById("saveBtn");
-  const status = document.getElementById("status");
-
-  function renderAlbumPills() {
-    const container = document.getElementById("albumPills");
-    container.innerHTML = "";
-
-    // "None" pill
-    const nonePill = document.createElement("button");
-    nonePill.className = "album-pill album-pill-none" + (uploadAlbumId === null ? " selected" : "");
-    nonePill.textContent = "None";
-    nonePill.addEventListener("click", () => { uploadAlbumId = null; renderAlbumPills(); });
-    container.appendChild(nonePill);
-
-    albums.forEach(album => {
-      const pill = document.createElement("button");
-      pill.className = "album-pill" + (uploadAlbumId === album.id ? " selected" : "");
-      pill.textContent = album.name;
-      pill.addEventListener("click", () => { uploadAlbumId = album.id; renderAlbumPills(); });
-      container.appendChild(pill);
-    });
   }
 
-  document.getElementById("openUploadBtn").addEventListener("click", () => {
-    pendingFiles = [];
-    previewStrip.innerHTML = "";
-    descInput.value = "";
-    // FIX: reset button text/state on open, not just close
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Add";
-    status.textContent = "";
-    // Pre-select current album if viewing one
-    uploadAlbumId = (activeTab === "albums" && viewingAlbumId) ? viewingAlbumId : null;
-    renderAlbumPills();
-    uploadOverlay.classList.add("open");
-  });
-
-  function closeUpload() {
-    uploadOverlay.classList.remove("open");
-    pendingFiles = [];
-    previewStrip.innerHTML = "";
-    descInput.value = "";
-    fileInput.value = "";
-    // FIX: reset button on close
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Add";
-    uploadAlbumId = null;
-  }
-
-  document.getElementById("cancelBtn").addEventListener("click", closeUpload);
-  uploadOverlay.addEventListener("click", e => { if (e.target === uploadOverlay) closeUpload(); });
-
-  const dropZone = document.getElementById("dropZone");
-  dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
-  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
-  dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("dragover"); handleFiles([...e.dataTransfer.files]); });
-  fileInput.addEventListener("change", () => handleFiles([...fileInput.files]));
-
-  function handleFiles(files) {
-    const imgs = files.filter(f => f.type.startsWith("image/"));
-    if (!imgs.length) return;
-    pendingFiles = imgs;
-    previewStrip.innerHTML = "";
-    imgs.forEach(f => {
-      const r = new FileReader();
-      r.onload = e => { const img = document.createElement("img"); img.src = e.target.result; previewStrip.appendChild(img); };
-      r.readAsDataURL(f);
-    });
-    saveBtn.disabled = false;
-  }
-
-  async function uploadToCloudinary(file) {
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("upload_preset", UPLOAD_PRESET);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: "POST", body: fd });
-    if (!res.ok) throw new Error("Cloudinary upload failed");
-    return (await res.json()).secure_url;
-  }
-
-  saveBtn.addEventListener("click", async () => {
-    if (!pendingFiles.length) return;
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Uploading…";
-    status.textContent = "";
-    const desc = descInput.value.trim();
-    try {
-      for (let i = 0; i < pendingFiles.length; i++) {
-        status.textContent = `Uploading ${i + 1} of ${pendingFiles.length}…`;
-        const url = await uploadToCloudinary(pendingFiles[i]);
-        await push(photosRef, {
-          url,
-          desc,
-          ts: Date.now(),
-          uploadedBy: currentUser || "",
-          albumId: uploadAlbumId || null
-        });
-      }
-      status.textContent = "";
-      closeUpload();
-    } catch (err) {
-      status.textContent = "Upload failed. Try again.";
-      saveBtn.disabled = false;
-      saveBtn.textContent = "Add";
-    }
-  });
-
-  // ── Edit Caption Sheet ─────────────────────────────────────────────────
-  const editOverlay = document.getElementById("editOverlay");
-  const editDescInput = document.getElementById("editDescInput");
-
-  function openEditModal(id) {
-    editingId = id;
-    const p = photos.find(x => x.id === id);
-    if (!p) return;
-    editDescInput.value = p.desc || "";
-    editOverlay.classList.add("open");
-    setTimeout(() => editDescInput.focus(), 80);
-  }
-
-  function closeEdit() {
-    editOverlay.classList.remove("open");
-    // FIX: clear editingId on close so stale state doesn't persist
-    editingId = null;
-  }
-
-  document.getElementById("cancelEditBtn").addEventListener("click", closeEdit);
-  editOverlay.addEventListener("click", e => { if (e.target === editOverlay) closeEdit(); });
-
-  document.getElementById("saveEditBtn").addEventListener("click", async () => {
-    if (!editingId) return;
-    const newDesc = editDescInput.value.trim();
-    await update(ref(db, `photos/${editingId}`), { desc: newDesc });
-    // Update lightbox if open and showing this photo
-    if (document.getElementById("lightbox").classList.contains("open")) {
-      const current = lbPhotos[lbIndex];
-      if (current && current.id === editingId) {
-        document.getElementById("lbDesc").textContent = newDesc;
-      }
-    }
-    closeEdit();
-  });
-
-  // ── Delete Photo ───────────────────────────────────────────────────────
-  async function deletePhoto(id) {
-    if (!confirm("Delete this photo?")) return;
-    const wasOpen = document.getElementById("lightbox").classList.contains("open");
-    if (wasOpen) closeLightbox();
-    await remove(ref(db, `photos/${id}`));
-  }
-
-  // ── Lightbox ───────────────────────────────────────────────────────────
-  const lightbox = document.getElementById("lightbox");
-  const lbImg = document.getElementById("lbImg");
-  const lbDate = document.getElementById("lbDate");
-  const lbDesc = document.getElementById("lbDesc");
-
-  // FIX: accept explicit photo pool so lightbox index is always in sync
-  function openLightbox(id, pool) {
-    lbPhotos = pool || getSorted(photos);
-    lbIndex = lbPhotos.findIndex(p => p.id === id);
-    if (lbIndex < 0) return;
-    showLbPhoto(lbPhotos[lbIndex]);
-    lightbox.classList.add("open");
-    document.body.style.overflow = "hidden";
-  }
-
-  function showLbPhoto(p) {
-    lbImg.src = p.url;
-    lbDate.textContent = formatDateLong(p.ts) + (p.uploadedBy ? " · " + p.uploadedBy : "");
-    lbDesc.textContent = p.desc || "";
-  }
-
-  function closeLightbox() {
-    lightbox.classList.remove("open");
-    document.body.style.overflow = "";
-    lbPhotos = [];
-  }
-
-  document.getElementById("lbClose").addEventListener("click", closeLightbox);
-
-  document.getElementById("lbEditBtn").addEventListener("click", () => {
-    if (lbPhotos[lbIndex]) openEditModal(lbPhotos[lbIndex].id);
-  });
-
-  document.getElementById("lbDeleteBtn").addEventListener("click", () => {
-    if (lbPhotos[lbIndex]) deletePhoto(lbPhotos[lbIndex].id);
-  });
-
-  document.getElementById("lbPrev").addEventListener("click", () => {
-    if (!lbPhotos.length) return;
-    lbIndex = (lbIndex - 1 + lbPhotos.length) % lbPhotos.length;
-    showLbPhoto(lbPhotos[lbIndex]);
-  });
-
-  document.getElementById("lbNext").addEventListener("click", () => {
-    if (!lbPhotos.length) return;
-    lbIndex = (lbIndex + 1) % lbPhotos.length;
-    showLbPhoto(lbPhotos[lbIndex]);
-  });
-
-  document.addEventListener("keydown", e => {
-    if (!lightbox.classList.contains("open")) return;
-    if (e.key === "Escape") closeLightbox();
-    if (e.key === "ArrowLeft") document.getElementById("lbPrev").click();
-    if (e.key === "ArrowRight") document.getElementById("lbNext").click();
-  });
-
-  // Touch swipe in lightbox
-  let touchStartX = null;
-  lightbox.addEventListener("touchstart", e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-  lightbox.addEventListener("touchend", e => {
-    if (touchStartX === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(dx) > 50) { dx < 0 ? document.getElementById("lbNext").click() : document.getElementById("lbPrev").click(); }
-    touchStartX = null;
+  let pressTimer, didLongPress = false;
+  div.addEventListener("touchstart", () => {
+    didLongPress = false;
+    pressTimer = setTimeout(() => { didLongPress = true; openCtx(null, photo.id, div); }, 500);
   }, { passive: true });
+  div.addEventListener("touchend",  () => clearTimeout(pressTimer), { passive: true });
+  div.addEventListener("touchmove", () => clearTimeout(pressTimer), { passive: true });
+  div.addEventListener("contextmenu", e => { e.preventDefault(); openCtx(e, photo.id, null); });
+  div.addEventListener("click", () => {
+    if (didLongPress) { didLongPress = false; return; }
+    openLightbox(photo.id, pool);
+  });
 
-  // ── Context Menu ───────────────────────────────────────────────────────
-  const contextMenu = document.getElementById("contextMenu");
+  return div;
+}
 
-  // FIX: account for scroll position when positioning context menu
-  function openContextMenu(e, id, anchor) {
-    contextId = id;
-    contextMenu.classList.add("open");
+// ── Albums list ────────────────────────────────────────────────────────
+function buildAlbumCover(album, albumPhotos) {
+  const wrap = document.createElement("div");
+  wrap.className = "album-cover";
 
-    const menuW = 220;
-    const menuH = 160;
+  const sorted = [...albumPhotos].sort((a,b) => tsMs(b) - tsMs(a));
 
-    if (e) {
-      const x = Math.min(e.clientX, window.innerWidth - menuW);
-      const y = Math.min(e.clientY, window.innerHeight - menuH);
-      contextMenu.style.left = x + "px";
-      contextMenu.style.top = y + "px";
-    } else if (anchor) {
-      const r = anchor.getBoundingClientRect();
-      const x = Math.min(r.left, window.innerWidth - menuW);
-      // FIX: position below the thumb, but clamp to viewport (no scroll offset needed — getBoundingClientRect is viewport-relative)
-      const y = Math.min(r.bottom + 4, window.innerHeight - menuH);
-      contextMenu.style.left = x + "px";
-      contextMenu.style.top = y + "px";
+  if (album.coverId) {
+    const cp = albumPhotos.find(p => p.id === album.coverId);
+    if (cp) { wrap.innerHTML = `<img src="${cp.url}" loading="lazy">`; return wrap; }
+  }
+
+  const n = Math.min(sorted.length, 4);
+  if (!n) {
+    wrap.innerHTML = `<div class="album-cover-empty"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>`;
+    return wrap;
+  }
+  if (n === 1) { wrap.innerHTML = `<img src="${sorted[0].url}" loading="lazy">`; return wrap; }
+
+  const mosaic = document.createElement("div");
+  mosaic.className = `album-cover-mosaic mosaic-${n}`;
+  sorted.slice(0, n).forEach(p => {
+    const i = document.createElement("img"); i.src = p.url; i.loading = "lazy";
+    mosaic.appendChild(i);
+  });
+  wrap.appendChild(mosaic);
+  return wrap;
+}
+
+function renderAlbumList() {
+  $("headerTitle").textContent = "Albums";
+  const view = $("albumsView");
+  view.innerHTML = "";
+  const grid = document.createElement("div");
+  grid.className = "albums-grid";
+
+  albums.forEach(al => {
+    const ap = photos.filter(p => p.albumId === al.id);
+    const card = document.createElement("div");
+    card.className = "album-card";
+    card.appendChild(buildAlbumCover(al, ap));
+    card.insertAdjacentHTML("beforeend",
+      `<div class="album-info"><div class="album-name">${al.name}</div><div class="album-count">${ap.length} photo${ap.length!==1?"s":""}</div></div>`);
+    card.onclick = () => { viewingAlbumId = al.id; render(); };
+    grid.appendChild(card);
+  });
+
+  const newCard = document.createElement("div");
+  newCard.className = "album-card album-card-new";
+  newCard.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>New Album</span>`;
+  newCard.onclick = () => $("newAlbumOverlay").classList.add("open");
+  grid.appendChild(newCard);
+  view.appendChild(grid);
+}
+
+function renderAlbumDetail(albumId) {
+  const al = albums.find(a => a.id === albumId);
+  if (!al) { viewingAlbumId = null; render(); return; }
+  $("headerTitle").textContent = "";
+  const view = $("albumsView");
+  view.innerHTML = "";
+
+  const hdr = document.createElement("div");
+  hdr.className = "album-detail-header";
+  const back = document.createElement("button");
+  back.className = "album-detail-back";
+  back.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Albums`;
+  back.onclick = () => { viewingAlbumId = null; render(); };
+  const title = document.createElement("div");
+  title.className = "album-detail-title";
+  title.textContent = al.name;
+  const editBtn = document.createElement("button");
+  editBtn.className = "icon-btn";
+  editBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+  editBtn.onclick = () => openEditAlbumSheet(albumId);
+  hdr.appendChild(back); hdr.appendChild(title); hdr.appendChild(editBtn);
+  view.appendChild(hdr);
+
+  const ap = photos.filter(p => p.albumId === albumId).sort((a,b) => tsMs(b) - tsMs(a));
+  if (!ap.length) {
+    view.insertAdjacentHTML("beforeend",
+      `<div class="empty-state"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><p>No photos in this album yet</p></div>`);
+    return;
+  }
+
+  const sec = document.createElement("div"); sec.className = "grid-section";
+  const grid = document.createElement("div"); grid.className = "photo-grid";
+  ap.forEach(p => grid.appendChild(makeThumb(p, ap)));
+  sec.appendChild(grid); view.appendChild(sec);
+}
+
+// ── Album sheets ───────────────────────────────────────────────────────
+document.querySelectorAll(".sheet-overlay").forEach(ov => {
+  ov.addEventListener("click", e => { if (e.target === ov && !isUploading) ov.classList.remove("open"); });
+});
+
+$("cancelNewAlbumBtn").onclick = () => $("newAlbumOverlay").classList.remove("open");
+$("saveNewAlbumBtn").onclick = async () => {
+  const name = $("albumNameInput").value.trim();
+  if (!name) return;
+  await addDoc(collection(db, "albums"), { name, createdBy: currentUser, ts: Date.now(), coverId: null });
+  $("albumNameInput").value = "";
+  $("newAlbumOverlay").classList.remove("open");
+};
+
+function openEditAlbumSheet(albumId) {
+  editingAlbumId = albumId;
+  const al = albums.find(a => a.id === albumId);
+  if (!al) return;
+  $("editAlbumNameInput").value = al.name;
+  $("editAlbumOverlay").classList.add("open");
+}
+$("saveEditAlbumBtn").onclick = async () => {
+  if (!editingAlbumId) return;
+  const name = $("editAlbumNameInput").value.trim();
+  if (!name) return;
+  await updateDoc(doc(db, "albums", editingAlbumId), { name });
+  $("editAlbumOverlay").classList.remove("open");
+};
+$("deleteAlbumBtn").onclick = async () => {
+  if (!confirm("Delete this album? Photos won't be deleted.")) return;
+  for (const p of photos.filter(x => x.albumId === editingAlbumId))
+    await updateDoc(doc(db, "photos", p.id), { albumId: null });
+  await deleteDoc(doc(db, "albums", editingAlbumId));
+  editingAlbumId = null; viewingAlbumId = null;
+  $("editAlbumOverlay").classList.remove("open");
+};
+
+// ── Album pills ────────────────────────────────────────────────────────
+function renderAlbumPills() {
+  const c = $("albumPills");
+  c.innerHTML = "";
+  const none = document.createElement("button");
+  none.className = "album-pill album-pill-none" + (uploadAlbumId === null ? " selected" : "");
+  none.textContent = "None";
+  none.onclick = () => { uploadAlbumId = null; renderAlbumPills(); };
+  c.appendChild(none);
+  albums.forEach(al => {
+    const pill = document.createElement("button");
+    pill.className = "album-pill" + (uploadAlbumId === al.id ? " selected" : "");
+    pill.textContent = al.name;
+    pill.onclick = () => { uploadAlbumId = al.id; renderAlbumPills(); };
+    c.appendChild(pill);
+  });
+}
+
+// ── Upload ─────────────────────────────────────────────────────────────
+function freshFileInput() {
+  const old = $("fileInput");
+  const fresh = old.cloneNode(true);
+  old.replaceWith(fresh);
+  fresh.addEventListener("change", () => handleFiles([...fresh.files]));
+}
+
+$("dropZone").addEventListener("dragover",  e => { e.preventDefault(); $("dropZone").classList.add("dragover"); });
+$("dropZone").addEventListener("dragleave", () => $("dropZone").classList.remove("dragover"));
+$("dropZone").addEventListener("drop", e => {
+  e.preventDefault(); $("dropZone").classList.remove("dragover");
+  handleFiles([...e.dataTransfer.files]);
+});
+$("fileInput").addEventListener("change", function() { handleFiles([...this.files]); });
+
+function handleFiles(files) {
+  const imgs = files.filter(f => f.type.startsWith("image/"));
+  if (!imgs.length) return;
+  pendingFiles = imgs;
+  $("previewStrip").innerHTML = "";
+  imgs.forEach(f => {
+    const r = new FileReader();
+    r.onload = e => $("previewStrip").insertAdjacentHTML("beforeend", `<img src="${e.target.result}">`);
+    r.readAsDataURL(f);
+  });
+  $("saveBtn").disabled = false;
+  $("uploadMsg").textContent = `${imgs.length} photo${imgs.length !== 1 ? "s" : ""} ready`;
+}
+
+$("openUploadBtn").onclick = () => {
+  if (isUploading) return;
+  pendingFiles = [];
+  $("previewStrip").innerHTML = "";
+  $("uploadMsg").textContent = "";
+  $("descInput").value = "";
+  $("saveBtn").disabled = true;
+  $("saveBtn").textContent = "Add";
+  uploadAlbumId = (activeTab === "albums" && viewingAlbumId) ? viewingAlbumId : null;
+  renderAlbumPills();
+  freshFileInput();  // reset so same files can be picked again
+  $("uploadOverlay").classList.add("open");
+};
+
+$("cancelBtn").onclick = () => {
+  if (isUploading) return;
+  $("uploadOverlay").classList.remove("open");
+  pendingFiles = [];
+};
+
+async function uploadToCloudinary(file) {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("upload_preset", UPLOAD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+    method: "POST", body: fd
+  });
+  if (!res.ok) throw new Error("Cloudinary " + res.status);
+  const json = await res.json();
+  if (!json.secure_url) throw new Error("No URL in response");
+  return json.secure_url;
+}
+
+$("saveBtn").onclick = async () => {
+  if (!pendingFiles.length || isUploading) return;
+  isUploading = true;
+  $("saveBtn").disabled = true;
+  const desc     = $("descInput").value.trim();
+  const albumId  = uploadAlbumId || null;
+  const uploader = currentUser;
+  const files    = [...pendingFiles];
+
+  for (let i = 0; i < files.length; i++) {
+    $("saveBtn").textContent = `Uploading ${i + 1} / ${files.length}…`;
+    $("uploadMsg").textContent = `Uploading photo ${i + 1} of ${files.length}…`;
+    try {
+      const url = await uploadToCloudinary(files[i]);
+      // Build the doc — never include null fields (Firestore handles missing fields fine)
+      const entry = {
+        url,
+        desc:       desc || "",
+        ts:         Date.now() + i,   // plain number, no Firestore Timestamp
+        uploadedBy: uploader
+      };
+      if (albumId) entry.albumId = albumId;
+
+      // Write to Firestore — onSnapshot will pick this up and re-render automatically
+      await addDoc(collection(db, "photos"), entry);
+      $("uploadMsg").textContent = `✓ Photo ${i + 1} saved`;
+    } catch (err) {
+      console.error("Upload failed for photo", i + 1, err);
+      $("uploadMsg").textContent = `⚠ Photo ${i + 1} failed — continuing`;
     }
   }
 
-  function closeContextMenu() {
-    contextMenu.classList.remove("open");
-    contextId = null;
+  isUploading = false;
+  $("uploadOverlay").classList.remove("open");
+  pendingFiles = [];
+  $("previewStrip").innerHTML = "";
+  $("uploadMsg").textContent = "";
+  $("descInput").value = "";
+  $("saveBtn").disabled = true;
+  $("saveBtn").textContent = "Add";
+  uploadAlbumId = null;
+};
+
+// ── Edit caption ───────────────────────────────────────────────────────
+$("cancelEditBtn").onclick = () => { $("editOverlay").classList.remove("open"); editingPhotoId = null; };
+$("saveEditBtn").onclick = async () => {
+  if (!editingPhotoId) return;
+  const desc = $("editDescInput").value.trim();
+  await updateDoc(doc(db, "photos", editingPhotoId), { desc });
+  if ($("lightbox").classList.contains("open") && lbPhotos[lbIndex]?.id === editingPhotoId)
+    $("lbDesc").textContent = desc;
+  editingPhotoId = null;
+  $("editOverlay").classList.remove("open");
+};
+function openEditCaption(id) {
+  editingPhotoId = id;
+  const p = photos.find(x => x.id === id);
+  $("editDescInput").value = p?.desc || "";
+  $("editOverlay").classList.add("open");
+}
+
+// ── Delete ─────────────────────────────────────────────────────────────
+async function deletePhoto(id) {
+  if (!confirm("Delete this photo?")) return;
+  if ($("lightbox").classList.contains("open")) closeLightbox();
+  await deleteDoc(doc(db, "photos", id));
+}
+
+// ── Lightbox ───────────────────────────────────────────────────────────
+function openLightbox(id, pool) {
+  lbPhotos = pool;
+  lbIndex  = pool.findIndex(p => p.id === id);
+  if (lbIndex < 0) return;
+  showLb(pool[lbIndex]);
+  $("lightbox").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function showLb(p) {
+  $("lbImg").src = p.url;
+  const ms = tsMs(p);
+  $("lbDate").textContent = new Date(ms).toLocaleDateString("en-AU",
+    {weekday:"long",day:"numeric",month:"long",year:"numeric"}) + (p.uploadedBy ? " · "+p.uploadedBy : "");
+  $("lbDesc").textContent = p.desc || "";
+}
+function closeLightbox() {
+  $("lightbox").classList.remove("open");
+  document.body.style.overflow = "";
+  lbPhotos = [];
+}
+$("lbClose").onclick   = closeLightbox;
+$("lbEditBtn").onclick = () => { if (lbPhotos[lbIndex]) openEditCaption(lbPhotos[lbIndex].id); };
+$("lbDeleteBtn").onclick = () => { if (lbPhotos[lbIndex]) deletePhoto(lbPhotos[lbIndex].id); };
+$("lbPrev").onclick = () => { if (!lbPhotos.length) return; lbIndex=(lbIndex-1+lbPhotos.length)%lbPhotos.length; showLb(lbPhotos[lbIndex]); };
+$("lbNext").onclick = () => { if (!lbPhotos.length) return; lbIndex=(lbIndex+1)%lbPhotos.length; showLb(lbPhotos[lbIndex]); };
+document.addEventListener("keydown", e => {
+  if (!$("lightbox").classList.contains("open")) return;
+  if (e.key==="Escape") closeLightbox();
+  if (e.key==="ArrowLeft")  $("lbPrev").click();
+  if (e.key==="ArrowRight") $("lbNext").click();
+});
+let tsX = null;
+$("lightbox").addEventListener("touchstart", e => { tsX = e.touches[0].clientX; }, {passive:true});
+$("lightbox").addEventListener("touchend",   e => {
+  if (tsX===null) return;
+  const dx = e.changedTouches[0].clientX - tsX;
+  if (Math.abs(dx) > 50) dx < 0 ? $("lbNext").click() : $("lbPrev").click();
+  tsX = null;
+}, {passive:true});
+
+// ── Context menu ───────────────────────────────────────────────────────
+function openCtx(e, id, anchor) {
+  contextPhotoId = id;
+  const photo = photos.find(p => p.id === id);
+  const showCover = activeTab === "albums" && viewingAlbumId && photo?.albumId === viewingAlbumId;
+  $("ctxSetCover").style.display = showCover ? "flex" : "none";
+  $("contextMenu").classList.add("open");
+  const mW = 220, mH = showCover ? 200 : 160;
+  if (e) {
+    $("contextMenu").style.left = Math.min(e.clientX, innerWidth - mW) + "px";
+    $("contextMenu").style.top  = Math.min(e.clientY, innerHeight - mH) + "px";
+  } else if (anchor) {
+    const r = anchor.getBoundingClientRect();
+    $("contextMenu").style.left = Math.min(r.left, innerWidth - mW) + "px";
+    $("contextMenu").style.top  = Math.min(r.bottom + 4, innerHeight - mH) + "px";
   }
+}
+function closeCtx() { $("contextMenu").classList.remove("open"); contextPhotoId = null; }
+document.addEventListener("click", e => { if (!$("contextMenu").contains(e.target)) closeCtx(); });
 
-  document.addEventListener("click", e => {
-    if (!contextMenu.contains(e.target)) closeContextMenu();
-  });
-
-  document.getElementById("ctxView").addEventListener("click", () => {
-    const pool = (activeTab === "albums" && viewingAlbumId)
-      ? getSorted(photos.filter(p => p.albumId === viewingAlbumId))
-      : getSorted(photos);
-    openLightbox(contextId, pool);
-    closeContextMenu();
-  });
-  document.getElementById("ctxEdit").addEventListener("click", () => { openEditModal(contextId); closeContextMenu(); });
-  document.getElementById("ctxDelete").addEventListener("click", () => { deletePhoto(contextId); closeContextMenu(); });
+$("ctxView").onclick = () => {
+  const pool = (activeTab === "albums" && viewingAlbumId)
+    ? photos.filter(p => p.albumId === viewingAlbumId).sort((a,b) => tsMs(b)-tsMs(a))
+    : [...photos];
+  openLightbox(contextPhotoId, pool);
+  closeCtx();
+};
+$("ctxEdit").onclick     = () => { openEditCaption(contextPhotoId); closeCtx(); };
+$("ctxSetCover").onclick = async () => {
+  if (contextPhotoId && viewingAlbumId)
+    await updateDoc(doc(db, "albums", viewingAlbumId), { coverId: contextPhotoId });
+  closeCtx();
+};
+$("ctxDelete").onclick = () => { deletePhoto(contextPhotoId); closeCtx(); };
 </script>
 </body>
 </html>
