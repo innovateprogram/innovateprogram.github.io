@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Journal · Anna &amp; Kai</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f2f2f7;
+      --surface: #ffffff;
+      --text: #000;
+      --text2: #3c3c43;
+      --text3: #8e8e93;
+      --blue: #007aff;
+      --red: #ff3b30;
+      --green: #34c759;
+      --orange: #ff9500;
+      --purple: #af52de;
+      --border: rgba(60,60,67,0.12);
+      --radius: 12px;
+      --radius-lg: 20px;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+
+    /* ── User Picker ── */
+    #userPicker { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 8px; }
+    #userPicker .picker-icon { width: 72px; height: 72px; border-radius: 22px; background: linear-gradient(145deg, #af52de, #007aff); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    #userPicker .picker-icon svg { width: 36px; height: 36px; fill: white; }
+    #userPicker h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 4px; }
+    #userPicker p { font-size: 15px; color: var(--text3); margin-bottom: 28px; }
+    #userPicker .picker-btns { display: flex; flex-direction: column; gap: 10px; width: 260px; }
+    #userPicker button { width: 100%; padding: 14px; font-size: 17px; font-weight: 500; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; background: var(--blue); color: #fff; }
+
+    /* ── Header ── */
+    header { position: sticky; top: 0; z-index: 50; background: rgba(242,242,247,0.85); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 0.5px solid var(--border); padding: 12px 20px 0; }
+    .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+    header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .icon-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--blue); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+    .icon-btn svg { width: 16px; height: 16px; }
+    .header-sub { font-size: 13px; color: var(--text3); padding-bottom: 10px; }
+
+    /* ── Notes list ── */
+    #notesList { padding: 16px 16px 100px; display: flex; flex-direction: column; gap: 12px; }
+    .note-card { background: var(--surface); border-radius: var(--radius-lg); padding: 16px; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.07); transition: transform 0.12s, box-shadow 0.12s; position: relative; overflow: hidden; }
+    .note-card:active { transform: scale(0.985); box-shadow: 0 0 0 rgba(0,0,0,0); }
+    .note-card-accent { position: absolute; top: 0; left: 0; width: 4px; bottom: 0; border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
+    .note-card-inner { padding-left: 12px; }
+    .note-heading { font-size: 17px; font-weight: 600; letter-spacing: -0.2px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-preview { font-size: 14px; color: var(--text3); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .note-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+    .note-date { font-size: 12px; color: var(--text3); }
+    .note-author { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; color: #fff; }
+
+    /* Empty state */
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px; gap: 12px; color: var(--text3); text-align: center; }
+    .empty-state svg { width: 52px; height: 52px; opacity: 0.25; }
+    .empty-state h3 { font-size: 18px; font-weight: 600; color: var(--text2); }
+    .empty-state p { font-size: 15px; line-height: 1.5; max-width: 260px; }
+
+    /* ── FAB ── */
+    #fab { position: fixed; bottom: 28px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--blue); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(0,122,255,0.45); display: flex; align-items: center; justify-content: center; z-index: 40; transition: transform 0.15s; }
+    #fab:active { transform: scale(0.93); }
+    #fab svg { width: 24px; height: 24px; }
+
+    /* ── Editor overlay ── */
+    #editorOverlay { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); flex-direction: column; }
+    #editorOverlay.open { display: flex; }
+    .editor-header { display: flex; align-items: center; gap: 12px; padding: 16px 16px 12px; border-bottom: 0.5px solid var(--border); background: rgba(242,242,247,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); flex-shrink: 0; }
+    .editor-back { background: none; border: none; color: var(--blue); font-size: 17px; font-family: inherit; font-weight: 400; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; white-space: nowrap; }
+    .editor-back svg { width: 18px; height: 18px; }
+    .editor-title-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .editor-label { font-size: 13px; font-weight: 600; color: var(--text3); }
+    .editor-actions { display: flex; gap: 8px; }
+    .editor-btn { font-family: inherit; font-size: 15px; font-weight: 500; background: none; border: none; color: var(--blue); cursor: pointer; padding: 4px 0; }
+    .editor-btn.danger { color: var(--red); }
+    .editor-btn:disabled { opacity: 0.35; cursor: default; }
+
+    /* Toolbar */
+    .format-toolbar { display: flex; align-items: center; gap: 2px; padding: 8px 12px; border-bottom: 0.5px solid var(--border); background: var(--surface); overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+    .format-toolbar::-webkit-scrollbar { display: none; }
+    .fmt-btn { width: 34px; height: 34px; border: none; border-radius: 8px; background: none; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+    .fmt-btn:hover { background: var(--bg); }
+    .fmt-btn.active { background: var(--blue); color: #fff; }
+    .fmt-btn svg { width: 16px; height: 16px; }
+    .fmt-divider { width: 1px; height: 24px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+
+    /* Color accent picker */
+    .color-dots { display: flex; gap: 6px; align-items: center; margin-left: 4px; }
+    .color-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; transition: transform 0.1s; }
+    .color-dot:hover { transform: scale(1.15); }
+    .color-dot.active { border-color: var(--text2); }
+
+    /* Editor body */
+    .editor-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0; }
+    #noteHeadingInput { width: 100%; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; font-family: inherit; border: none; outline: none; background: transparent; color: var(--text); padding: 20px 20px 8px; resize: none; }
+    #noteContent { width: 100%; min-height: 300px; font-size: 16px; line-height: 1.65; font-family: inherit; border: none; outline: none; background: transparent; color: var(--text); padding: 0 20px 60px; resize: none; }
+
+    /* Rich content area */
+    #richContent { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    #richEditor { min-height: 300px; outline: none; font-size: 16px; line-height: 1.7; color: var(--text); padding: 0 20px 80px; }
+    #richEditor:empty::before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
+    #richEditor h1 { font-size: 24px; font-weight: 700; margin: 16px 0 8px; letter-spacing: -0.4px; }
+    #richEditor h2 { font-size: 20px; font-weight: 600; margin: 14px 0 6px; }
+    #richEditor h3 { font-size: 17px; font-weight: 600; margin: 12px 0 4px; }
+    #richEditor p { margin: 6px 0; }
+    #richEditor ul, #richEditor ol { padding-left: 24px; margin: 8px 0; }
+    #richEditor li { margin: 4px 0; }
+    #richEditor blockquote { border-left: 3px solid var(--blue); padding-left: 14px; color: var(--text2); margin: 12px 0; font-style: italic; }
+    #richEditor strong { font-weight: 700; }
+    #richEditor em { font-style: italic; }
+    #richEditor u { text-decoration: underline; }
+    #richEditor a { color: var(--blue); }
+    #richEditor code { font-family: "SF Mono", Menlo, monospace; font-size: 14px; background: rgba(0,0,0,0.06); border-radius: 4px; padding: 1px 5px; }
+    #richEditor hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+    /* Heading input above rich editor */
+    #headingWrap { padding: 20px 20px 0; background: transparent; flex-shrink: 0; }
+    #headingInput { width: 100%; font-size: 28px; font-weight: 700; letter-spacing: -0.6px; font-family: inherit; border: none; outline: none; background: transparent; color: var(--text); line-height: 1.2; }
+    #headingInput::placeholder { color: var(--text3); }
+    .heading-divider { height: 0.5px; background: var(--border); margin: 12px 20px 12px; }
+
+    /* ── Delete confirm sheet ── */
+    .sheet-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.4); align-items: flex-end; justify-content: center; }
+    .sheet-overlay.open { display: flex; }
+    @media(min-width:600px) { .sheet-overlay { align-items: center; } }
+    .sheet { background: var(--surface); border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 20px 20px 36px; width: 100%; max-width: 480px; }
+    @media(min-width:600px) { .sheet { border-radius: var(--radius-lg); padding-bottom: 20px; } }
+    .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
+    @media(min-width:600px) { .sheet-handle { display: none; } }
+    .sheet h2 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .sheet p { font-size: 14px; color: var(--text3); margin-bottom: 20px; line-height: 1.5; }
+    .sheet-actions { display: flex; gap: 10px; }
+    .btn { flex: 1; padding: 12px; border-radius: var(--radius); font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; border: none; }
+    .btn-ghost { background: var(--bg); color: var(--blue); }
+    .btn-danger { background: var(--bg); color: var(--red); }
+
+    /* Keyboard-aware bottom padding */
+    @supports (height: env(keyboard-inset-height)) {
+      .editor-body { padding-bottom: env(keyboard-inset-height, 0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- User Picker -->
+<div id="userPicker">
+  <div class="picker-icon">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+  </div>
+  <h2>Anna &amp; Kai</h2>
+  <p>Who are you?</p>
+  <div class="picker-btns">
+    <button id="pickAnna">Anna</button>
+    <button id="pickKai">Kai</button>
+  </div>
+</div>
+
+<!-- Main app -->
+<div id="app" style="display:none;">
+  <header>
+    <div class="header-top">
+      <h1>Journal</h1>
+      <div class="header-actions">
+        <button class="icon-btn" id="switchUserBtn" title="Switch user">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="header-sub" id="headerSub"></div>
+  </header>
+
+  <div id="notesList"></div>
+
+  <button id="fab" title="New note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+</div>
+
+<!-- Editor overlay -->
+<div id="editorOverlay">
+  <div class="editor-header">
+    <button class="editor-back" id="editorBack">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Journal
+    </button>
+    <div class="editor-title-wrap">
+      <span class="editor-label" id="editorLabel">New Note</span>
+    </div>
+    <div class="editor-actions">
+      <button class="editor-btn danger" id="editorDeleteBtn" style="display:none;">Delete</button>
+      <button class="editor-btn" id="editorSaveBtn">Save</button>
+    </div>
+  </div>
+
+  <!-- Format toolbar -->
+  <div class="format-toolbar" id="formatToolbar">
+    <!-- Text style -->
+    <button class="fmt-btn" data-cmd="bold" title="Bold"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h8a4 4 0 0 1 0 8H6zm0 8h9a4 4 0 0 1 0 8H6z"/></svg></button>
+    <button class="fmt-btn" data-cmd="italic" title="Italic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4h4l-4 16H6l4-16zm4 0h4"/></svg></button>
+    <button class="fmt-btn" data-cmd="underline" title="Underline"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3v7a6 6 0 0 0 12 0V3h-2v7a4 4 0 0 1-8 0V3H6zm-2 15h16v2H4v-2z"/></svg></button>
+    <div class="fmt-divider"></div>
+    <!-- Headings -->
+    <button class="fmt-btn" data-cmd="formatBlock" data-val="h2" title="Heading">H2</button>
+    <button class="fmt-btn" data-cmd="formatBlock" data-val="h3" title="Subheading">H3</button>
+    <button class="fmt-btn" data-cmd="formatBlock" data-val="p" title="Body text"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 4a4 4 0 0 1 0 8H7v4H5V4h8zm0 2H7v4h6a2 2 0 0 0 0-4z"/></svg></button>
+    <div class="fmt-divider"></div>
+    <!-- Lists -->
+    <button class="fmt-btn" data-cmd="insertUnorderedList" title="Bullet list"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="4" cy="6" r="1.5"/><rect x="7" y="5" width="13" height="2"/><circle cx="4" cy="12" r="1.5"/><rect x="7" y="11" width="13" height="2"/><circle cx="4" cy="18" r="1.5"/><rect x="7" y="17" width="13" height="2"/></svg></button>
+    <button class="fmt-btn" data-cmd="insertOrderedList" title="Numbered list"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17h2v.5H4v1h1v.5H3v1h3v-4H3v1zm1-9h1V4H3v1h1v3zm-1 3h1.8L3 13.1v.9h3v-1H4.2L6 10.9V10H3v1zm5-9v2h13V5H8zm0 14h13v-2H8v2zm0-6h13v-2H8v2z"/></svg></button>
+    <button class="fmt-btn" data-cmd="formatBlock" data-val="blockquote" title="Quote"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg></button>
+    <div class="fmt-divider"></div>
+    <!-- Rule -->
+    <button class="fmt-btn" data-cmd="insertHorizontalRule" title="Divider"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="11" width="18" height="2"/></svg></button>
+    <div class="fmt-divider"></div>
+    <!-- Accent colour -->
+  </div>
+
+  <!-- Heading input -->
+  <div id="headingWrap">
+    <input type="text" id="headingInput" placeholder="Title" maxlength="120" autocomplete="off" />
+  </div>
+  <div class="heading-divider"></div>
+
+  <!-- Rich editor -->
+  <div id="richContent">
+    <div id="richEditor" contenteditable="true" data-placeholder="Start writing…"></div>
+  </div>
+</div>
+
+<!-- Delete confirm sheet -->
+<div class="sheet-overlay" id="deleteSheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Delete Note?</h2>
+    <p>This note will be permanently deleted. This action can't be undone.</p>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" id="cancelDeleteBtn">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc,
+  addDoc, updateDoc, deleteDoc,
+  onSnapshot, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseApp = initializeApp({
+  apiKey: "AIzaSyByKwzFa9sEtBrPtqWlYc5gZvz0MfsWlOM",
+  authDomain: "memories-bbef7.firebaseapp.com",
+  projectId: "memories-bbef7",
+  storageBucket: "memories-bbef7.firebasestorage.app",
+  messagingSenderId: "862304681371",
+  appId: "1:862304681371:web:d2c348e8e0a96e035cf53e"
+});
+const db = getFirestore(firebaseApp);
+
+// ── State ──────────────────────────────────────────────────────────────
+let currentUser = localStorage.getItem("ak_user") || "";
+let notes = [];
+let editingNoteId = null;
+let selectedAccent = "#007aff";
+let autoSaveTimer = null;
+let isDirty = false;
+
+const $ = id => document.getElementById(id);
+
+// Accent colours per user avatar
+const USER_COLORS = {
+  "Anna": "#af52de",
+  "Kai":  "#007aff"
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────
+function tsMs(n) {
+  return n.updatedAt || n.createdAt || 0;
+}
+function formatDate(ms) {
+  const d = new Date(ms);
+  const now = new Date();
+  const diff = (now - d) / 1000;
+  if (diff < 60) return "Just now";
+  if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+  if (diff < 86400 && d.getDate() === now.getDate()) return d.toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" });
+  if (diff < 86400 * 7) return d.toLocaleDateString("en-AU", { weekday: "long" });
+  return d.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+}
+function stripHtml(html) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || "";
+}
+
+// ── User ───────────────────────────────────────────────────────────────
+function setUser(name) {
+  currentUser = name;
+  localStorage.setItem("ak_user", name);
+  $("userPicker").style.display = "none";
+  $("app").style.display = "block";
+  $("headerSub").textContent = "Signed in as " + name;
+}
+if (currentUser) {
+  setUser(currentUser);
+} else {
+  $("userPicker").style.display = "flex";
+  $("app").style.display = "none";
+}
+$("pickAnna").onclick = () => setUser("Anna");
+$("pickKai").onclick  = () => setUser("Kai");
+$("switchUserBtn").onclick = () => {
+  localStorage.removeItem("ak_user");
+  currentUser = "";
+  $("userPicker").style.display = "flex";
+  $("app").style.display = "none";
+};
+
+// ── Firestore ──────────────────────────────────────────────────────────
+onSnapshot(
+  query(collection(db, "journal"), orderBy("updatedAt", "desc")),
+  snap => {
+    notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderNotesList();
+  },
+  err => console.error("journal listener error:", err)
+);
+
+// ── Render notes list ──────────────────────────────────────────────────
+function renderNotesList() {
+  const wrap = $("notesList");
+  wrap.innerHTML = "";
+
+  if (!notes.length) {
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+        <h3>No notes yet</h3>
+        <p>Tap the + button to write your first journal entry.</p>
+      </div>`;
+    return;
+  }
+
+  notes.forEach(note => {
+    const card = document.createElement("div");
+    card.className = "note-card";
+    const accent = note.accent || "#007aff";
+    const authorColor = USER_COLORS[note.author] || "#007aff";
+    const preview = stripHtml(note.content || "");
+
+    card.innerHTML = `
+      <div class="note-card-accent" style="background:${accent};"></div>
+      <div class="note-card-inner">
+        <div class="note-heading">${note.heading || "Untitled"}</div>
+        ${preview ? `<div class="note-preview">${preview}</div>` : ''}
+        <div class="note-meta">
+          <span class="note-date">${formatDate(tsMs(note))}</span>
+          <span class="note-author" style="background:${authorColor};">${note.author || "?"}</span>
+        </div>
+      </div>`;
+    card.onclick = () => openEditor(note.id);
+    wrap.appendChild(card);
+  });
+}
+
+// ── Editor ─────────────────────────────────────────────────────────────
+function openEditor(noteId) {
+  editingNoteId = noteId;
+  isDirty = false;
+
+  if (noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    $("headingInput").value = note.heading || "";
+    $("richEditor").innerHTML = note.content || "";
+    $("editorLabel").textContent = "Edit Note";
+    $("editorDeleteBtn").style.display = "block";
+    setAccent(note.accent || "#007aff");
+  } else {
+    $("headingInput").value = "";
+    $("richEditor").innerHTML = "";
+    $("editorLabel").textContent = "New Note";
+    $("editorDeleteBtn").style.display = "none";
+    setAccent(USER_COLORS[currentUser] || "#007aff");
+  }
+
+  $("editorOverlay").style.display = "flex";
+  $("editorOverlay").style.flexDirection = "column";
+  document.body.style.overflow = "hidden";
+
+  setTimeout(() => {
+    if (!$("headingInput").value) {
+      $("headingInput").focus();
+    } else {
+      $("richEditor").focus();
+      // Move cursor to end
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents($("richEditor"));
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }, 100);
+}
+
+function closeEditor() {
+  clearTimeout(autoSaveTimer);
+  $("editorOverlay").style.display = "none";
+  document.body.style.overflow = "";
+  editingNoteId = null;
+  isDirty = false;
+}
+
+async function saveNote() {
+  const heading = $("headingInput").value.trim();
+  const content = $("richEditor").innerHTML.trim();
+
+  if (!heading && !stripHtml(content)) {
+    closeEditor();
+    return;
+  }
+
+  const now = Date.now();
+  const data = {
+    heading: heading || "Untitled",
+    content,
+    accent: selectedAccent,
+    author: currentUser,
+    updatedAt: now
+  };
+
+  try {
+    if (editingNoteId) {
+      await updateDoc(doc(db, "journal", editingNoteId), data);
+    } else {
+      data.createdAt = now;
+      const ref = await addDoc(collection(db, "journal"), data);
+      editingNoteId = ref.id;
+    }
+    isDirty = false;
+    $("editorSaveBtn").textContent = "Saved";
+    setTimeout(() => { $("editorSaveBtn").textContent = "Save"; }, 1500);
+  } catch (e) {
+    console.error("Save error:", e);
+    $("editorSaveBtn").textContent = "Error";
+    setTimeout(() => { $("editorSaveBtn").textContent = "Save"; }, 2000);
+  }
+}
+
+// Auto-save on content change
+function schedulAutoSave() {
+  isDirty = true;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    if (isDirty) saveNote();
+  }, 2500);
+}
+
+$("headingInput").addEventListener("input", schedulAutoSave);
+$("richEditor").addEventListener("input", schedulAutoSave);
+
+$("fab").onclick = () => { editingNoteId = null; openEditor(null); };
+$("editorBack").onclick = async () => {
+  clearTimeout(autoSaveTimer);
+  if (isDirty) await saveNote();
+  closeEditor();
+};
+$("editorSaveBtn").onclick = saveNote;
+
+// Delete
+$("editorDeleteBtn").onclick = () => $("deleteSheet").classList.add("open");
+$("cancelDeleteBtn").onclick = () => $("deleteSheet").classList.remove("open");
+$("confirmDeleteBtn").onclick = async () => {
+  if (!editingNoteId) return;
+  await deleteDoc(doc(db, "journal", editingNoteId));
+  $("deleteSheet").classList.remove("open");
+  closeEditor();
+};
+$("deleteSheet").addEventListener("click", e => {
+  if (e.target === $("deleteSheet")) $("deleteSheet").classList.remove("open");
+});
+
+// Escape key
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && $("editorOverlay").style.display === "flex") {
+    $("editorBack").click();
+  }
+});
+
+// ── Format toolbar ─────────────────────────────────────────────────────
+document.querySelectorAll(".fmt-btn[data-cmd]").forEach(btn => {
+  btn.addEventListener("mousedown", e => {
+    e.preventDefault();
+    const cmd = btn.dataset.cmd;
+    const val = btn.dataset.val || null;
+    document.execCommand(cmd, false, val);
+    $("richEditor").focus();
+    updateToolbarState();
+  });
+});
+
+$("richEditor").addEventListener("keyup", updateToolbarState);
+$("richEditor").addEventListener("mouseup", updateToolbarState);
+$("richEditor").addEventListener("selectionchange", updateToolbarState);
+document.addEventListener("selectionchange", () => {
+  if ($("editorOverlay").style.display === "flex") updateToolbarState();
+});
+
+function updateToolbarState() {
+  const cmds = ["bold", "italic", "underline", "insertUnorderedList", "insertOrderedList"];
+  cmds.forEach(cmd => {
+    const btn = document.querySelector(`.fmt-btn[data-cmd="${cmd}"]`);
+    if (btn) btn.classList.toggle("active", document.queryCommandState(cmd));
+  });
+}
+
+// ── Accent colour ──────────────────────────────────────────────────────
+function setAccent(color) {
+  selectedAccent = color;
+  document.querySelectorAll(".color-dot").forEach(dot => {
+    dot.classList.toggle("active", dot.dataset.color === color);
+  });
+}
+
+document.querySelectorAll(".color-dot").forEach(dot => {
+  dot.addEventListener("click", () => {
+    setAccent(dot.dataset.color);
+    schedulAutoSave();
+  });
+});
+</script>
+</body>
+</html>
