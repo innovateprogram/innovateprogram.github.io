@@ -1,0 +1,1956 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Presentation Manager V4.0</title>
+
+    <meta name="description" content="Presentation Manager — control and schedule digital signage displays in real time." />
+    <meta name="author" content="MRSC" />
+    <meta name="theme-color" content="#2e8b2e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Presentation Manager V4.0" />
+    <meta property="og:description" content="Control and schedule digital signage displays in real time." />
+    <meta property="og:image" content="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
+    <meta property="og:image:width" content="480" />
+    <meta property="og:image:height" content="480" />
+    <meta property="og:image:alt" content="MRSC Logo" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Presentation Manager V4.0" />
+    <meta name="twitter:description" content="Control and schedule digital signage displays in real time." />
+    <meta name="twitter:image" content="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
+    <meta name="twitter:image:alt" content="MRSC Logo" />
+    <link rel="icon" type="image/png" href="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
+    <link rel="apple-touch-icon" href="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" />
+
+    <style>
+      * {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI",
+          Arial, sans-serif !important;
+      }
+    </style>
+    <style>
+      :root {
+        --bg: #f0f5f0;
+        --bg2: #e8f0e8;
+        --surface: #ffffff;
+        --surface2: #f4faf4;
+        --surface3: #e6f0e6;
+        --border: rgba(0, 0, 0, 0.08);
+        --border2: rgba(0, 0, 0, 0.13);
+        --text: #1a2b1a;
+        --text2: #4a6a4a;
+        --text3: #7a9a7a;
+        --accent: #2e8b2e;
+        --accent2: #236e23;
+        --accent-glow: rgba(46, 139, 46, 0.13);
+        --green: #1e7e34;
+        --green-glow: rgba(30, 126, 52, 0.13);
+        --red: #c0392b;
+        --orange: #d35400;
+        --yellow: #d4a017;
+        --blue: #1a73e8;
+        --r: 14px;
+        --r-sm: 9px;
+        --sidebar-w: 340px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 15px;
+        margin: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+      .app {
+        display: flex;
+        min-height: 100vh;
+      }
+      ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--surface3);
+        border-radius: 2px;
+      }
+
+      /* ===== AUTH GATE ===== */
+      #authGate {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      #authGate::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(46, 139, 46, 0.07) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .auth-box {
+        background: var(--surface);
+        border: 1px solid var(--border2);
+        border-radius: 20px;
+        padding: 48px 44px 40px;
+        width: 100%;
+        max-width: 400px;
+        position: relative;
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(46, 139, 46, 0.08);
+        animation: authIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      @keyframes authIn {
+        0% { opacity: 0; transform: translateY(32px) scale(0.94); filter: blur(4px); }
+        60% { opacity: 1; filter: blur(0); }
+        80% { transform: translateY(-4px) scale(1.01); }
+        100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      }
+      .auth-logo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+        font-weight: 800;
+        font-size: 17px;
+        color: var(--text);
+        text-align: center;
+      }
+      .auth-logo-row { display: flex; align-items: center; gap: 10px; }
+      .auth-logo .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
+      .auth-title { font-weight: 700; font-size: 22px; color: var(--text); margin-bottom: 6px; }
+      .auth-sub { font-size: 13px; color: var(--text3); margin-bottom: 32px; line-height: 1.5; }
+      .auth-error {
+        font-size: 13px; color: var(--red); margin-top: 12px; text-align: center; min-height: 18px;
+        font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .auth-error.visible::before { content: "⚠"; }
+      .auth-pin-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
+      .auth-pin-input {
+        width: 64px; height: 64px; text-align: center; background: var(--surface2); border: 1px solid var(--border2);
+        border-radius: 12px; color: var(--text); font-size: 24px; font-weight: 700; outline: none;
+        -webkit-appearance: none; caret-color: transparent; transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      .auth-pin-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); transform: scale(1.08); }
+      .auth-pin-input.filled { color: var(--accent); animation: pinFilled 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      @keyframes pinFilled { 0% { transform: scale(1); } 40% { transform: scale(1.22); } 100% { transform: scale(1); } }
+      .auth-pin-input.err { border-color: var(--red); box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15); animation: shake 0.4s ease; }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); }
+        60% { transform: translateX(-5px); } 80% { transform: translateX(5px); }
+      }
+      #authLoadingMsg { font-size: 13px; color: var(--text3); text-align: center; margin-top: 10px; min-height: 20px; }
+
+      /* ===== ONBOARDING CHECKLIST ===== */
+      .onboard-card {
+        background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+        border: 1px solid rgba(46, 139, 46, 0.25);
+        border-radius: var(--r);
+        padding: 26px 28px;
+        box-shadow: 0 2px 12px rgba(46, 139, 46, 0.08);
+        position: relative;
+      }
+      .onboard-head {
+        display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;
+      }
+      .onboard-title {
+        font-size: 16px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 10px;
+      }
+      .onboard-dismiss {
+        background: none; border: none; color: var(--text3); font-size: 20px; cursor: pointer; line-height: 1;
+        padding: 4px 8px; border-radius: 6px;
+      }
+      .onboard-dismiss:hover { background: var(--surface3); color: var(--text2); }
+      .onboard-sub { font-size: 13px; color: var(--text3); margin-bottom: 18px; }
+      .onboard-steps { display: flex; flex-direction: column; gap: 10px; }
+      .onboard-step {
+        display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: var(--r-sm);
+        background: var(--surface); border: 1px solid var(--border); transition: all 0.15s;
+      }
+      .onboard-step.done { opacity: 0.55; }
+      .onboard-step-num {
+        width: 26px; height: 26px; border-radius: 50%; background: var(--surface3); color: var(--text2);
+        font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      }
+      .onboard-step.done .onboard-step-num { background: var(--green); color: #fff; }
+      .onboard-step-body { flex: 1; min-width: 0; }
+      .onboard-step-title { font-size: 14px; font-weight: 600; color: var(--text); }
+      .onboard-step-sub { font-size: 12.5px; color: var(--text3); margin-top: 1px; }
+      .onboard-step-action { flex-shrink: 0; }
+
+      /* ===== SIDEBAR ===== */
+      .sidebar {
+        width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--surface);
+        border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky;
+        top: 0; height: 100vh; overflow: hidden; z-index: 100; flex-shrink: 0;
+        transition: transform 0.42s cubic-bezier(0.34, 1.2, 0.64, 1);
+      }
+      .sidebar::before {
+        content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.6;
+      }
+      .sidebar-header {
+        padding: 22px 20px 18px; display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid var(--border); flex-shrink: 0;
+      }
+      .sidebar-logo {
+        font-weight: 800; font-size: 16px; color: var(--text); letter-spacing: 0.01em;
+        display: flex; align-items: center; gap: 10px;
+      }
+      .sidebar-logo .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+      .sidebar-close {
+        display: none; width: 36px; height: 36px; align-items: center; justify-content: center;
+        border-radius: var(--r-sm); border: 1px solid var(--border2); background: var(--surface3);
+        color: var(--text2); font-size: 18px; cursor: pointer; flex-shrink: 0;
+      }
+      .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+      .sidebar-tab {
+        flex: 1; padding: 14px; text-align: center; font-size: 12px; font-weight: 600; color: var(--text3);
+        cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 2px solid transparent;
+      }
+      .sidebar-tab:hover { color: var(--text2); }
+      .sidebar-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+      .sidebar-panel { display: none; flex: 1; overflow-y: auto; padding: 18px; flex-direction: column; gap: 14px; -webkit-overflow-scrolling: touch; }
+      .sidebar-panel.active { display: flex; }
+
+      .sidebar-hint {
+        font-size: 12.5px; color: var(--text3); line-height: 1.5; background: var(--surface2);
+        border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px;
+      }
+
+      /* ===== UPLOAD ZONE ===== */
+      .drop-zone {
+        border: 2px dashed var(--border2); border-radius: var(--r); padding: 32px 20px; text-align: center;
+        cursor: pointer; transition: all 0.2s; background: var(--surface2); position: relative;
+      }
+      .drop-zone:hover, .drop-zone.dragging { border-color: var(--accent); background: var(--accent-glow); }
+      .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+      .drop-zone-icon { font-size: 36px; margin-bottom: 12px; }
+      .drop-zone-label { font-size: 14px; font-weight: 600; color: var(--text2); }
+      .drop-zone-sub { font-size: 12px; color: var(--text3); margin-top: 5px; }
+
+      /* ===== MEDIA CARDS ===== */
+      .media-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; transition: border-color 0.15s; }
+      .media-card:hover { border-color: var(--border2); }
+      .media-thumb-wrap { width: 100%; height: 100px; background: var(--surface3); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+      .media-thumb-wrap img, .media-thumb-wrap video { width: 100%; height: 100%; object-fit: cover; }
+      .media-thumb-type {
+        position: absolute; top: 8px; left: 8px; background: rgba(255, 255, 255, 0.85); border-radius: 5px;
+        padding: 3px 8px; font-size: 10px; color: var(--text2); text-transform: uppercase;
+      }
+      .media-card-body { padding: 12px 14px 14px; }
+      .media-card-name {
+        font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis; background: none; border: none; width: 100%; cursor: text;
+      }
+      .media-card-name:focus { outline: none; color: var(--accent); }
+      .media-card-actions { display: flex; gap: 7px; margin-top: 10px; }
+
+      /* ===== BUTTONS ===== */
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 13px 20px;
+        border-radius: var(--r-sm); border: 1px solid var(--border2); background: var(--surface3); color: var(--text);
+        font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+        letter-spacing: 0.01em; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+      }
+      .btn:hover { background: var(--surface2); border-color: rgba(0, 0, 0, 0.18); transform: scale(1.03); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); }
+      .btn:active { opacity: 0.85; transform: scale(0.95); box-shadow: none; }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .btn.primary:hover { background: var(--accent2); border-color: var(--accent2); box-shadow: 0 4px 18px rgba(46, 139, 46, 0.3); transform: scale(1.03); }
+      .btn.danger { background: rgba(192, 57, 43, 0.08); border-color: rgba(192, 57, 43, 0.22); color: var(--red); }
+      .btn.danger:hover { background: rgba(192, 57, 43, 0.16); }
+      .btn.ghost { background: transparent; border-color: transparent; color: var(--text3); }
+      .btn.ghost:hover { background: var(--surface3); color: var(--text2); }
+      .btn.sm { padding: 11px 18px; font-size: 14px; }
+      .btn.xs { padding: 9px 14px; font-size: 13px; border-radius: 8px; }
+      .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+      .btn.full { width: 100%; }
+
+      /* ===== MAIN AREA ===== */
+      .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+      /* ===== TOP BAR ===== */
+      .topbar {
+        background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center;
+        padding: 0 24px; height: 62px; gap: 12px; flex-shrink: 0; position: sticky; top: 0; z-index: 50;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      }
+      .topbar-menu {
+        display: none; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: var(--r-sm);
+        border: 1px solid var(--border2); background: var(--surface3); color: var(--text2); font-size: 20px; cursor: pointer;
+        flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+      }
+      .topbar-title { font-weight: 700; font-size: 17px; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+      .topbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .badge-live {
+        display: inline-flex; align-items: center; gap: 6px; background: var(--green-glow); border: 1px solid rgba(30, 126, 52, 0.3);
+        color: var(--green); border-radius: 20px; padding: 5px 13px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      }
+      .badge-live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+      @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(30, 126, 52, 0.4); } 50% { box-shadow: 0 0 0 5px rgba(30, 126, 52, 0); } }
+
+      /* ===== PRESENTATION TABS ===== */
+      .pres-tabs {
+        background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: stretch;
+        padding: 0 10px; gap: 2px; height: 46px; overflow-x: auto; flex-shrink: 0; -webkit-overflow-scrolling: touch;
+        position: sticky; top: 62px; z-index: 49;
+      }
+      .pres-tab {
+        display: inline-flex; align-items: center; gap: 8px; padding: 0 18px; height: 46px; cursor: pointer;
+        font-size: 13px; font-weight: 500; color: var(--text3); border-bottom: 2px solid transparent; transition: all 0.15s;
+        user-select: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+      }
+      .pres-tab:hover { color: var(--text2); }
+      .pres-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+      .pres-tab-close {
+        width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 4px;
+        color: var(--text3); font-size: 15px; transition: all 0.1s; flex-shrink: 0;
+      }
+      .pres-tab-close:hover { background: rgba(192, 57, 43, 0.12); color: var(--red); }
+      .pres-tab-add {
+        display: flex; align-items: center; justify-content: center; width: 44px; height: 46px; cursor: pointer;
+        color: var(--text3); font-size: 20px; transition: color 0.15s; -webkit-tap-highlight-color: transparent;
+      }
+      .pres-tab-add:hover { color: var(--accent); }
+      .chip { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; letter-spacing: 0.07em; border-radius: 4px; padding: 2px 6px; text-transform: uppercase; }
+      .chip-live { background: var(--green-glow); color: var(--green); border: 1px solid rgba(30, 126, 52, 0.3); }
+      .chip-sync { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(46, 139, 46, 0.3); }
+
+      /* ===== EDITOR LAYOUT ===== */
+      .editor-layout { flex: 1; display: flex; }
+      .editor-scroll { flex: 1; padding: 32px; display: flex; flex-direction: column; gap: 20px; max-width: 980px; margin: 0 auto; width: 100%; }
+
+      /* ===== CARDS ===== */
+      .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+      .card-header {
+        padding: 22px 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border);
+        min-height: 68px; gap: 16px; background: var(--surface); cursor: pointer; user-select: none;
+      }
+      .card-header:hover { background: var(--surface2); }
+      .card.no-collapse .card-header { cursor: default; }
+      .card.no-collapse .card-header:hover { background: var(--surface); }
+      .card-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text2); display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+      .card-title-icon { font-size: 20px; }
+      .card-chevron { font-size: 13px; color: var(--text3); transition: transform 0.2s; margin-left: 6px; }
+      .card.collapsed .card-chevron { transform: rotate(-90deg); }
+      .card-body { padding: 28px; }
+      .card-body.compact { padding: 22px 28px; }
+      .card.collapsed .card-body { display: none; }
+      .card-header-right { display: flex; align-items: center; gap: 12px; }
+
+      /* ===== FORM ELEMENTS ===== */
+      label { display: block; font-size: 13px; font-weight: 700; color: var(--text3); margin-bottom: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+      input[type="text"], input[type="number"], input[type="password"], select, textarea {
+        width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--r-sm);
+        padding: 16px 20px; color: var(--text); font-size: 16px; transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none;
+      }
+      input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+      select option { background: var(--surface); }
+      .field { margin-bottom: 22px; }
+      .field:last-child { margin-bottom: 0; }
+      .field-help { font-size: 12.5px; color: var(--text3); margin-top: 7px; line-height: 1.4; }
+      .row { display: flex; gap: 20px; }
+      .row > .field { flex: 1; }
+      input[type="checkbox"] { accent-color: var(--accent); width: 20px; height: 20px; }
+      .check-row { display: flex; align-items: center; gap: 14px; font-size: 15px; color: var(--text2); cursor: pointer; }
+      input[type="color"] { width: 100%; height: 52px; padding: 4px; cursor: pointer; border-radius: var(--r-sm); border: 1px solid var(--border2); background: var(--surface2); }
+
+      /* ===== SETTINGS GRID ===== */
+      .settings-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; }
+
+      /* ===== SLIDE ITEMS ===== */
+      .slides-area { display: flex; flex-direction: column; gap: 12px; }
+      .slide-item {
+        background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden;
+        transition: border-color 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        cursor: grab; display: flex; align-items: stretch;
+      }
+      .slide-item:hover { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09); transform: translateY(-1px); }
+      .slide-item:active { cursor: grabbing; }
+      .slide-item.drag-over { border-color: var(--accent); transform: scale(1.01); }
+      .slide-item-thumb { width: 160px; min-height: 110px; background: var(--surface3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; position: relative; }
+      .slide-item-thumb img, .slide-item-thumb video { width: 100%; height: 100%; object-fit: cover; }
+      .slide-item-thumb-yt { font-size: 28px; color: rgba(0, 0, 0, 0.3); }
+      .slide-item-thumb-badge { position: absolute; bottom: 6px; left: 6px; background: rgba(255, 255, 255, 0.85); border-radius: 4px; font-size: 10px; padding: 2px 6px; color: var(--text3); }
+      .slide-num { position: absolute; top: 6px; left: 6px; background: rgba(255, 255, 255, 0.92); color: var(--text2); border-radius: 5px; font-size: 12px; font-weight: 700; padding: 4px 8px; }
+      .slide-item-body { flex: 1; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+      .slide-item-name {
+        font-size: 16px; font-weight: 600; color: var(--text); background: none; border: none; width: 100%;
+        padding: 4px 0; border-bottom: 1px solid transparent; transition: border-color 0.15s;
+      }
+      .slide-item-name:focus { outline: none; color: var(--accent); border-bottom-color: var(--accent); }
+      .slide-item-fields { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+      .slide-item-fields .field { margin-bottom: 0; flex: 1; min-width: 80px; }
+      .slide-item-fields label { margin-bottom: 4px; }
+      .slide-item-actions { display: flex; gap: 5px; align-items: center; margin-left: auto; padding-bottom: 2px; }
+      .drag-handle { display: flex; align-items: center; padding: 0 12px; color: var(--text3); cursor: grab; font-size: 18px; flex-shrink: 0; }
+      .drag-handle:hover { color: var(--text2); }
+
+      .empty-state { text-align: center; padding: 60px 40px; color: var(--text3); }
+      .empty-state-icon { font-size: 52px; margin-bottom: 18px; opacity: 0.35; }
+      .empty-state-title { font-size: 18px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+      .empty-state-sub { font-size: 15px; line-height: 1.6; margin-bottom: 18px; }
+
+      .overlay-preview { padding: 18px 22px; border-radius: var(--r-sm); font-size: 20px; font-weight: 700; word-break: break-word; margin-top: 14px; display: none; }
+
+      .swatch-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+      .swatch {
+        width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.15s ease, box-shadow 0.2s ease;
+      }
+      .swatch:hover { transform: scale(1.28); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18); }
+      .swatch.active { border-color: #333; transform: scale(1.1); }
+
+      .monitors-list { display: flex; flex-direction: column; gap: 10px; }
+      .monitor-row { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 20px 24px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+      .monitor-status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+      .monitor-status-dot.online { background: var(--green); box-shadow: 0 0 10px var(--green-glow); animation: pulse 2s infinite; }
+      .monitor-status-dot.offline { background: var(--surface3); }
+      .monitor-info { flex: 1; min-width: 0; }
+      .monitor-name { font-size: 16px; font-weight: 600; color: var(--text); }
+      .monitor-meta { font-size: 13px; color: var(--text3); margin-top: 4px; }
+      .monitor-pres { font-size: 14px; color: var(--text2); margin-top: 4px; }
+      .monitor-actions { display: flex; gap: 6px; }
+
+      .assigned-wrap { display: flex; flex-wrap: wrap; gap: 10px; min-height: 38px; margin-top: 18px; }
+      .assigned-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(46, 139, 46, 0.08); border: 1px solid rgba(46, 139, 46, 0.22); border-radius: 20px; padding: 8px 18px; font-size: 15px; color: var(--accent); }
+
+      .progress-wrap { margin-top: 14px; display: none; }
+      .progress-bar { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+      .progress-fill { height: 100%; width: 0; background: var(--accent); transition: width 0.15s; border-radius: 2px; }
+      .progress-label { font-size: 12px; color: var(--text2); margin-top: 7px; text-align: center; }
+
+      .status-text { font-size: 13px; color: var(--green); margin-top: 8px; text-align: center; }
+      .status-text.err { color: var(--red); }
+
+      .divider { display: flex; align-items: center; gap: 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin: 4px 0; }
+      .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+      .info-box { background: var(--accent-glow); border: 1px solid rgba(46, 139, 46, 0.22); border-radius: var(--r-sm); padding: 18px 20px; font-size: 15px; color: var(--text2); line-height: 1.65; display: none; margin-top: 18px; }
+      .info-box.visible { display: block; }
+
+      .no-pres { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; color: var(--text3); text-align: center; padding: 40px; }
+      .no-pres-icon { font-size: 56px; opacity: 0.25; }
+      .no-pres-title { font-size: 18px; font-weight: 600; color: var(--text2); }
+      .no-pres-sub { font-size: 14px; line-height: 1.5; }
+
+      .upload-name { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+      .upload-name input { flex: 1; }
+
+      .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); z-index: 99; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+
+      .toast-wrap { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none; max-width: calc(100vw - 48px); }
+      .toast {
+        background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r-sm); padding: 13px 18px; font-size: 13px;
+        font-weight: 500; color: var(--text); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        animation: toastIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), toastOut 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 2.7s forwards;
+        display: flex; align-items: center; gap: 10px; pointer-events: all; min-width: 200px;
+      }
+      .toast.success { border-left: 3px solid var(--green); }
+      .toast.error { border-left: 3px solid var(--red); }
+      .toast.info { border-left: 3px solid var(--accent); }
+      @keyframes toastIn { 0% { opacity: 0; transform: translateY(18px) scale(0.92); filter: blur(3px); } 60% { filter: blur(0); } 80% { transform: translateY(-3px) scale(1.02); } 100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+      @keyframes toastOut { 0% { opacity: 1; transform: scale(1); filter: blur(0); } 100% { opacity: 0; transform: scale(0.9) translateY(8px); filter: blur(2px); } }
+
+      .slide-item-fields input[type="number"] { padding: 14px 16px; font-size: 15px; }
+
+      .yt-library { display: flex; flex-direction: column; gap: 10px; }
+      .yt-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; }
+      .yt-card-thumb { width: 100%; height: 80px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-size: 28px; color: rgba(0, 0, 0, 0.3); position: relative; }
+      .yt-card-body { padding: 10px 12px 12px; }
+      .yt-card-name { font-size: 13px; font-weight: 600; color: var(--text); background: none; border: none; width: 100%; cursor: text; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .yt-card-name:focus { outline: none; color: var(--accent); }
+      .yt-card-actions { display: flex; gap: 7px; margin-top: 8px; }
+      .yt-badge { position: absolute; top: 6px; right: 6px; background: rgba(255, 0, 0, 0.8); border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700; color: #fff; letter-spacing: 0.05em; }
+
+      .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(3px); z-index: 8000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+      .modal-box { background: var(--surface); border: 1px solid var(--border2); border-radius: 18px; padding: 40px 36px 32px; width: 100%; max-width: 380px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15); animation: authIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+      .modal-title { font-weight: 700; font-size: 19px; color: var(--text); margin-bottom: 6px; }
+      .modal-sub { font-size: 13px; color: var(--text3); margin-bottom: 28px; line-height: 1.5; }
+      .modal-field { margin-bottom: 18px; }
+      .modal-field label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; display: block; }
+      .modal-field input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--r-sm); padding: 14px 18px; color: var(--text); font-size: 16px; letter-spacing: 0.2em; transition: border-color 0.15s, box-shadow 0.15s; outline: none; -webkit-appearance: none; }
+      .modal-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+      .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
+      .modal-error { font-size: 13px; color: var(--red); margin-top: 10px; min-height: 18px; font-weight: 500; }
+
+      /* ===== TOOLTIP ===== */
+      .tip {
+        display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%;
+        background: var(--surface3); color: var(--text3); font-size: 10.5px; font-weight: 700; cursor: help; flex-shrink: 0; position: relative;
+      }
+      .tip:hover::after {
+        content: attr(data-tip); position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: var(--text);
+        color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; white-space: normal; width: 220px;
+        line-height: 1.4; text-transform: none; letter-spacing: normal; z-index: 10; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      .card-header .check-row span { font-size: 14px; }
+
+      @media (max-width: 1024px) {
+        :root { --sidebar-w: 300px; }
+        .settings-grid { grid-template-columns: 1fr 1fr; }
+        .topbar-actions .btn.ghost { display: none; }
+      }
+
+      @media (max-width: 720px) {
+        :root { --sidebar-w: min(320px, 88vw); }
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; height: 100vh; transform: translateX(-105%); box-shadow: 4px 0 40px rgba(0, 0, 0, 0.15); }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-backdrop.visible { display: block; }
+        .sidebar-close { display: flex; }
+        .topbar { padding: 0 16px; height: 58px; }
+        .topbar-menu { display: flex; }
+        .topbar-title { font-size: 15px; }
+        .topbar-actions .btn.ghost { display: none; }
+        .topbar-actions .badge-live { display: none; }
+        .editor-scroll { padding: 16px; gap: 16px; }
+        .card-body { padding: 18px; }
+        .card-body.compact { padding: 16px 18px; }
+        .card-header { padding: 16px 18px; min-height: 56px; }
+        .settings-grid { grid-template-columns: 1fr; gap: 14px; }
+        .slide-item-thumb { width: 100px; }
+        .slide-item-body { padding: 12px 14px; }
+        .row { flex-direction: column; gap: 0; }
+        .pres-tabs { padding: 0 6px; height: 44px; }
+        .pres-tab { padding: 0 14px; font-size: 13px; }
+        .toast-wrap { left: 16px; right: 16px; bottom: 16px; max-width: 100%; }
+        .toast { min-width: unset; width: 100%; }
+        .monitor-row { gap: 10px; }
+        .monitor-actions { flex-wrap: wrap; }
+        .auth-box { padding: 32px 22px 28px; margin: 0 16px; }
+        .auth-pin-input { width: 56px; height: 56px; font-size: 20px; }
+        .onboard-card { padding: 20px 18px; }
+      }
+
+      @media (max-width: 400px) {
+        .slide-item { flex-direction: column; }
+        .slide-item-thumb { width: 100%; height: 120px; }
+        .slide-item-body { padding: 12px; }
+        .drag-handle { display: none; }
+        .slide-item-fields { flex-direction: column; }
+        .slide-item-actions { margin-left: 0; width: 100%; }
+        .slide-item-actions .btn { flex: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===== AUTH GATE ===== -->
+    <div id="authGate">
+      <div class="auth-box">
+        <div class="auth-logo">
+          <img src="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" alt="MRSC Logo" style="width: 72px; height: 72px; object-fit: contain; border-radius: 16px" />
+          <div class="auth-logo-row"><div class="dot"></div>PRESENTATION MGR</div>
+        </div>
+        <div class="auth-title">Enter your PIN</div>
+        <div class="auth-sub">Ask your administrator if you don't have the 4-digit PIN.</div>
+        <div class="auth-pin-row" id="pinRow">
+          <input class="auth-pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" type="password" id="pin0" />
+          <input class="auth-pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" type="password" id="pin1" />
+          <input class="auth-pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" type="password" id="pin2" />
+          <input class="auth-pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" type="password" id="pin3" />
+        </div>
+        <div class="auth-error" id="authError"></div>
+        <div id="authLoadingMsg">Loading…</div>
+      </div>
+    </div>
+
+    <!-- ===== CHANGE PIN MODAL ===== -->
+    <div id="changePinModal" class="modal-overlay" style="display: none">
+      <div class="modal-box">
+        <div class="modal-title">🔑 Change PIN</div>
+        <div class="modal-sub">Enter your current PIN, then choose a new 4-digit PIN. Everyone with the old PIN will need the new one to sign in.</div>
+        <div class="modal-field"><label>Current PIN</label><input type="password" id="cpCurrentPin" maxlength="4" inputmode="numeric" placeholder="••••" /></div>
+        <div class="modal-field"><label>New PIN</label><input type="password" id="cpNewPin" maxlength="4" inputmode="numeric" placeholder="••••" /></div>
+        <div class="modal-field"><label>Confirm New PIN</label><input type="password" id="cpConfirmPin" maxlength="4" inputmode="numeric" placeholder="••••" /></div>
+        <div class="modal-error" id="cpError"></div>
+        <div class="modal-actions">
+          <button class="btn primary" id="cpSaveBtn" style="flex: 1">Save New PIN</button>
+          <button class="btn" id="cpCancelBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="app" id="mainApp" style="display: none">
+      <!-- SIDEBAR -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <img src="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" alt="MRSC Logo" style="width: 28px; height: 28px; object-fit: contain; border-radius: 6px; flex-shrink: 0" />
+            PRESENTATION MGR
+          </div>
+          <button class="sidebar-close" id="sidebarClose">×</button>
+        </div>
+        <div class="sidebar-tabs">
+          <div class="sidebar-tab active" data-panel="media">📁 Media</div>
+          <div class="sidebar-tab" data-panel="youtube">▶ YouTube</div>
+        </div>
+
+        <!-- MEDIA PANEL -->
+        <div class="sidebar-panel active" id="panel-media">
+          <div class="sidebar-hint">Step 1 — Upload a photo or video here. Then add it to your slides from the library below.</div>
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="file" accept="image/*,video/*" multiple />
+            <div class="drop-zone-icon">🖼️</div>
+            <div class="drop-zone-label">Drop a file here</div>
+            <div class="drop-zone-sub">or tap to browse · images &amp; videos</div>
+          </div>
+          <div class="upload-name"><input type="text" id="fname" placeholder="Label (optional)" /></div>
+          <div class="field" style="margin-top: 8px">
+            <label>After upload</label>
+            <select id="showNow">
+              <option value="append" selected>Add to current slides</option>
+              <option value="no">Just save to library</option>
+              <option value="replace">Replace current slides</option>
+            </select>
+          </div>
+          <button id="uploadBtn" class="btn primary full">↑ Upload</button>
+          <div class="progress-wrap" id="progressWrap">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-label" id="progressPct">0%</div>
+          </div>
+          <div id="uploadStatus" class="status-text"></div>
+          <div class="divider" style="margin-top: 6px">Your library</div>
+          <div id="mediaList" style="display: flex; flex-direction: column; gap: 10px"></div>
+        </div>
+
+        <!-- YOUTUBE PANEL -->
+        <div class="sidebar-panel" id="panel-youtube">
+          <div class="sidebar-hint">Paste a YouTube link to add it to your library, then add it to slides like any other media.</div>
+          <div class="card">
+            <div class="card-body">
+              <div class="field"><label>YouTube link or video ID</label><input id="ytUrl" type="text" placeholder="youtube.com/watch?v=..." /></div>
+              <div class="field"><label>Display label</label><input id="ytName" type="text" placeholder="Optional name" /></div>
+              <div class="row">
+                <div class="field"><label>Start (sec)</label><input id="ytStart" type="number" value="0" min="0" /></div>
+                <div class="field"><label>End (sec)</label><input id="ytEnd" type="number" placeholder="auto" min="0" /></div>
+              </div>
+              <button id="ytSaveBtn" class="btn primary full">Save to Library</button>
+              <div id="ytStatus" class="status-text"></div>
+            </div>
+          </div>
+          <div class="divider">Your YouTube library</div>
+          <div class="yt-library" id="ytLibrary"></div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="main">
+        <div class="topbar">
+          <button class="topbar-menu" id="topbarMenu">☰</button>
+          <img src="https://mapsmarketing.com.au/wp-content/uploads/2020/08/MRSC_Primary_Logo-480x480-1.png" alt="MRSC Logo" style="width: 34px; height: 34px; object-fit: contain; border-radius: 8px; flex-shrink: 0" />
+          <div class="topbar-title" id="editorTitle">Select a Presentation</div>
+          <div class="topbar-actions">
+            <span id="liveIndicator" style="display: none" class="badge-live">DEFAULT</span>
+            <button id="setActiveBtn" class="btn primary sm">⚡ Set as Default</button>
+            <button id="refreshViewBtn" class="btn sm" title="Refresh all displays">↺ Refresh Displays</button>
+            <button id="renamePresentationBtn" class="btn sm ghost">✎ Rename</button>
+            <button id="changePinBtn" class="btn sm ghost" title="Change PIN">🔑</button>
+            <button id="deletePresentationBtn" class="btn sm danger">✕</button>
+          </div>
+        </div>
+
+        <div class="pres-tabs" id="tabsBar">
+          <div class="pres-tab-add" id="addPresentationBtn" title="New presentation">+</div>
+        </div>
+
+        <div class="editor-layout">
+          <div class="editor-scroll" id="editorArea">
+            <div class="no-pres" id="noPres" style="display: none">
+              <div class="no-pres-icon">🎞️</div>
+              <div class="no-pres-title">No presentation selected</div>
+              <div class="no-pres-sub">Tap <strong>+</strong> above to create one</div>
+            </div>
+
+            <!-- Onboarding checklist -->
+            <div class="onboard-card" id="onboardCard" style="display: none">
+              <div class="onboard-head">
+                <div class="onboard-title">👋 Get your first display running</div>
+                <button class="onboard-dismiss" id="onboardDismiss" title="Hide this">×</button>
+              </div>
+              <div class="onboard-sub">Follow these steps in order — each one unlocks the next.</div>
+              <div class="onboard-steps" id="onboardSteps"></div>
+            </div>
+
+            <!-- Slides (always visible — the main task) -->
+            <div class="card no-collapse" id="slidesCard">
+              <div class="card-header">
+                <div class="card-title"><span class="card-title-icon">🎞️</span> Slides</div>
+                <span style="font-size: 12px; color: var(--text3)">Drag to reorder</span>
+              </div>
+              <div class="card-body">
+                <div id="presentationItems" class="slides-area"></div>
+              </div>
+            </div>
+
+            <!-- Monitor Assignment -->
+            <div class="card collapsed" id="monitorAssignCard" data-collapsible="1">
+              <div class="card-header">
+                <div class="card-title"><span class="card-title-icon">🖥️</span> Assign Monitors <span class="card-chevron">▾</span></div>
+              </div>
+              <div class="card-body compact">
+                <label style="display:flex; align-items:center; gap:8px;">Monitor names <span class="tip" data-tip="Type the names of the screens that should show this presentation, separated by commas.">?</span></label>
+                <input id="monitorAssign" placeholder="e.g. Lobby Screen, Room A" style="margin-bottom: 10px" />
+                <div style="display:flex; gap:8px; margin-bottom: 4px;">
+                  <button id="assignMonitorsBtn" class="btn primary sm">Assign</button>
+                  <button id="clearMonitorAssignments" class="btn danger sm">Clear All</button>
+                </div>
+                <div class="field-help">Re-enter a name already assigned here and click Assign to unassign it.</div>
+                <div class="assigned-wrap" id="assignedMonitorsList"></div>
+              </div>
+            </div>
+
+            <!-- Active Monitors -->
+            <div class="card collapsed" id="activeMonitorsCard" data-collapsible="1">
+              <div class="card-header">
+                <div class="card-title"><span class="card-title-icon">📡</span> Active Monitors <span class="card-chevron">▾</span></div>
+                <span style="font-size: 12px; color: var(--text3)">Online if seen &lt;15s ago</span>
+              </div>
+              <div class="card-body compact" id="monitorsContainer">
+                <div class="monitors-list" id="monitorsList"></div>
+              </div>
+            </div>
+
+            <!-- Settings Card -->
+            <div class="card collapsed" id="settingsCard" data-collapsible="1">
+              <div class="card-header">
+                <div class="card-title"><span class="card-title-icon">⚙️</span> Playback Settings <span class="card-chevron">▾</span></div>
+              </div>
+              <div class="card-body">
+                <div class="settings-grid">
+                  <div class="field" style="margin-bottom: 0">
+                    <label>Mode</label>
+                    <select id="mode"><option value="slideshow">Slideshow</option><option value="single">Single Slide</option></select>
+                  </div>
+                  <div class="field" style="margin-bottom: 0">
+                    <label>Transition</label>
+                    <select id="transition"><option value="fade">Fade</option><option value="cut">Cut</option></select>
+                  </div>
+                  <div class="field" style="margin-bottom: 0">
+                    <label>Interval (seconds)</label>
+                    <input id="intervalS" type="number" value="5" min="1" />
+                  </div>
+                </div>
+                <label class="check-row" style="margin-top: 18px; cursor: pointer">
+                  <input id="syncPlayback" type="checkbox" />
+                  <span>Sync playback across all displays</span>
+                </label>
+                <div id="syncInfo" class="info-box">When enabled, all monitors showing this presentation stay on the same slide. If a display refreshes or reconnects, it jumps to the current position.</div>
+              </div>
+            </div>
+
+            <!-- Overlay Card -->
+            <div class="card collapsed" id="overlayCard" data-collapsible="1">
+              <div class="card-header">
+                <div class="card-title"><span class="card-title-icon">📢</span> Overlay Banner <span class="card-chevron">▾</span></div>
+                <label class="check-row" style="cursor: pointer" onclick="event.stopPropagation()">
+                  <input id="overlayVisible" type="checkbox" />
+                  <span style="font-size: 13px; color: var(--text2)">Show on display</span>
+                </label>
+              </div>
+              <div class="card-body">
+                <div class="field"><label>Message</label><input id="overlayText" placeholder="e.g. Room closed today" /></div>
+                <div id="overlayPreview" class="overlay-preview"></div>
+                <div class="row" style="margin-top: 16px">
+                  <div class="field">
+                    <label>Background</label>
+                    <div class="swatch-row" id="overlayBgSwatches">
+                      <div class="swatch" style="background: #cc0000" data-color="#cc0000"></div>
+                      <div class="swatch" style="background: #e65c00" data-color="#e65c00"></div>
+                      <div class="swatch" style="background: #f0b429" data-color="#f0b429"></div>
+                      <div class="swatch" style="background: #1a7f37" data-color="#1a7f37"></div>
+                      <div class="swatch" style="background: #1a73e8" data-color="#1a73e8"></div>
+                      <div class="swatch" style="background: #6a0dad" data-color="#6a0dad"></div>
+                      <div class="swatch" style="background: #212121" data-color="#212121"></div>
+                      <div class="swatch" style="background: #f5f5f5; border: 1px solid #ccc" data-color="#f5f5f5"></div>
+                    </div>
+                    <input id="overlayBgColor" type="color" value="#cc0000" />
+                  </div>
+                  <div class="field">
+                    <label>Text Colour</label>
+                    <div class="swatch-row" id="overlayTxtSwatches">
+                      <div class="swatch" style="background: #ffffff; border: 1px solid #ccc" data-color="#ffffff"></div>
+                      <div class="swatch" style="background: #000000" data-color="#000000"></div>
+                      <div class="swatch" style="background: #f0b429" data-color="#f0b429"></div>
+                      <div class="swatch" style="background: #ff6b6b" data-color="#ff6b6b"></div>
+                    </div>
+                    <input id="overlayTxtColor" type="color" value="#ffffff" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-wrap" id="toastWrap"></div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+      import { getDatabase, ref, push, set, onValue, remove, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+      import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBgV9PoUFut3FPc0iChFNm2-h6-Uc5z6s0",
+        authDomain: "infinity-service-b2f10.firebaseapp.com",
+        databaseURL: "https://infinity-service-b2f10-default-rtdb.firebaseio.com",
+        projectId: "infinity-service-b2f10",
+        storageBucket: "infinity-service-b2f10.firebasestorage.app",
+        messagingSenderId: "805770674259",
+        appId: "1:805770674259:web:bcc520979e6772fda5c6a6"
+      };
+      const CLOUD_NAME = "dgrmpcha9";
+      const UPLOAD_PRESET = "Innovate";
+      const DEFAULT_PIN = "1234";
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const auth = getAuth(app);
+      const mediaRef = ref(db, "media");
+      const presentationsRef = ref(db, "presentations");
+      const activeRef = ref(db, "activePresentation");
+      const refreshRef = ref(db, "refreshSignal");
+      const monitorsRef = ref(db, "monitors");
+      const pinRef = ref(db, "appPin");
+
+      // ===== ANONYMOUS AUTH — required before any database read/write =====
+      // The PIN screen is a UX gate, not a security boundary (this is public
+      // client-side JS on GitHub Pages). Real protection comes from Firebase
+      // rules requiring `auth != null`, so we sign in anonymously up front.
+      const $ = (id) => document.getElementById(id);
+
+      let authReadyResolve, authReadyReject;
+      const authReady = new Promise((res, rej) => {
+        authReadyResolve = res;
+        authReadyReject = rej;
+      });
+      onAuthStateChanged(auth, (user) => {
+        if (user) authReadyResolve(user);
+      });
+      signInAnonymously(auth).catch((err) => {
+        console.error("Anonymous sign-in failed:", err);
+        const msgEl = $("authLoadingMsg");
+        if (msgEl) msgEl.textContent = "Connection error — check your network and reload";
+        authReadyReject(err);
+      });
+
+      const authGate = $("authGate");
+      const mainApp = $("mainApp");
+      const authError = $("authError");
+      const authLoadingMsg = $("authLoadingMsg");
+      const pinInputs = [$("pin0"), $("pin1"), $("pin2"), $("pin3")];
+
+      const changePinModal = $("changePinModal");
+      const cpCurrentPin = $("cpCurrentPin");
+      const cpNewPin = $("cpNewPin");
+      const cpConfirmPin = $("cpConfirmPin");
+      const cpError = $("cpError");
+      const cpSaveBtn = $("cpSaveBtn");
+      const cpCancelBtn = $("cpCancelBtn");
+
+      let correctPin = null;
+      let localMedia = {};
+      let presentations = {};
+      let activePresentationId = null;
+      let selectedPresentationId = null;
+      let selectedOverlayBg = "#cc0000";
+      let selectedOverlayTxt = "#ffffff";
+      let localMonitors = {};
+      let dragSrcIdx = null;
+      let localOverlay = { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" };
+      let overlaySaveTimer = null;
+      let appInited = false;
+      let onboardDismissed = localStorage.getItem("pm_onboard_dismissed") === "1" ? true : false;
+
+      async function loadPinAndShowAuth() {
+        authLoadingMsg.textContent = "Connecting…";
+        try {
+          await authReady;
+        } catch (e) {
+          /* handled by signInAnonymously catch above */
+        }
+        authLoadingMsg.textContent = "Loading…";
+        try {
+          const snap = await get(pinRef);
+          if (snap.exists()) {
+            correctPin = String(snap.val());
+          } else {
+            await set(pinRef, DEFAULT_PIN);
+            correctPin = DEFAULT_PIN;
+          }
+        } catch (e) {
+          correctPin = DEFAULT_PIN;
+          authLoadingMsg.textContent = "Offline — using default PIN";
+          return;
+        }
+        authLoadingMsg.textContent = "";
+        pinInputs.forEach((inp) => (inp.disabled = false));
+        pinInputs[0].focus();
+      }
+      pinInputs.forEach((inp) => (inp.disabled = true));
+      loadPinAndShowAuth();
+
+      function showAuthError(msg) {
+        authError.textContent = msg;
+        authError.classList.add("visible");
+        pinInputs.forEach((inp) => {
+          inp.value = "";
+          inp.classList.remove("filled");
+          inp.classList.add("err");
+        });
+        setTimeout(() => {
+          pinInputs.forEach((inp) => inp.classList.remove("err"));
+          authError.textContent = "";
+          authError.classList.remove("visible");
+          pinInputs[0].focus();
+        }, 1400);
+      }
+
+      function checkPin() {
+        if (!correctPin) return;
+        const pin = pinInputs.map((i) => i.value).join("");
+        if (pin.length < 4) return;
+        if (pin === correctPin) {
+          authGate.style.transition = "opacity 0.4s ease";
+          authGate.style.opacity = "0";
+          setTimeout(() => {
+            authGate.style.display = "none";
+            mainApp.style.display = "flex";
+            initApp();
+          }, 400);
+        } else {
+          showAuthError("Incorrect PIN — try again");
+        }
+      }
+
+      pinInputs.forEach((inp, idx) => {
+        inp.addEventListener("input", (e) => {
+          const val = e.target.value.replace(/[^0-9]/g, "");
+          inp.value = val.slice(-1);
+          inp.classList.toggle("filled", !!inp.value);
+          if (inp.value && idx < 3) pinInputs[idx + 1].focus();
+          checkPin();
+        });
+        inp.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !inp.value && idx > 0) {
+            pinInputs[idx - 1].focus();
+            pinInputs[idx - 1].value = "";
+            pinInputs[idx - 1].classList.remove("filled");
+          }
+          if (e.key === "ArrowLeft" && idx > 0) pinInputs[idx - 1].focus();
+          if (e.key === "ArrowRight" && idx < 3) pinInputs[idx + 1].focus();
+        });
+        inp.addEventListener("paste", (e) => {
+          e.preventDefault();
+          const paste = (e.clipboardData || window.clipboardData).getData("text").replace(/[^0-9]/g, "");
+          paste.split("").slice(0, 4).forEach((ch, i) => {
+            if (pinInputs[i]) {
+              pinInputs[i].value = ch;
+              pinInputs[i].classList.add("filled");
+            }
+          });
+          checkPin();
+        });
+      });
+
+      $("changePinBtn").onclick = () => {
+        cpCurrentPin.value = "";
+        cpNewPin.value = "";
+        cpConfirmPin.value = "";
+        cpError.textContent = "";
+        changePinModal.style.display = "flex";
+        setTimeout(() => cpCurrentPin.focus(), 50);
+      };
+      cpCancelBtn.onclick = () => (changePinModal.style.display = "none");
+      changePinModal.onclick = (e) => { if (e.target === changePinModal) changePinModal.style.display = "none"; };
+
+      cpSaveBtn.onclick = async () => {
+        cpError.textContent = "";
+        const cur = cpCurrentPin.value.trim();
+        const nw = cpNewPin.value.trim();
+        const conf = cpConfirmPin.value.trim();
+        if (cur !== correctPin) return (cpError.textContent = "Current PIN is incorrect.");
+        if (!/^\d{4}$/.test(nw)) return (cpError.textContent = "New PIN must be exactly 4 digits.");
+        if (nw !== conf) return (cpError.textContent = "New PINs do not match.");
+        cpSaveBtn.disabled = true;
+        try {
+          await set(pinRef, nw);
+          correctPin = nw;
+          changePinModal.style.display = "none";
+          toast("PIN changed successfully 🔑");
+        } catch (e) {
+          cpError.textContent = "Failed to save PIN. Try again.";
+        } finally {
+          cpSaveBtn.disabled = false;
+        }
+      };
+      [cpCurrentPin, cpNewPin, cpConfirmPin].forEach((inp) => {
+        inp.addEventListener("keydown", (e) => { if (e.key === "Enter") cpSaveBtn.click(); });
+      });
+
+      const fileInput = $("file");
+      const uploadBtn = $("uploadBtn");
+      const uploadStatus = $("uploadStatus");
+      const fname = $("fname");
+      const showNow = $("showNow");
+      const progressWrap = $("progressWrap");
+      const progressFill = $("progressFill");
+      const progressPct = $("progressPct");
+      const mediaListEl = $("mediaList");
+      const ytLibraryEl = $("ytLibrary");
+      const presentationItemsEl = $("presentationItems");
+      const tabsBar = $("tabsBar");
+      const addPresentationBtn = $("addPresentationBtn");
+      const editorTitle = $("editorTitle");
+      const modeEl = $("mode");
+      const transitionEl = $("transition");
+      const intervalSEl = $("intervalS");
+      const syncPlaybackEl = $("syncPlayback");
+      const syncInfoEl = $("syncInfo");
+      const overlayTextEl = $("overlayText");
+      const overlayVisibleEl = $("overlayVisible");
+      const overlayBgColorInput = $("overlayBgColor");
+      const overlayTxtColorInput = $("overlayTxtColor");
+      const overlayPreviewEl = $("overlayPreview");
+      const setActiveBtn = $("setActiveBtn");
+      const refreshViewBtn = $("refreshViewBtn");
+      const renamePresentationBtn = $("renamePresentationBtn");
+      const deletePresentationBtn = $("deletePresentationBtn");
+      const ytUrlEl = $("ytUrl");
+      const ytNameEl = $("ytName");
+      const ytStartEl = $("ytStart");
+      const ytEndEl = $("ytEnd");
+      const ytSaveBtn = $("ytSaveBtn");
+      const ytStatus = $("ytStatus");
+      const monitorAssignInput = $("monitorAssign");
+      const assignMonitorsBtn = $("assignMonitorsBtn");
+      const assignedMonitorsList = $("assignedMonitorsList");
+      const clearMonitorAssignmentsBtn = $("clearMonitorAssignments");
+      const monitorsList = $("monitorsList");
+      const liveIndicator = $("liveIndicator");
+      const toastWrap = $("toastWrap");
+      const sidebar = $("sidebar");
+      const sidebarBackdrop = $("sidebarBackdrop");
+      const sidebarClose = $("sidebarClose");
+      const topbarMenu = $("topbarMenu");
+      const onboardCard = $("onboardCard");
+      const onboardSteps = $("onboardSteps");
+      const onboardDismiss = $("onboardDismiss");
+
+      function scheduleOverlaySave() {
+        clearTimeout(overlaySaveTimer);
+        overlaySaveTimer = setTimeout(commitOverlay, 350);
+      }
+      async function commitOverlay() {
+        if (!selectedPresentationId) return;
+        await updatePresentationPartial({ overlay: { ...localOverlay } });
+      }
+
+      const editLocks = new Set();
+      const lock = (k) => editLocks.add(k);
+      const unlock = (k) => editLocks.delete(k);
+      const isLocked = (k) => editLocks.has(k);
+
+      function openSidebar() {
+        sidebar.classList.add("open");
+        sidebarBackdrop.classList.add("visible");
+        document.body.style.overflow = "hidden";
+      }
+      function closeSidebar() {
+        sidebar.classList.remove("open");
+        sidebarBackdrop.classList.remove("visible");
+        document.body.style.overflow = "";
+      }
+      topbarMenu.onclick = openSidebar;
+      sidebarClose.onclick = closeSidebar;
+      sidebarBackdrop.onclick = closeSidebar;
+
+      function toast(msg, type = "success") {
+        const el = document.createElement("div");
+        el.className = `toast ${type}`;
+        const icons = { success: "✓", error: "✕", info: "ℹ" };
+        el.textContent = `${icons[type] || ""} ${msg}`;
+        toastWrap.appendChild(el);
+        setTimeout(() => el.remove(), 3200);
+      }
+
+      document.querySelectorAll(".sidebar-tab").forEach((tab) => {
+        tab.onclick = () => {
+          document.querySelectorAll(".sidebar-tab").forEach((t) => t.classList.remove("active"));
+          document.querySelectorAll(".sidebar-panel").forEach((p) => p.classList.remove("active"));
+          tab.classList.add("active");
+          $(`panel-${tab.dataset.panel}`).classList.add("active");
+        };
+      });
+
+      // ===== COLLAPSIBLE CARDS =====
+      document.querySelectorAll('.card[data-collapsible="1"] .card-header').forEach((header) => {
+        header.addEventListener("click", (e) => {
+          if (e.target.closest(".check-row")) return; // don't toggle when clicking the overlay checkbox
+          header.closest(".card").classList.toggle("collapsed");
+        });
+      });
+      function expandCard(id) {
+        const el = $(id);
+        if (el) el.classList.remove("collapsed");
+      }
+
+      const dropZone = $("dropZone");
+      dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragging"); });
+      dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragging"));
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragging");
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          uploadBtn.click();
+        }
+      });
+
+      function escHtml(s) {
+        return s ? String(s).replaceAll("<", "&lt;").replaceAll(">", "&gt;") : "";
+      }
+      function extractYtId(raw) {
+        raw = (raw || "").trim();
+        if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
+        try {
+          const u = new URL(raw);
+          if (u.hostname.includes("youtu.be")) return u.pathname.slice(1).split("?")[0].slice(0, 11);
+          return u.searchParams.get("v") || null;
+        } catch {
+          return null;
+        }
+      }
+
+      function setSwatchActive(containerId, color) {
+        document.querySelectorAll(`#${containerId} .swatch`).forEach((s) => {
+          s.classList.toggle("active", (s.dataset.color || "").toLowerCase() === (color || "").toLowerCase());
+        });
+      }
+      function setupSwatches(contId, inputEl, onSelect) {
+        document.querySelectorAll(`#${contId} .swatch`).forEach((s) => {
+          s.onclick = () => {
+            inputEl.value = s.dataset.color;
+            setSwatchActive(contId, s.dataset.color);
+            onSelect(s.dataset.color);
+          };
+        });
+        inputEl.addEventListener("input", () => {
+          setSwatchActive(contId, inputEl.value);
+          onSelect(inputEl.value);
+        });
+      }
+      setupSwatches("overlayBgSwatches", overlayBgColorInput, (c) => {
+        selectedOverlayBg = c;
+        localOverlay.color = c;
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+      setupSwatches("overlayTxtSwatches", overlayTxtColorInput, (c) => {
+        selectedOverlayTxt = c;
+        localOverlay.textColor = c;
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+
+      function updateOverlayPreview() {
+        const txt = overlayTextEl.value;
+        if (txt && overlayVisibleEl.checked) {
+          overlayPreviewEl.style.display = "block";
+          overlayPreviewEl.style.background = selectedOverlayBg;
+          overlayPreviewEl.style.color = selectedOverlayTxt;
+          overlayPreviewEl.textContent = txt;
+        } else {
+          overlayPreviewEl.style.display = "none";
+        }
+      }
+
+      // ===== ONBOARDING CHECKLIST =====
+      function renderOnboarding() {
+        if (onboardDismissed) {
+          onboardCard.style.display = "none";
+          return;
+        }
+        const hasMedia = Object.keys(localMedia || {}).length > 0;
+        const p = selectedPresentationId ? presentations[selectedPresentationId] : null;
+        const hasSlides = !!(p && p.items && p.items.length > 0);
+        const hasMonitor = selectedPresentationId ? getAssignedMonitorNames(selectedPresentationId).length > 0 : false;
+        const isDefault = selectedPresentationId && activePresentationId === selectedPresentationId;
+
+        const steps = [
+          {
+            done: hasMedia,
+            title: "Upload a photo or video",
+            sub: "Open the Media tab in the sidebar and drop a file in.",
+            action: !hasMedia ? { label: "Open Media", fn: () => { openSidebar(); } } : null
+          },
+          {
+            done: hasSlides,
+            title: "Add it to your slides",
+            sub: "Click \u201c+ Add to Slides\u201d on any item in your library.",
+            action: hasMedia && !hasSlides ? { label: "Open Media", fn: () => { openSidebar(); } } : null
+          },
+          {
+            done: hasMonitor,
+            title: "Assign a monitor",
+            sub: "Type your screen's name under \u201cAssign Monitors\u201d below.",
+            action: hasSlides && !hasMonitor ? { label: "Go there", fn: () => { expandCard("monitorAssignCard"); document.getElementById("monitorAssignCard").scrollIntoView({ behavior: "smooth", block: "center" }); } } : null
+          },
+          {
+            done: isDefault,
+            title: "Set as default",
+            sub: "Make this presentation the one new displays show automatically.",
+            action: hasMonitor && !isDefault ? { label: "Set Default", fn: () => setActiveBtn.click() } : null
+          }
+        ];
+
+        // If all done, auto-hide after a short delay (but don't permanently dismiss, so it can reappear if state changes)
+        const allDone = steps.every((s) => s.done);
+        if (allDone) {
+          onboardCard.style.display = "none";
+          return;
+        }
+
+        onboardCard.style.display = "block";
+        onboardSteps.innerHTML = "";
+        steps.forEach((s, i) => {
+          const row = document.createElement("div");
+          row.className = "onboard-step" + (s.done ? " done" : "");
+          row.innerHTML = `
+            <div class="onboard-step-num">${s.done ? "✓" : i + 1}</div>
+            <div class="onboard-step-body">
+              <div class="onboard-step-title">${escHtml(s.title)}</div>
+              <div class="onboard-step-sub">${escHtml(s.sub)}</div>
+            </div>
+            <div class="onboard-step-action"></div>`;
+          if (s.action) {
+            const btn = document.createElement("button");
+            btn.className = "btn xs primary";
+            btn.textContent = s.action.label;
+            btn.onclick = s.action.fn;
+            row.querySelector(".onboard-step-action").appendChild(btn);
+          }
+          onboardSteps.appendChild(row);
+        });
+      }
+      onboardDismiss.onclick = () => {
+        onboardDismissed = true;
+        localStorage.setItem("pm_onboard_dismissed", "1");
+        onboardCard.style.display = "none";
+      };
+
+      function initApp() {
+        if (appInited) return;
+        appInited = true;
+
+        onValue(mediaRef, (snap) => {
+          localMedia = snap.val() || {};
+          renderMediaList();
+          renderYtLibrary();
+          if (selectedPresentationId) renderPresentationEditor();
+          renderOnboarding();
+        });
+
+        onValue(presentationsRef, (snap) => {
+          const raw = snap.val() || {};
+          presentations = {};
+          for (const [k, v] of Object.entries(raw)) {
+            if (k !== "current") presentations[k] = v;
+          }
+          if (Object.keys(presentations).length === 0) {
+            createPresentation("Main");
+            return;
+          }
+          if (!selectedPresentationId || !presentations[selectedPresentationId]) {
+            selectedPresentationId = Object.keys(presentations)[0];
+          }
+          renderTabs();
+          renderPresentationEditor();
+          renderOnboarding();
+        });
+
+        onValue(activeRef, (snap) => {
+          activePresentationId = snap.val() || null;
+          renderTabs();
+          updateLiveIndicator();
+          renderOnboarding();
+        });
+
+        onValue(monitorsRef, (snap) => {
+          localMonitors = snap.val() || {};
+          renderMonitorsList();
+          renderPresentationEditor();
+          renderOnboarding();
+        });
+      }
+
+      function updateLiveIndicator() {
+        if (selectedPresentationId && activePresentationId === selectedPresentationId) {
+          liveIndicator.style.display = "inline-flex";
+        } else {
+          liveIndicator.style.display = "none";
+        }
+      }
+
+      async function createPresentation(name) {
+        const newRef = push(presentationsRef);
+        const id = newRef.key;
+        await set(newRef, {
+          name: name || "New Presentation",
+          items: [],
+          mode: "slideshow",
+          intervalMs: 5000,
+          transition: "fade",
+          syncPlayback: false,
+          overlay: { text: "", visible: false, color: "#cc0000", textColor: "#ffffff" }
+        });
+        selectedPresentationId = id;
+      }
+
+      addPresentationBtn.onclick = async () => {
+        const name = prompt("New presentation name:", "New Presentation");
+        if (name) await createPresentation(name);
+      };
+      renamePresentationBtn.onclick = async () => {
+        if (!selectedPresentationId) return;
+        const cur = presentations[selectedPresentationId]?.name || "";
+        const name = prompt("Rename:", cur);
+        if (!name) return;
+        await update(ref(db, `presentations/${selectedPresentationId}`), { name });
+        toast(`Renamed to "${name}"`);
+      };
+      deletePresentationBtn.onclick = async () => {
+        if (!selectedPresentationId) return;
+        if (Object.keys(presentations).length <= 1) return toast("Need at least one presentation.", "error");
+        const name = presentations[selectedPresentationId]?.name;
+        if (!confirm(`Delete "${name}"?`)) return;
+        await remove(ref(db, `presentations/${selectedPresentationId}`));
+        selectedPresentationId = null;
+        toast(`Deleted "${name}"`, "info");
+      };
+      setActiveBtn.onclick = async () => {
+        if (!selectedPresentationId) return;
+        await set(activeRef, selectedPresentationId);
+        const p = (await get(ref(db, `presentations/${selectedPresentationId}`))).val();
+        if (p) await set(ref(db, "presentations/current"), { ...p, id: "current" });
+        toast(`"${p?.name}" is now the default`);
+        updateLiveIndicator();
+      };
+      refreshViewBtn.onclick = async () => {
+        await set(refreshRef, Date.now());
+        toast("Refresh signal sent to all displays", "info");
+      };
+
+      ytSaveBtn.onclick = async () => {
+        const raw = ytUrlEl.value.trim();
+        if (!raw) return toast("Enter a YouTube URL or video ID", "error");
+        const videoId = extractYtId(raw);
+        if (!videoId) return toast("Couldn't parse a YouTube video ID.", "error");
+        const name = ytNameEl.value.trim() || `YouTube: ${videoId}`;
+        const start = parseFloat(ytStartEl.value) || 0;
+        const endVal = ytEndEl.value.trim();
+        const end = endVal ? parseFloat(endVal) : null;
+        const newRef2 = push(mediaRef);
+        await set(newRef2, { resource_type: "youtube", ytId: videoId, filename: name, uploadedAt: Date.now(), start, end, duration: end || null });
+        ytUrlEl.value = "";
+        ytNameEl.value = "";
+        ytStartEl.value = "0";
+        ytEndEl.value = "";
+        toast("YouTube video saved to library");
+      };
+
+      function renderTabs() {
+        tabsBar.querySelectorAll(".pres-tab").forEach((t) => t.remove());
+        const addBtn = $("addPresentationBtn");
+        Object.entries(presentations).forEach(([id, p]) => {
+          const isSelected = id === selectedPresentationId;
+          const isLive = id === activePresentationId;
+          const isSynced = !!p.syncPlayback;
+          const tab = document.createElement("div");
+          tab.className = "pres-tab" + (isSelected ? " active" : "");
+          tab.innerHTML = `<span>${escHtml(p.name || "Untitled")}</span>${isLive ? '<span class="chip chip-live">Default</span>' : ""}${isSynced ? '<span class="chip chip-sync">Sync</span>' : ""}<span class="pres-tab-close">×</span>`;
+          tab.addEventListener("click", (e) => {
+            if (e.target.classList.contains("pres-tab-close")) return;
+            selectedPresentationId = id;
+            renderTabs();
+            renderPresentationEditor();
+            updateLiveIndicator();
+            renderOnboarding();
+          });
+          tab.querySelector(".pres-tab-close").addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (Object.keys(presentations).length <= 1) return toast("Need at least one presentation.", "error");
+            if (!confirm(`Delete "${p.name}"?`)) return;
+            await remove(ref(db, `presentations/${id}`));
+          });
+          tabsBar.insertBefore(tab, addBtn);
+        });
+        updateLiveIndicator();
+      }
+
+      function renderMediaList() {
+        mediaListEl.innerHTML = "";
+        const sorted = Object.keys(localMedia)
+          .filter((id) => localMedia[id].resource_type !== "youtube")
+          .sort((a, b) => localMedia[a].uploadedAt - localMedia[b].uploadedAt);
+        if (sorted.length === 0) {
+          mediaListEl.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No media yet — upload above</div>';
+          return;
+        }
+        sorted.forEach((id) => {
+          const m = localMedia[id];
+          const div = document.createElement("div");
+          div.className = "media-card";
+          let thumb = "";
+          if (m.resource_type === "image") thumb = `<div class="media-thumb-wrap"><img src="${m.url}" loading="lazy" /></div>`;
+          else thumb = `<div class="media-thumb-wrap"><video src="${m.url}" muted playsinline></video></div>`;
+          const typeLabel = m.resource_type || "file";
+          div.innerHTML = `
+            ${thumb}
+            <div class="media-card-body">
+              <input class="media-card-name rename-input" data-id="${id}" value="${escHtml(m.filename || id)}" title="Click to rename" />
+              <div class="media-card-actions">
+                <button data-id="${id}" class="btn primary xs addBtn">+ Add to Slides</button>
+                <button data-id="${id}" class="btn danger xs deleteBtn">✕</button>
+              </div>
+            </div>`;
+          const thumbEl = div.querySelector(".media-thumb-wrap");
+          if (thumbEl) {
+            const badge = document.createElement("div");
+            badge.className = "media-thumb-type";
+            badge.textContent = typeLabel;
+            thumbEl.appendChild(badge);
+          }
+          mediaListEl.appendChild(div);
+        });
+        attachMediaCardHandlers(mediaListEl);
+      }
+
+      function renderYtLibrary() {
+        ytLibraryEl.innerHTML = "";
+        const sorted = Object.keys(localMedia)
+          .filter((id) => localMedia[id].resource_type === "youtube")
+          .sort((a, b) => localMedia[a].uploadedAt - localMedia[b].uploadedAt);
+        if (sorted.length === 0) {
+          ytLibraryEl.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No YouTube videos saved yet</div>';
+          return;
+        }
+        sorted.forEach((id) => {
+          const m = localMedia[id];
+          const card = document.createElement("div");
+          card.className = "yt-card";
+          card.innerHTML = `
+            <div class="yt-card-thumb">▶<div class="yt-badge">YouTube</div></div>
+            <div class="yt-card-body">
+              <input class="yt-card-name yt-rename-input" data-id="${id}" value="${escHtml(m.filename || id)}" title="Click to rename" />
+              <div class="yt-card-actions">
+                <button data-id="${id}" class="btn primary xs ytAddBtn">+ Add to Slides</button>
+                <button data-id="${id}" class="btn danger xs ytDeleteBtn">✕</button>
+              </div>
+            </div>`;
+          ytLibraryEl.appendChild(card);
+        });
+        ytLibraryEl.querySelectorAll(".yt-rename-input").forEach((inp) => {
+          const save = async () => {
+            const id = inp.dataset.id;
+            const val = inp.value.trim();
+            if (!val || val === (localMedia[id]?.filename || "")) return;
+            await update(ref(db, `media/${id}`), { filename: val });
+          };
+          inp.addEventListener("blur", save);
+          inp.addEventListener("keydown", (e) => { if (e.key === "Enter") inp.blur(); });
+        });
+        ytLibraryEl.querySelectorAll(".ytAddBtn").forEach((b) => { b.onclick = () => { addToPresentation(b.dataset.id); closeSidebar(); }; });
+        ytLibraryEl.querySelectorAll(".ytDeleteBtn").forEach((b) => {
+          b.onclick = async () => {
+            if (!confirm("Delete this YouTube video from all presentations?")) return;
+            await remove(ref(db, "media/" + b.dataset.id));
+            for (const [pid, p] of Object.entries(presentations)) {
+              if (!p.items) continue;
+              const filtered = p.items.filter((it) => it.mediaId !== b.dataset.id);
+              if (filtered.length !== p.items.length) await update(ref(db, `presentations/${pid}`), { items: filtered });
+            }
+            toast("YouTube video removed");
+          };
+        });
+      }
+
+      function attachMediaCardHandlers(container) {
+        container.querySelectorAll(".rename-input").forEach((inp) => {
+          const save = async () => {
+            const id = inp.dataset.id;
+            const val = inp.value.trim();
+            if (!val || val === (localMedia[id]?.filename || "")) return;
+            await update(ref(db, `media/${id}`), { filename: val });
+          };
+          inp.addEventListener("blur", save);
+          inp.addEventListener("keydown", (e) => { if (e.key === "Enter") inp.blur(); });
+        });
+        container.querySelectorAll(".addBtn").forEach((b) => (b.onclick = () => { addToPresentation(b.dataset.id); closeSidebar(); }));
+        container.querySelectorAll(".deleteBtn").forEach((b) => {
+          b.onclick = async () => {
+            if (!confirm("Delete this media from all presentations?")) return;
+            await remove(ref(db, "media/" + b.dataset.id));
+            for (const [pid, p] of Object.entries(presentations)) {
+              if (!p.items) continue;
+              const filtered = p.items.filter((it) => it.mediaId !== b.dataset.id);
+              if (filtered.length !== p.items.length) await update(ref(db, `presentations/${pid}`), { items: filtered });
+            }
+            toast("Media removed");
+          };
+        });
+      }
+
+      async function addToPresentation(mediaId) {
+        if (!selectedPresentationId) return toast("Select a presentation tab first", "error");
+        const m = localMedia[mediaId];
+        if (!m) return;
+        const pSnap = await get(ref(db, `presentations/${selectedPresentationId}`));
+        const p = pSnap.val() || {};
+        const items = p.items || [];
+        items.push({ mediaId, start: m.start || 0, end: m.end || m.duration || null, label: m.filename || "" });
+        await update(ref(db, `presentations/${selectedPresentationId}`), { items });
+        toast(`Added "${m.filename || mediaId}" to slides`);
+      }
+
+      async function updatePresentationPartial(updates) {
+        if (!selectedPresentationId) return;
+        await update(ref(db, `presentations/${selectedPresentationId}`), updates);
+        if (selectedPresentationId === activePresentationId) {
+          const curRef2 = ref(db, "presentations/current");
+          const curSnap = await get(curRef2);
+          const curVal = curSnap.val() || {};
+          await set(curRef2, { ...curVal, ...updates });
+        }
+      }
+
+      function getAssignedMonitorNames(pid) {
+        const assigned = [];
+        for (const [mn, val] of Object.entries(localMonitors || {})) {
+          let p = null;
+          if (typeof val === "string") p = val;
+          else if (val && typeof val === "object") p = val.presentation || val.assigned || val.pid || null;
+          if (p === pid) assigned.push(decodeURIComponent(mn));
+        }
+        return assigned;
+      }
+
+      function renderPresentationEditor() {
+        if (!selectedPresentationId || !presentations[selectedPresentationId]) {
+          editorTitle.textContent = "Select a Presentation";
+          return;
+        }
+        const p = presentations[selectedPresentationId];
+        editorTitle.textContent = p.name || "Presentation";
+        if (!isLocked("mode")) modeEl.value = p.mode || "slideshow";
+        if (!isLocked("transition")) transitionEl.value = p.transition || "fade";
+        if (!isLocked("interval")) intervalSEl.value = Math.round((p.intervalMs || 5000) / 1000);
+        if (!isLocked("syncPlayback")) syncPlaybackEl.checked = !!p.syncPlayback;
+        syncInfoEl.classList.toggle("visible", !!p.syncPlayback);
+
+        if (!isLocked("overlayText")) {
+          overlayTextEl.value = p.overlay?.text || "";
+          localOverlay.text = p.overlay?.text || "";
+        }
+        overlayVisibleEl.checked = !!p.overlay?.visible;
+        localOverlay.visible = !!p.overlay?.visible;
+        if (p.overlay?.color) {
+          selectedOverlayBg = p.overlay.color;
+          overlayBgColorInput.value = p.overlay.color;
+          localOverlay.color = p.overlay.color;
+          setSwatchActive("overlayBgSwatches", selectedOverlayBg);
+        }
+        if (p.overlay?.textColor) {
+          selectedOverlayTxt = p.overlay.textColor;
+          overlayTxtColorInput.value = p.overlay.textColor;
+          localOverlay.textColor = p.overlay.textColor;
+          setSwatchActive("overlayTxtSwatches", selectedOverlayTxt);
+        }
+        updateOverlayPreview();
+
+        const assigned = getAssignedMonitorNames(selectedPresentationId);
+        assignedMonitorsList.innerHTML = "";
+        if (assigned.length === 0) {
+          assignedMonitorsList.innerHTML = '<span style="font-size:13px;color:var(--text3)">No monitors assigned</span>';
+        }
+        assigned.forEach((name) => {
+          const el = document.createElement("div");
+          el.className = "assigned-badge";
+          el.innerHTML = `🖥️ ${escHtml(name)}`;
+          assignedMonitorsList.appendChild(el);
+        });
+        if (!isLocked("monitorAssign") && !monitorAssignInput.value.trim() && assigned.length > 0) {
+          monitorAssignInput.value = assigned.join(", ");
+        }
+        renderSlides(p);
+      }
+
+      function renderSlides(p) {
+        presentationItemsEl.innerHTML = "";
+        if (!p.items || p.items.length === 0) {
+          presentationItemsEl.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🖼️</div>
+              <div class="empty-state-title">No slides yet</div>
+              <div class="empty-state-sub">Open the Media panel and click "+ Add to Slides" on anything you've uploaded.</div>
+              <button class="btn primary" id="emptyOpenSidebarBtn">📁 Open Media Library</button>
+            </div>`;
+          const btn = $("emptyOpenSidebarBtn");
+          if (btn) btn.onclick = openSidebar;
+          return;
+        }
+
+        const pRef2 = ref(db, `presentations/${selectedPresentationId}`);
+        const getP = async () => (await get(pRef2)).val();
+
+        p.items.forEach((it, index) => {
+          const m = localMedia[it.mediaId] || {};
+          const isYt = m.resource_type === "youtube";
+          const div = document.createElement("div");
+          div.className = "slide-item";
+          div.draggable = true;
+          div.dataset.idx = index;
+
+          let thumbHtml = "";
+          if (isYt) thumbHtml = `<div class="slide-item-thumb"><div class="slide-item-thumb-yt">▶</div><div class="slide-item-thumb-badge">YT</div><div class="slide-num">${index + 1}</div></div>`;
+          else if (m.resource_type === "image") thumbHtml = `<div class="slide-item-thumb"><img src="${m.url}" /><div class="slide-num">${index + 1}</div></div>`;
+          else thumbHtml = `<div class="slide-item-thumb"><video src="${m.url}" muted></video><div class="slide-num">${index + 1}</div></div>`;
+
+          div.innerHTML = `
+            <div class="drag-handle">⠿</div>
+            ${thumbHtml}
+            <div class="slide-item-body">
+              <input class="slide-item-name itemLabel" data-idx="${index}" value="${escHtml(it.label || m.filename || it.mediaId || "")}" placeholder="Label..." />
+              <div class="slide-item-fields">
+                <div class="field"><label>Start (s)</label><input type="number" data-idx="${index}" class="itemStart" value="${it.start || 0}" /></div>
+                <div class="field"><label>End (s)</label><input type="number" data-idx="${index}" class="itemEnd" value="${it.end == null ? "" : it.end}" placeholder="auto" /></div>
+                <div class="slide-item-actions"><button data-idx="${index}" class="btn danger xs removeBtn">✕ Remove</button></div>
+              </div>
+            </div>`;
+          presentationItemsEl.appendChild(div);
+
+          div.addEventListener("dragstart", (e) => {
+            dragSrcIdx = index;
+            e.dataTransfer.effectAllowed = "move";
+            setTimeout(() => (div.style.opacity = "0.5"), 0);
+          });
+          div.addEventListener("dragend", () => (div.style.opacity = ""));
+          div.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            document.querySelectorAll(".slide-item").forEach((el) => el.classList.remove("drag-over"));
+            div.classList.add("drag-over");
+          });
+          div.addEventListener("dragleave", () => div.classList.remove("drag-over"));
+          div.addEventListener("drop", async (e) => {
+            e.preventDefault();
+            div.classList.remove("drag-over");
+            const toIdx = index;
+            if (dragSrcIdx === null || dragSrcIdx === toIdx) return;
+            const p2 = await getP();
+            const [moved] = p2.items.splice(dragSrcIdx, 1);
+            p2.items.splice(toIdx, 0, moved);
+            await set(pRef2, p2);
+            dragSrcIdx = null;
+          });
+        });
+
+        presentationItemsEl.querySelectorAll(".removeBtn").forEach(
+          (b) => (b.onclick = async () => {
+            const p2 = await getP();
+            p2.items.splice(+b.dataset.idx, 1);
+            await set(pRef2, p2);
+            toast("Removed slide", "info");
+          })
+        );
+        presentationItemsEl.querySelectorAll(".itemStart").forEach((inp) => {
+          const k = `start-${inp.dataset.idx}`;
+          inp.addEventListener("focus", () => lock(k));
+          inp.addEventListener("blur", async () => {
+            unlock(k);
+            const p2 = await getP();
+            p2.items[+inp.dataset.idx].start = parseFloat(inp.value) || 0;
+            await set(pRef2, p2);
+          });
+        });
+        presentationItemsEl.querySelectorAll(".itemEnd").forEach((inp) => {
+          const k = `end-${inp.dataset.idx}`;
+          inp.addEventListener("focus", () => lock(k));
+          inp.addEventListener("blur", async () => {
+            unlock(k);
+            const p2 = await getP();
+            p2.items[+inp.dataset.idx].end = inp.value === "" ? null : parseFloat(inp.value);
+            await set(pRef2, p2);
+          });
+        });
+        presentationItemsEl.querySelectorAll(".itemLabel").forEach((inp) => {
+          const k = `label-${inp.dataset.idx}`;
+          inp.addEventListener("focus", () => lock(k));
+          inp.addEventListener("blur", async () => {
+            unlock(k);
+            const p2 = await getP();
+            p2.items[+inp.dataset.idx].label = inp.value;
+            await set(pRef2, p2);
+          });
+        });
+      }
+
+      function renderMonitorsList() {
+        monitorsList.innerHTML = "";
+        const entries = Object.entries(localMonitors || {}).sort((a, b) => a[0].localeCompare(b[0]));
+        if (entries.length === 0) {
+          monitorsList.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No monitors connected yet</div>';
+          return;
+        }
+        const now = Date.now();
+        entries.forEach(([encodedName, data]) => {
+          const name = decodeURIComponent(encodedName);
+          let lastSeen = 0, online = false, resolution = "—", pid = null;
+          if (typeof data === "string") {
+            pid = data;
+          } else if (data && typeof data === "object") {
+            lastSeen = data.lastSeen || 0;
+            online = now - lastSeen < 20000 && data.status === "online";
+            resolution = data.resolution || "—";
+            pid = data.presentation || data.assigned || data.pid || null;
+          }
+          const presName = pid && presentations[pid] ? presentations[pid].name : pid ? pid.slice(0, 8) + "…" : "Unassigned";
+          const lastSeenStr = lastSeen ? new Date(lastSeen).toLocaleTimeString() : "Never";
+          const row = document.createElement("div");
+          row.className = "monitor-row";
+          row.innerHTML = `
+            <div class="monitor-status-dot ${online ? "online" : "offline"}"></div>
+            <div class="monitor-info">
+              <div class="monitor-name">${escHtml(name)}</div>
+              <div class="monitor-meta">${resolution} · ${lastSeenStr}</div>
+              <div class="monitor-pres">→ ${escHtml(presName)}</div>
+            </div>
+            <div class="monitor-actions">
+              <button data-name="${encodedName}" class="btn xs assignToBtn">Assign here</button>
+              <button data-name="${encodedName}" class="btn xs reloadBtn">↺ Reload</button>
+              <button data-name="${encodedName}" class="btn danger xs removeMonBtn">✕</button>
+            </div>`;
+          monitorsList.appendChild(row);
+        });
+
+        monitorsList.querySelectorAll(".assignToBtn").forEach((b) => {
+          b.onclick = async () => {
+            if (!selectedPresentationId) return toast("Select a presentation tab first.", "error");
+            const key = b.dataset.name;
+            const curSnap = await get(ref(db, `monitors/${key}`));
+            const curVal = curSnap.val();
+            if (typeof curVal === "object" && curVal !== null) await update(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
+            else await set(ref(db, `monitors/${key}`), { presentation: selectedPresentationId });
+            toast("Monitor assigned");
+          };
+        });
+        monitorsList.querySelectorAll(".reloadBtn").forEach((b) => {
+          b.onclick = async () => {
+            const key = b.dataset.name;
+            const curSnap = await get(ref(db, `monitors/${key}`));
+            const curVal = curSnap.val();
+            if (curVal && typeof curVal === "object") await update(ref(db, `monitors/${key}`), { command: { cmd: "reloadPresentation", at: Date.now() } });
+            else await set(ref(db, `monitors/${key}`), { presentation: curVal || null, command: { cmd: "reloadPresentation", at: Date.now() } });
+            toast("Reload sent", "info");
+          };
+        });
+        monitorsList.querySelectorAll(".removeMonBtn").forEach((b) => {
+          b.onclick = async () => {
+            if (!confirm("Remove monitor entry?")) return;
+            await remove(ref(db, `monitors/${b.dataset.name}`));
+            toast("Monitor removed", "info");
+          };
+        });
+      }
+
+      setInterval(() => { if (Object.keys(localMonitors).length > 0) renderMonitorsList(); }, 10000);
+
+      modeEl.addEventListener("change", async () => {
+        lock("mode");
+        await updatePresentationPartial({ mode: modeEl.value });
+        setTimeout(() => unlock("mode"), 250);
+      });
+      transitionEl.addEventListener("change", async () => {
+        lock("transition");
+        await updatePresentationPartial({ transition: transitionEl.value });
+        setTimeout(() => unlock("transition"), 250);
+      });
+      intervalSEl.addEventListener("focus", () => lock("interval"));
+      intervalSEl.addEventListener("blur", async () => {
+        unlock("interval");
+        await updatePresentationPartial({ intervalMs: (parseInt(intervalSEl.value, 10) || 5) * 1000 });
+      });
+      syncPlaybackEl.addEventListener("change", async () => {
+        lock("syncPlayback");
+        syncInfoEl.classList.toggle("visible", syncPlaybackEl.checked);
+        await updatePresentationPartial({ syncPlayback: syncPlaybackEl.checked });
+        renderTabs();
+        setTimeout(() => unlock("syncPlayback"), 250);
+      });
+
+      overlayTextEl.addEventListener("focus", () => lock("overlayText"));
+      overlayTextEl.addEventListener("input", () => {
+        localOverlay.text = overlayTextEl.value;
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+      overlayTextEl.addEventListener("blur", () => {
+        unlock("overlayText");
+        clearTimeout(overlaySaveTimer);
+        commitOverlay();
+      });
+      overlayVisibleEl.addEventListener("change", () => {
+        localOverlay.visible = overlayVisibleEl.checked;
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+      overlayBgColorInput.addEventListener("change", () => {
+        selectedOverlayBg = overlayBgColorInput.value;
+        localOverlay.color = overlayBgColorInput.value;
+        setSwatchActive("overlayBgSwatches", selectedOverlayBg);
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+      overlayTxtColorInput.addEventListener("change", () => {
+        selectedOverlayTxt = overlayTxtColorInput.value;
+        localOverlay.textColor = overlayTxtColorInput.value;
+        setSwatchActive("overlayTxtSwatches", selectedOverlayTxt);
+        updateOverlayPreview();
+        scheduleOverlaySave();
+      });
+
+      monitorAssignInput.addEventListener("focus", () => lock("monitorAssign"));
+      monitorAssignInput.addEventListener("blur", () => unlock("monitorAssign"));
+
+      assignMonitorsBtn.onclick = async () => {
+        if (!selectedPresentationId) return toast("Select a presentation first.", "error");
+        const raw = monitorAssignInput.value.trim();
+        const names = raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+        const keys = names.map((n) => encodeURIComponent(n));
+        const snap = await get(monitorsRef);
+        const cur = snap.val() || {};
+        const currentlyAssignedKeys = Object.entries(cur)
+          .filter(([mn, val]) => {
+            let pid = null;
+            if (typeof val === "string") pid = val;
+            else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
+            return pid === selectedPresentationId;
+          })
+          .map(([mn]) => mn);
+
+        for (const mn of currentlyAssignedKeys) {
+          if (!keys.includes(mn)) {
+            const v = cur[mn];
+            if (typeof v === "object" && v !== null) await update(ref(db, `monitors/${mn}`), { presentation: null });
+            else await remove(ref(db, `monitors/${mn}`));
+          }
+        }
+
+        let toggledOff = 0;
+        for (const k of keys) {
+          const v = cur[k];
+          let currentPid = null;
+          if (typeof v === "string") currentPid = v;
+          else if (v && typeof v === "object") currentPid = v.presentation || v.assigned || v.pid || null;
+          if (currentPid === selectedPresentationId) {
+            if (typeof v === "object" && v !== null) await update(ref(db, `monitors/${k}`), { presentation: null });
+            else await remove(ref(db, `monitors/${k}`));
+            toggledOff++;
+          } else {
+            const curSnap2 = await get(ref(db, `monitors/${k}`));
+            const curVal2 = curSnap2.val();
+            if (typeof curVal2 === "object" && curVal2 !== null) await update(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+            else await set(ref(db, `monitors/${k}`), { presentation: selectedPresentationId });
+          }
+        }
+
+        if (toggledOff > 0 && toggledOff === keys.length) toast(`${toggledOff} monitor(s) unassigned`, "info");
+        else if (toggledOff > 0) toast(`${keys.length - toggledOff} assigned, ${toggledOff} unassigned`);
+        else toast(`${names.length} monitor(s) assigned`);
+      };
+
+      clearMonitorAssignmentsBtn.onclick = async () => {
+        if (!selectedPresentationId) return;
+        if (!confirm("Clear all monitor assignments for this presentation?")) return;
+        const snap = await get(monitorsRef);
+        const cur = snap.val() || {};
+        for (const [mn, val] of Object.entries(cur)) {
+          let pid = null;
+          if (typeof val === "string") pid = val;
+          else if (val && typeof val === "object") pid = val.presentation || val.assigned || val.pid || null;
+          if (pid === selectedPresentationId) {
+            if (typeof val === "object") await update(ref(db, `monitors/${mn}`), { presentation: null });
+            else await remove(ref(db, `monitors/${mn}`));
+          }
+        }
+        monitorAssignInput.value = "";
+        toast("Monitor assignments cleared", "info");
+      };
+
+      uploadBtn.onclick = async () => {
+        const files = fileInput.files;
+        if (!files || files.length === 0) return toast("Choose a file first", "error");
+        uploadStatus.textContent = "";
+        progressWrap.style.display = "block";
+        progressFill.style.width = "0%";
+        progressPct.textContent = "0%";
+        uploadBtn.disabled = true;
+        try {
+          const file = files[0];
+          const fd = new FormData();
+          fd.append("file", file);
+          fd.append("upload_preset", UPLOAD_PRESET);
+          const data = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`);
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                progressFill.style.width = pct + "%";
+                progressPct.textContent = pct + "%";
+              }
+            };
+            xhr.onload = () => (xhr.status < 300 ? resolve(JSON.parse(xhr.responseText)) : reject(new Error("HTTP " + xhr.status)));
+            xhr.onerror = () => reject(new Error("Network error"));
+            xhr.send(fd);
+          });
+          const mobj = { url: data.secure_url, resource_type: data.resource_type, filename: fname.value || file.name, uploadedAt: Date.now(), duration: data.duration || null };
+          const newRef3 = push(mediaRef);
+          await set(newRef3, mobj);
+          toast(`"${mobj.filename}" uploaded`);
+          fname.value = "";
+          fileInput.value = "";
+          if (showNow.value !== "no" && selectedPresentationId) {
+            const pRef3 = ref(db, `presentations/${selectedPresentationId}`);
+            const cur = (await get(pRef3)).val() || {};
+            const item = { mediaId: newRef3.key, start: 0, end: mobj.duration || null, label: mobj.filename };
+            await update(pRef3, { items: showNow.value === "replace" ? [item] : [...(cur.items || []), item] });
+          }
+        } catch (err) {
+          toast("Upload failed: " + err.message, "error");
+        } finally {
+          uploadBtn.disabled = false;
+          setTimeout(() => (progressWrap.style.display = "none"), 3000);
+        }
+      };
+    </script>
+  </body>
+</html>
