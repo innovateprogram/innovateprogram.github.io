@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.U.A — Takin' Out the Trash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#242a8c;
+    --navy-deep:#1a1f6b;
+    --green:#1fb35b;
+    --green-deep:#158a46;
+    --cream:#f7f6f0;
+    --charcoal:#181a26;
+    --amber:#f2a93b;
+    --paper:#ffffff;
+    --max:1180px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Archivo',sans-serif;
+    background:var(--cream);
+    color:var(--charcoal);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Archivo Black',sans-serif;
+    text-transform:uppercase;
+    line-height:0.98;
+    letter-spacing:-0.01em;
+  }
+  a{color:inherit;}
+  img{max-width:100%;display:block;}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 32px;}
+  :focus-visible{outline:3px solid var(--amber);outline-offset:3px;}
+
+  /* ---------- decorative bin-lid divider ---------- */
+  .lid-divider{
+    height:64px;
+    width:100%;
+    position:relative;
+    overflow:hidden;
+  }
+  .lid-divider svg{width:100%;height:100%;display:block;}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    background:var(--navy);
+    border-bottom:4px solid var(--green);
+  }
+  .nav-inner{
+    max-width:var(--max);margin:0 auto;padding:16px 32px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .brand{
+    display:flex;align-items:center;gap:12px;
+    color:var(--paper);
+    font-family:'Archivo Black',sans-serif;
+    font-size:1.15rem;
+    letter-spacing:0.02em;
+  }
+  .brand .can{width:34px;height:34px;flex:none;}
+  nav.links{display:flex;gap:28px;}
+  nav.links a{
+    color:var(--paper);
+    text-decoration:none;
+    font-weight:700;
+    font-size:0.88rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    opacity:0.88;
+    transition:opacity .15s ease;
+    padding:6px 2px;
+    border-bottom:2px solid transparent;
+  }
+  nav.links a:hover{opacity:1;border-bottom-color:var(--green);}
+  .nav-cta{
+    background:var(--green);
+    color:var(--navy-deep);
+    font-weight:800;
+    text-transform:uppercase;
+    font-size:0.85rem;
+    letter-spacing:0.04em;
+    padding:10px 20px;
+    border-radius:100px;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .nav-cta:hover{background:#fff;}
+  .burger{display:none;background:none;border:0;color:#fff;font-size:1.6rem;cursor:pointer;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:var(--navy);
+    color:var(--paper);
+    position:relative;
+    overflow:hidden;
+    padding:88px 0 0;
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:40px;
+    align-items:center;
+    position:relative;
+    z-index:2;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    background:rgba(31,179,91,0.16);
+    border:1px solid var(--green);
+    color:var(--green);
+    font-weight:800;
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    padding:8px 16px;
+    border-radius:100px;
+    margin-bottom:28px;
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+  .hero h1{
+    font-size:clamp(3rem,7vw,5.4rem);
+    color:var(--paper);
+  }
+  .hero h1 .accent{color:var(--green);}
+  .hero .tagline{
+    font-style:italic;
+    font-family:'Archivo',sans-serif;
+    font-weight:700;
+    font-size:1.35rem;
+    color:var(--amber);
+    margin-top:22px;
+    letter-spacing:0.01em;
+  }
+  .hero p.lede{
+    margin-top:22px;
+    font-size:1.08rem;
+    max-width:46ch;
+    color:rgba(255,255,255,0.82);
+  }
+  .hero .cta-row{
+    display:flex;gap:16px;margin-top:36px;flex-wrap:wrap;
+  }
+  .btn-primary{
+    background:var(--green);
+    color:var(--navy-deep);
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    font-size:0.92rem;
+    padding:16px 30px;
+    border-radius:100px;
+    text-decoration:none;
+    display:inline-block;
+    box-shadow:0 8px 24px rgba(31,179,91,0.28);
+    transition:transform .15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-ghost{
+    border:2px solid rgba(255,255,255,0.35);
+    color:var(--paper);
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    font-size:0.92rem;
+    padding:14px 28px;
+    border-radius:100px;
+    text-decoration:none;
+    display:inline-block;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .btn-ghost:hover{border-color:var(--paper);background:rgba(255,255,255,0.06);}
+
+  /* hero bin illustration */
+  .hero-art{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .bin-badge{
+    width:min(420px,90%);
+    aspect-ratio:1/1;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #2f36a3, var(--navy-deep) 70%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 30px 70px rgba(0,0,0,0.35);
+    position:relative;
+  }
+  .bin-badge svg{width:56%;height:56%;}
+  .hero .dots{
+    position:absolute;
+    top:36px;right:0;
+    display:grid;
+    grid-template-columns:repeat(5,14px);
+    gap:14px;
+    opacity:0.5;
+  }
+  .hero .dots span{width:6px;height:6px;border-radius:50%;background:var(--green);}
+
+  /* ---------- SECTION HEADS ---------- */
+  .section{padding:96px 0;}
+  .section-cream{background:var(--cream);}
+  .section-navy{background:var(--navy);color:var(--paper);}
+  .kicker{
+    color:var(--green-deep);
+    font-weight:800;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    font-size:0.8rem;
+    margin-bottom:14px;
+  }
+  .section-navy .kicker{color:var(--green);}
+  h2.section-title{font-size:clamp(2.1rem,4.4vw,3.2rem);margin-bottom:24px;}
+
+  /* ---------- INTRO ---------- */
+  .intro-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:64px;
+    align-items:center;
+  }
+  .intro-copy p{font-size:1.12rem;color:#40435a;max-width:52ch;}
+  .intro-copy p + p{margin-top:16px;}
+  .intro-visual{
+    position:relative;
+    border-radius:28px;
+    overflow:hidden;
+    aspect-ratio:4/3;
+    background:
+      repeating-linear-gradient(135deg, #d8d3c4 0 18px, #cfc9b8 18px 36px);
+    display:flex;align-items:flex-end;
+    padding:24px;
+  }
+  .intro-visual .tag{
+    background:var(--navy);
+    color:#fff;
+    font-weight:800;
+    text-transform:uppercase;
+    font-size:0.78rem;
+    letter-spacing:0.06em;
+    padding:10px 16px;
+    border-radius:10px;
+  }
+
+  /* ---------- POLICIES (bin-lid cards) ---------- */
+  .policy-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:28px;
+    margin-top:52px;
+  }
+  .policy-card{
+    background:var(--paper);
+    border-radius:20px;
+    padding:34px 28px 30px;
+    position:relative;
+    border-top:10px solid var(--green);
+    box-shadow:0 4px 0 rgba(24,26,38,0.04);
+  }
+  .policy-card:nth-child(2){border-top-color:var(--amber);}
+  .policy-card:nth-child(3){border-top-color:var(--navy);}
+  .policy-icon{
+    width:56px;height:56px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(31,179,91,0.12);
+    margin-bottom:20px;
+  }
+  .policy-card:nth-child(2) .policy-icon{background:rgba(242,169,59,0.16);}
+  .policy-card:nth-child(3) .policy-icon{background:rgba(36,42,140,0.10);}
+  .policy-icon svg{width:28px;height:28px;}
+  .policy-card h3{
+    font-family:'Archivo',sans-serif;
+    font-weight:800;
+    text-transform:none;
+    font-size:1.18rem;
+    margin-bottom:10px;
+    letter-spacing:0;
+  }
+  .policy-card p{color:#54576b;font-size:0.98rem;}
+  .policy-label{
+    position:absolute;top:-14px;right:24px;
+    background:var(--charcoal);
+    color:#fff;
+    font-size:0.68rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    padding:5px 12px;
+    border-radius:100px;
+  }
+
+  /* ---------- ACTION ITEMS (alternating) ---------- */
+  .action-item{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:60px;
+    align-items:center;
+    padding:64px 0;
+    border-top:1px solid rgba(24,26,38,0.08);
+  }
+  .action-item:last-child{border-bottom:1px solid rgba(24,26,38,0.08);}
+  .action-item.reverse .action-copy{order:2;}
+  .action-item.reverse .action-visual{order:1;}
+  .action-copy .kicker{margin-bottom:10px;}
+  .action-copy h3{
+    font-size:clamp(1.5rem,3vw,2.1rem);
+    margin-bottom:16px;
+  }
+  .action-copy p{color:#40435a;font-size:1.04rem;max-width:50ch;}
+  .action-visual{
+    border-radius:24px;
+    aspect-ratio:16/11;
+    position:relative;
+    overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .av-weekly{background:linear-gradient(135deg,#e7f7ee,#cdeedb);}
+  .av-clean{background:linear-gradient(135deg,#eef0fb,#dadeef);}
+  .av-weekly svg, .av-clean svg{width:60%;height:60%;}
+
+  /* ---------- STAT / LANDFILL SECTION ---------- */
+  .stat-section{
+    background:var(--charcoal);
+    color:var(--paper);
+    padding:100px 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .stat-inner{
+    display:grid;
+    grid-template-columns:0.9fr 1.1fr;
+    gap:56px;
+    align-items:center;
+  }
+  .stat-number{
+    font-family:'Archivo Black',sans-serif;
+    font-size:clamp(3.2rem,8vw,5.6rem);
+    color:var(--amber);
+    line-height:0.95;
+  }
+  .stat-number .unit{
+    display:block;
+    font-size:0.28em;
+    color:var(--paper);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-top:10px;
+  }
+  .stat-copy p{color:rgba(255,255,255,0.78);font-size:1.08rem;max-width:52ch;}
+  .stat-bar-track{
+    margin-top:36px;
+    height:14px;
+    border-radius:100px;
+    background:rgba(255,255,255,0.1);
+    overflow:hidden;
+  }
+  .stat-bar-fill{
+    height:100%;
+    width:32%;
+    background:linear-gradient(90deg,var(--amber),#f4c26a);
+    border-radius:100px;
+  }
+  .stat-bar-label{
+    display:flex;justify-content:space-between;
+    font-size:0.78rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.06em;color:rgba(255,255,255,0.55);
+    margin-top:10px;
+  }
+
+  /* ---------- CTA / SIGN THE PLEDGE ---------- */
+  .pledge{
+    background:var(--green);
+    padding:80px 0;
+    color:var(--navy-deep);
+  }
+  .pledge-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:32px;flex-wrap:wrap;
+  }
+  .pledge h2{font-size:clamp(1.9rem,4vw,2.7rem);max-width:16ch;}
+  .pledge p{margin-top:12px;font-weight:600;max-width:42ch;}
+  .btn-dark{
+    background:var(--navy-deep);
+    color:#fff;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    font-size:0.92rem;
+    padding:18px 34px;
+    border-radius:100px;
+    text-decoration:none;
+    display:inline-block;
+    white-space:nowrap;
+    box-shadow:0 10px 26px rgba(24,26,38,0.22);
+  }
+  .btn-dark:hover{background:#000;}
+
+  /* ---------- FOOTER (bin shape) ---------- */
+  footer{
+    background:var(--navy-deep);
+    color:rgba(255,255,255,0.75);
+    padding:56px 0 34px;
+  }
+  .footer-top{
+    display:flex;justify-content:space-between;
+    gap:40px;flex-wrap:wrap;
+    padding-bottom:36px;
+    border-bottom:1px solid rgba(255,255,255,0.12);
+  }
+  .footer-brand{display:flex;align-items:center;gap:12px;color:#fff;font-family:'Archivo Black',sans-serif;font-size:1.1rem;}
+  .footer-brand .can{width:30px;height:30px;}
+  .footer-cols{display:flex;gap:64px;flex-wrap:wrap;}
+  .footer-col h4{
+    font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;
+    color:rgba(255,255,255,0.5);margin-bottom:14px;font-weight:800;
+  }
+  .footer-col a{display:block;color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.92rem;margin-bottom:10px;}
+  .footer-col a:hover{color:var(--green);}
+  .footer-bottom{
+    display:flex;justify-content:space-between;
+    padding-top:26px;font-size:0.82rem;color:rgba(255,255,255,0.45);
+    flex-wrap:wrap;gap:10px;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:920px){
+    nav.links{display:none;}
+    .burger{display:block;}
+    .hero .wrap{grid-template-columns:1fr;text-align:left;}
+    .hero-art{order:-1;margin-bottom:8px;}
+    .bin-badge{width:220px;}
+    .intro-grid{grid-template-columns:1fr;}
+    .policy-grid{grid-template-columns:1fr;}
+    .action-item, .action-item.reverse{grid-template-columns:1fr;}
+    .action-item.reverse .action-copy,.action-item.reverse .action-visual{order:initial;}
+    .stat-inner{grid-template-columns:1fr;}
+    .pledge-inner{flex-direction:column;align-items:flex-start;}
+  }
+  @media (max-width:520px){
+    .wrap{padding:0 20px;}
+    .hero{padding-top:64px;}
+    .section{padding:64px 0;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    *{transition:none!important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<header class="nav">
+  <div class="nav-inner wrap" style="padding-left:0;padding-right:0;">
+    <div class="brand">
+      <svg class="can" viewBox="0 0 48 48" fill="none">
+        <rect x="10" y="16" width="28" height="26" rx="3" fill="#fff"/>
+        <rect x="7" y="10" width="34" height="6" rx="2" fill="#fff"/>
+        <path d="M19 6h10a2 2 0 0 1 2 2v2H17V8a2 2 0 0 1 2-2Z" fill="#fff"/>
+        <path d="M16 22c4 6 12 6 16 0" stroke="#1fb35b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M24 22v14" stroke="#1fb35b" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      C.U.A
+    </div>
+    <nav class="links">
+      <a href="#policies">Policies</a>
+      <a href="#action">In Action</a>
+      <a href="#facts">The Facts</a>
+      <a href="#pledge">Get Involved</a>
+    </nav>
+    <a class="nav-cta" href="#pledge">Sign the Pledge</a>
+    <button class="burger" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="dots" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <div class="wrap">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="dot"></span>Clean Up Australia Campaign</div>
+      <h1>Vote for<br><span class="accent">C.U.A</span></h1>
+      <p class="tagline">"Takin' out the trash."</p>
+      <p class="lede">Australia's rubbish problem isn't going away on its own. C.U.A is a straightforward plan to fix collection, cut waste, and get more of what we throw away actually recycled.</p>
+      <div class="cta-row">
+        <a class="btn-primary" href="#pledge">Sign the Pledge</a>
+        <a class="btn-ghost" href="#policies">See the Policies</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="bin-badge">
+        <svg viewBox="0 0 200 200" fill="none">
+          <rect x="20" y="0" width="120" height="14" rx="5" fill="#e7e7ea"/>
+          <circle cx="80" cy="7" r="10" fill="none" stroke="#e7e7ea" stroke-width="6"/>
+          <path d="M30 24 L40 190 a10 10 0 0 0 10 10 h60 a10 10 0 0 0 10-10 L130 24 Z" fill="#e7e7ea"/>
+          <path d="M55 75c14 18 46 18 60 0" stroke="#1fb35b" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path d="M85 75v55" stroke="#1fb35b" stroke-width="7" stroke-linecap="round"/>
+          <text x="100" y="165" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="20" fill="#181a26">C.U.A</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="lid-divider" aria-hidden="true">
+    <svg viewBox="0 0 1440 64" preserveAspectRatio="none">
+      <path d="M0 20 C 360 70, 1080 -10, 1440 30 L1440 64 L0 64 Z" fill="#f7f6f0"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ================= INTRO ================= -->
+<section class="section section-cream" id="about">
+  <div class="wrap intro-grid">
+    <div class="intro-copy">
+      <div class="kicker">Why C.U.A</div>
+      <h2 class="section-title">The environment isn't a debate. It's a deadline.</h2>
+      <p>At C.U.A, we know protecting the environment is the right call — not a talking point. One of the biggest problems facing our environment right now is the never-ending stream of rubbish flowing into it.</p>
+      <p>Our plan starts with the basics: better bin systems, clearer sorting, and real education so households can put better habits into practice every single week.</p>
+    </div>
+    <div class="intro-visual">
+      <span class="tag">Landfill overflow, 2026</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= POLICIES ================= -->
+<section class="section section-navy" id="policies">
+  <div class="wrap">
+    <div class="kicker">Our Policies</div>
+    <h2 class="section-title">Three ways we sort this out.</h2>
+    <p style="max-width:60ch;color:rgba(255,255,255,0.78);font-size:1.06rem;">We're prioritising the environment with a plan built on consistency, reduction, and protection — the same three things every good bin system needs.</p>
+
+    <div class="policy-grid">
+      <div class="policy-card">
+        <span class="policy-label">Consistency</span>
+        <div class="policy-icon">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#158a46" stroke-width="2"/><path d="M12 3v18M3 12h18" stroke="#158a46" stroke-width="1.6"/></svg>
+        </div>
+        <h3>One national colour code</h3>
+        <p>Every bin, the same colour, in every state — no more guessing which lid means what when you cross a border.</p>
+      </div>
+      <div class="policy-card">
+        <span class="policy-label">Reduction</span>
+        <div class="policy-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0-4-4m4 4 4-4" stroke="#c9820f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 21h16" stroke="#c9820f" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Less single-use, more reusable</h3>
+        <p>We'll cut single-use plastic at the source and back reusable products so there's simply less to throw away.</p>
+      </div>
+      <div class="policy-card">
+        <span class="policy-label">Protection</span>
+        <div class="policy-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3Z" stroke="#242a8c" stroke-width="2" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#242a8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Stronger local protections</h3>
+        <p>Funded community clean-ups, better collection routes, and tougher litter laws to protect the places we live.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="lid-divider" aria-hidden="true" style="margin-top:80px;">
+    <svg viewBox="0 0 1440 64" preserveAspectRatio="none">
+      <path d="M0 40 C 400 -10, 1040 80, 1440 20 L1440 64 L0 64 Z" fill="#f7f6f0"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ================= ACTION ITEMS ================= -->
+<section class="section section-cream" id="action">
+  <div class="wrap">
+    <div class="kicker">C.U.A In Action</div>
+    <h2 class="section-title">Two changes you'll actually notice.</h2>
+
+    <div class="action-item">
+      <div class="action-copy">
+        <div class="kicker">Policy 01</div>
+        <h3>Weekly collection, every week</h3>
+        <p>We'll pick up bins every week instead of the current fortnightly schedule. That means fewer overflowing bins, less illegal dumping, and less rubbish piling up at home — plus a tidier-looking street for every neighbourhood.</p>
+      </div>
+      <div class="action-visual av-weekly">
+        <svg viewBox="0 0 200 160" fill="none">
+          <rect x="20" y="30" width="120" height="70" rx="8" fill="#fff"/>
+          <rect x="20" y="30" width="120" height="70" rx="8" stroke="#158a46" stroke-width="3"/>
+          <circle cx="45" cy="112" r="10" fill="#181a26"/>
+          <circle cx="120" cy="112" r="10" fill="#181a26"/>
+          <rect x="140" y="45" width="34" height="40" rx="4" fill="#158a46"/>
+          <rect x="60" y="10" width="26" height="24" rx="4" fill="#f2a93b"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="action-item reverse">
+      <div class="action-copy">
+        <div class="kicker">Policy 02</div>
+        <h3>Free monthly bin cleaning</h3>
+        <p>A new, free bin-cleaning service to keep every household's waste bins hygienic — cutting down on food build-up, mould, and bad smells, and reducing maggots and pests along the way.</p>
+      </div>
+      <div class="action-visual av-clean">
+        <svg viewBox="0 0 200 160" fill="none">
+          <path d="M70 40 L60 140a8 8 0 0 0 8 9h30a8 8 0 0 0 8-9L96 40Z" fill="#fff" stroke="#242a8c" stroke-width="3"/>
+          <path d="M100 30 L150 15" stroke="#242a8c" stroke-width="4" stroke-linecap="round"/>
+          <path d="M148 8c6 4 8 10 4 18" stroke="#158a46" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <circle cx="160" cy="30" r="3" fill="#158a46"/>
+          <circle cx="168" cy="38" r="2.4" fill="#158a46"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STAT / FACTS ================= -->
+<section class="stat-section" id="facts">
+  <div class="wrap stat-inner">
+    <div>
+      <div class="kicker">The Facts</div>
+      <div class="stat-number">2.5M<span class="unit">Tonnes of plastic never recycled</span></div>
+    </div>
+    <div class="stat-copy">
+      <p>2.5 million tonnes of plastic go unrecycled every year. That's why C.U.A is prioritising better waste collection and stronger recycling systems built to stop material from escaping in the first place.</p>
+      <p style="margin-top:16px;">We'll also work with businesses to move toward recyclable packaging — and make sure what goes in the yellow bin actually gets recycled.</p>
+      <div class="stat-bar-track"><div class="stat-bar-fill"></div></div>
+      <div class="stat-bar-label"><span>Recycled today</span><span>Target under C.U.A</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PLEDGE / CTA ================= -->
+<section class="pledge" id="pledge">
+  <div class="wrap pledge-inner">
+    <div>
+      <h2>Ready to take out the trash?</h2>
+      <p>Join the campaign, spread the word, and help push these policies from bin to ballot.</p>
+    </div>
+    <a class="btn-dark" href="#">Sign the Pledge</a>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <svg class="can" viewBox="0 0 48 48" fill="none">
+          <rect x="10" y="16" width="28" height="26" rx="3" fill="#fff"/>
+          <rect x="7" y="10" width="34" height="6" rx="2" fill="#fff"/>
+          <path d="M19 6h10a2 2 0 0 1 2 2v2H17V8a2 2 0 0 1 2-2Z" fill="#fff"/>
+          <path d="M16 22c4 6 12 6 16 0" stroke="#1fb35b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path d="M24 22v14" stroke="#1fb35b" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+        C.U.A
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Campaign</h4>
+          <a href="#about">About</a>
+          <a href="#policies">Policies</a>
+          <a href="#action">In Action</a>
+        </div>
+        <div class="footer-col">
+          <h4>Involved</h4>
+          <a href="#facts">The Facts</a>
+          <a href="#pledge">Sign the Pledge</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 C.U.A — Takin' Out the Trash</span>
+      <span>Colour-coded. Community-first. Cleaner every week.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
