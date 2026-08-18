@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>C.U.A | Takin' Out the Trash</title>
+<title>C.U.A — Takin' Out the Trash</title>
 <link rel="icon" type="image/png" href="https://innovateprogram.github.io/cua/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -179,6 +179,30 @@
   }
   .btn-ghost:hover{border-color:var(--paper);background:rgba(255,255,255,0.06);}
 
+  /* ---------- PLACEHOLDER IMAGE BOX ---------- */
+  /* Replace the src="" on each .img-placeholder <img> tag below with your own image URL. */
+  .img-placeholder{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    background:repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 10px, rgba(0,0,0,0.02) 10px 20px);
+    border:2px dashed rgba(0,0,0,0.25);
+    color:rgba(0,0,0,0.45);
+    font-family:'Archivo',sans-serif;
+    font-weight:700;
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    text-align:center;
+  }
+  .section-navy .img-placeholder,
+  .stat-section .img-placeholder{
+    background:repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 10px, rgba(255,255,255,0.03) 10px 20px);
+    border-color:rgba(255,255,255,0.3);
+    color:rgba(255,255,255,0.55);
+  }
+
   /* hero bin illustration */
   .hero-art{
     position:relative;
@@ -195,7 +219,6 @@
     box-shadow:0 30px 70px rgba(0,0,0,0.35);
     position:relative;
   }
-  .bin-badge svg{width:56%;height:56%;}
   .hero .dots{
     position:absolute;
     top:36px;right:0;
@@ -231,24 +254,8 @@
   .intro-copy p{font-size:1.12rem;color:#40435a;max-width:52ch;}
   .intro-copy p + p{margin-top:16px;}
   .intro-visual{
-    position:relative;
     border-radius:28px;
-    overflow:hidden;
     aspect-ratio:4/3;
-    background:
-      repeating-linear-gradient(135deg, #d8d3c4 0 18px, #cfc9b8 18px 36px);
-    display:flex;align-items:flex-end;
-    padding:24px;
-  }
-  .intro-visual .tag{
-    background:var(--navy);
-    color:#fff;
-    font-weight:800;
-    text-transform:uppercase;
-    font-size:0.78rem;
-    letter-spacing:0.06em;
-    padding:10px 16px;
-    border-radius:10px;
   }
 
   /* ---------- POLICIES (bin-lid cards) ---------- */
@@ -276,7 +283,6 @@
   }
   .policy-card:nth-child(2) .policy-icon{background:rgba(242,169,59,0.16);}
   .policy-card:nth-child(3) .policy-icon{background:rgba(36,42,140,0.10);}
-  .policy-icon svg{width:28px;height:28px;}
   .policy-card h3{
     font-family:'Archivo',sans-serif;
     font-weight:800;
@@ -319,13 +325,7 @@
   .action-visual{
     border-radius:24px;
     aspect-ratio:16/11;
-    position:relative;
-    overflow:hidden;
-    display:flex;align-items:center;justify-content:center;
   }
-  .av-weekly{background:linear-gradient(135deg,#e7f7ee,#cdeedb);}
-  .av-clean{background:linear-gradient(135deg,#eef0fb,#dadeef);}
-  .av-weekly svg, .av-clean svg{width:60%;height:60%;}
 
   /* ---------- STAT / LANDFILL SECTION ---------- */
   .stat-section{
@@ -496,7 +496,7 @@
     </div>
     <div class="hero-art">
       <div class="bin-badge">
-        <img src="https://innovateprogram.github.io/cua/logo.png" alt="C.U.A logo" style="width:60%;height:60%;object-fit:contain;">
+        <img src="https://innovateprogram.github.io/cua/logo.png" alt="Hero bin illustration" style="width:60%;height:60%;border-radius:50%;">
       </div>
     </div>
   </div>
@@ -517,9 +517,7 @@
       <p>At C.U.A, we know protecting the environment is the right call — not a talking point. One of the biggest problems facing our environment right now is the never-ending stream of rubbish flowing into it.</p>
       <p>Our plan starts with the basics: better bin systems, clearer sorting, and real education so households can put better habits into practice every single week.</p>
     </div>
-    <div class="intro-visual">
-      <span class="tag">Landfill overflow, 2026</span>
-    </div>
+    <img class="intro-visual img-placeholder" src="https://innovateprogram.github.io/cua/6279a503-f005-443c-b330-1ef3b7e6ae40.png" alt="Photo: landfill / rubbish overflow">
   </div>
 </section>
 
@@ -533,25 +531,19 @@
     <div class="policy-grid">
       <div class="policy-card">
         <span class="policy-label">Consistency</span>
-        <div class="policy-icon">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#158a46" stroke-width="2"/><path d="M12 3v18M3 12h18" stroke="#158a46" stroke-width="1.6"/></svg>
-        </div>
+        <img class="policy-icon img-placeholder" src="https://www.sourceseparationsystems.com.au/static/99c98a9c0ef959c5db0e67068d196a3a/db189/Coloured-Liners-in-MultiSort-w-rolls-2.png" alt="Icon" style="border-radius:14px;font-size:0.6rem;">
         <h3>One national colour code</h3>
         <p>Every bin, the same colour, in every state — no more guessing which lid means what when you cross a border.</p>
       </div>
       <div class="policy-card">
         <span class="policy-label">Reduction</span>
-        <div class="policy-icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0-4-4m4 4 4-4" stroke="#c9820f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 21h16" stroke="#c9820f" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
+        <img class="policy-icon img-placeholder" src="https://trashhero.org/wp-content/uploads/2023/02/No-Plastic-bags-ssign.jpeg" alt="Icon" style="border-radius:14px;font-size:0.6rem;">
         <h3>Less single-use, more reusable</h3>
         <p>We'll cut single-use plastic at the source and back reusable products so there's simply less to throw away.</p>
       </div>
       <div class="policy-card">
         <span class="policy-label">Protection</span>
-        <div class="policy-icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3Z" stroke="#242a8c" stroke-width="2" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#242a8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+        <img class="policy-icon img-placeholder" src="https://www.purplepass.com/blog/wp-content/uploads/2024/07/clean-up.jpg" alt="Icon" style="border-radius:14px;font-size:0.6rem;">
         <h3>Stronger local protections</h3>
         <p>Funded community clean-ups, better collection routes, and tougher litter laws to protect the places we live.</p>
       </div>
@@ -577,16 +569,7 @@
         <h3>Weekly collection, every week</h3>
         <p>We'll pick up bins every week instead of the current fortnightly schedule. That means fewer overflowing bins, less illegal dumping, and less rubbish piling up at home — plus a tidier-looking street for every neighbourhood.</p>
       </div>
-      <div class="action-visual av-weekly">
-        <svg viewBox="0 0 200 160" fill="none">
-          <rect x="20" y="30" width="120" height="70" rx="8" fill="#fff"/>
-          <rect x="20" y="30" width="120" height="70" rx="8" stroke="#158a46" stroke-width="3"/>
-          <circle cx="45" cy="112" r="10" fill="#181a26"/>
-          <circle cx="120" cy="112" r="10" fill="#181a26"/>
-          <rect x="140" y="45" width="34" height="40" rx="4" fill="#158a46"/>
-          <rect x="60" y="10" width="26" height="24" rx="4" fill="#f2a93b"/>
-        </svg>
-      </div>
+      <img class="action-visual av-weekly img-placeholder" src="https://www.superiorpak.com.au/wp-content/uploads/2025/10/Home_IMG_1.jpg" alt="Illustration: weekly collection truck">
     </div>
 
     <div class="action-item reverse">
@@ -595,15 +578,7 @@
         <h3>Free monthly bin cleaning</h3>
         <p>A new, free bin-cleaning service to keep every household's waste bins hygienic — cutting down on food build-up, mould, and bad smells, and reducing maggots and pests along the way.</p>
       </div>
-      <div class="action-visual av-clean">
-        <svg viewBox="0 0 200 160" fill="none">
-          <path d="M70 40 L60 140a8 8 0 0 0 8 9h30a8 8 0 0 0 8-9L96 40Z" fill="#fff" stroke="#242a8c" stroke-width="3"/>
-          <path d="M100 30 L150 15" stroke="#242a8c" stroke-width="4" stroke-linecap="round"/>
-          <path d="M148 8c6 4 8 10 4 18" stroke="#158a46" stroke-width="3" stroke-linecap="round" fill="none"/>
-          <circle cx="160" cy="30" r="3" fill="#158a46"/>
-          <circle cx="168" cy="38" r="2.4" fill="#158a46"/>
-        </svg>
-      </div>
+      <img class="action-visual av-clean img-placeholder" src="https://frostsbinfresh.co.uk/wp-content/uploads/2021/09/Job-1.jpg" alt="Illustration: bin cleaning service">
     </div>
   </div>
 </section>
