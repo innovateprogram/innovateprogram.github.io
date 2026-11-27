@@ -18,6 +18,12 @@ The screen listens to Firebase Realtime Database and refreshes when the playlist
 
 The database rules intentionally allow public reads only under `/screen` so the display can load without logging in. Only the configured Firebase Auth UID can change screen content. Do not replace the UID condition with a public write rule. If the Firebase account or project is not configured yet, the pages will render but they cannot sync until these steps are complete.
 
+### Fixing `auth/api-key-not-valid`
+
+The web API key in `firebase.js` was copied from the project details provided for this setup. This error means Google is rejecting that key, so a code change cannot generate or repair it. In Firebase Console, open **Project settings → General → Your apps**, copy the web app's current `apiKey` from its Firebase config, and replace only the `apiKey` value in `firebase.js`. Confirm the app and key belong to project `innovateprogram-fd00c` and that the key has not been deleted or disabled.
+
+If the key is restricted in Google Cloud Console, check that its website referrers allow `https://innovateprogram.github.io/*` and that its API restrictions do not block Firebase Authentication / the Identity Toolkit API. Keep the key restricted appropriately for this website. A Firebase web API key is a public project identifier, not a password; Firebase Authentication and database rules provide access control.
+
 ### Firebase Realtime Database rules
 
 Replace the placeholder before publishing:
