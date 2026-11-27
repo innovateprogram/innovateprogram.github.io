@@ -74,7 +74,7 @@ button, input, select {
 }
 .desktop-icon:hover, .desktop-icon:focus-visible { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); outline: none; }
 .desktop-icon:active { background: rgba(80,140,255,0.22); }
-.di-icon { font-size: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+.di-icon { font-size: 11px; font-weight: 700; letter-spacing: .05em; }
 .di-label { font-size: 11px; text-align: center; line-height: 1.2; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
 /* ===================================================== Call banner */
@@ -228,10 +228,10 @@ button, input, select {
   position: relative;
   background: rgba(255,255,255,0.06);
   border: none; border-radius: 999px;
-  width: 36px; height: 36px;
+  width: auto; height: 36px; padding: 0 12px;
   color: #e8ecf4;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 12px;
 }
 .notif-badge {
   position: absolute; top: -2px; right: -2px;
@@ -281,7 +281,7 @@ button, input, select {
   font-size: 11px;
   min-height: 58px;
 }
-.start-item span { font-size: 20px; }
+.start-item span { font-size: 10px; font-weight: 700; }
 .start-item:hover { background: rgba(75,107,255,0.2); }
 .start-footer { padding: 10px 14px 14px; border-top: 1px solid #242b4c; display: flex; flex-direction: column; gap: 8px; }
 .start-sfx { font-size: 12px; display: flex; align-items: center; gap: 6px; color: #aab2d6; }
@@ -307,7 +307,7 @@ button, input, select {
   font-size: 10px;
   min-height: 48px;
 }
-.mq-btn span { font-size: 18px; }
+.mq-btn span { font-size: 10px; font-weight: 700; }
 
 /* ===================================================== Overlay (day intro/summary) */
 .overlay {
@@ -404,7 +404,7 @@ button, input, select {
 .ticket-avatar { font-size: 28px; text-align: center; }
 .ticket-meta { display: flex; flex-direction: column; min-width: 0; }
 .ticket-meta span { font-size: 12px; color: #aab2d6; }
-.mood-emoji { font-size: 24px; }
+.mood-label { color: #566276; font-size: 12px; font-weight: 600; }
 .ticket-desc { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.5; color: #cfd6ee; }
 .ticket-panel { background: rgba(255,255,255,0.03); border: 1px dashed #2a3356; border-radius: 10px; padding: 12px; }
 .resolution { display: flex; flex-direction: column; gap: 8px; }
@@ -500,7 +500,7 @@ button, input, select {
 
 /* ===================================================== Security scanner */
 .app-security { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
-.sec-shield { font-size: 50px; }
+.sec-shield { font-size: 14px; font-weight: 700; letter-spacing: .08em; }
 .sec-results { width: 100%; display: flex; flex-direction: column; gap: 6px; }
 .threat-row { background: rgba(255,80,80,0.1); border-radius: 6px; padding: 7px 10px; text-align: left; font-size: 12.5px; }
 

@@ -292,7 +292,7 @@
         content: "";
       }
       .auth-error.visible::before {
-        content: "⚠";
+        content: "";
       }
       .auth-pin-row {
         display: flex;
@@ -1300,6 +1300,7 @@
         text-align: center;
         padding: 40px;
       }
+      .drop-zone-icon:empty, .card-title-icon:empty, .empty-state-icon:empty, .no-pres-icon:empty { display: none; }
       .no-pres-icon {
         font-size: 56px;
         opacity: 0.25;
@@ -1726,7 +1727,7 @@
     <!-- ===== CHANGE PIN MODAL ===== -->
     <div id="changePinModal" class="modal-overlay" style="display: none">
       <div class="modal-box">
-        <div class="modal-title">🔑 Change PIN</div>
+        <div class="modal-title">Change PIN</div>
         <div class="modal-sub">Enter your current PIN, then set a new 4-digit PIN.</div>
         <div class="modal-field">
           <label>Current PIN</label>
@@ -1763,15 +1764,15 @@
           <button class="sidebar-close" id="sidebarClose">×</button>
         </div>
         <div class="sidebar-tabs">
-          <div class="sidebar-tab active" data-panel="media">📁 Media</div>
-          <div class="sidebar-tab" data-panel="youtube">▶ YouTube</div>
+          <div class="sidebar-tab active" data-panel="media">Media</div>
+          <div class="sidebar-tab" data-panel="youtube">YouTube</div>
         </div>
 
         <!-- MEDIA PANEL -->
         <div class="sidebar-panel active" id="panel-media">
           <div class="drop-zone" id="dropZone">
             <input type="file" id="file" accept="image/*,video/*" multiple />
-            <div class="drop-zone-icon">🖼️</div>
+            <div class="drop-zone-icon"></div>
             <div class="drop-zone-label">Drop files here</div>
             <div class="drop-zone-sub">or tap to browse · images &amp; videos</div>
           </div>
@@ -1838,10 +1839,10 @@
           <div class="topbar-title" id="editorTitle">Select a Presentation</div>
           <div class="topbar-actions">
             <span id="liveIndicator" style="display: none" class="badge-live">DEFAULT</span>
-            <button id="setActiveBtn" class="btn primary sm">⚡ Default</button>
+            <button id="setActiveBtn" class="btn primary sm">Default</button>
             <button id="refreshViewBtn" class="btn sm" title="Refresh all displays">↺</button>
             <button id="renamePresentationBtn" class="btn sm ghost">✎ Rename</button>
-            <button id="changePinBtn" class="btn sm ghost" title="Change PIN">🔑</button>
+            <button id="changePinBtn" class="btn sm ghost" title="Change PIN">PIN</button>
             <button id="deletePresentationBtn" class="btn sm danger">✕</button>
           </div>
         </div>
@@ -1853,7 +1854,7 @@
         <div class="editor-layout">
           <div class="editor-scroll" id="editorArea">
             <div class="no-pres" id="noPres" style="display: none">
-              <div class="no-pres-icon">🎞️</div>
+              <div class="no-pres-icon"></div>
               <div class="no-pres-title">No Presentation Selected</div>
               <div class="no-pres-sub">Tap <strong>+</strong> in the tabs above to create one</div>
             </div>
@@ -1861,7 +1862,7 @@
             <!-- Settings Card -->
             <div class="card" id="settingsCard">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">⚙️</span> Playback Settings</div>
+                <div class="card-title"><span class="card-title-icon"></span> Playback Settings</div>
               </div>
               <div class="card-body">
                 <div class="settings-grid">
@@ -1898,7 +1899,7 @@
             <!-- Overlay Card -->
             <div class="card" id="overlayCard">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">📢</span> Overlay Banner</div>
+                <div class="card-title"><span class="card-title-icon"></span> Overlay Banner</div>
                 <label class="check-row" style="cursor: pointer">
                   <input id="overlayVisible" type="checkbox" />
                   <span style="font-size: 13px; color: var(--text2)">Show on display</span>
@@ -1948,7 +1949,7 @@
             <!-- Monitors -->
             <div class="card" id="monitorAssignCard">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">🖥️</span> Monitor Assignment</div>
+                <div class="card-title"><span class="card-title-icon"></span> Monitor Assignment</div>
                 <div style="display: flex; gap: 8px">
                   <button id="assignMonitorsBtn" class="btn primary sm">Assign</button>
                   <button id="clearMonitorAssignments" class="btn danger sm">Clear</button>
@@ -1964,7 +1965,7 @@
             <!-- Active Monitors -->
             <div class="card" id="activeMonitorsCard">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">📡</span> Active Monitors</div>
+                <div class="card-title"><span class="card-title-icon"></span> Active Monitors</div>
                 <span style="font-size: 12px; color: var(--text3)">Online if heartbeat &lt;15s</span>
               </div>
               <div class="card-body compact" id="monitorsContainer">
@@ -1975,7 +1976,7 @@
             <!-- Slides -->
             <div class="card" id="slidesCard">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">🎞️</span> Slides</div>
+                <div class="card-title"><span class="card-title-icon"></span> Slides</div>
                 <span style="font-size: 12px; color: var(--text3)">Drag to reorder</span>
               </div>
               <div class="card-body">
@@ -2192,7 +2193,7 @@
           await set(pinRef, nw);
           correctPin = nw;
           changePinModal.style.display = "none";
-          toast("PIN changed successfully 🔑");
+          toast("PIN changed successfully ");
         } catch (e) {
           cpError.textContent = "Failed to save PIN. Try again.";
         } finally {
@@ -2287,7 +2288,7 @@
       function toast(msg, type = "success") {
         const el = document.createElement("div");
         el.className = `toast ${type}`;
-        const icons = { success: "✓", error: "✕", info: "ℹ" };
+        const icons = { success: "✓", error: "✕", info: "INFO" };
         el.textContent = `${icons[type] || ""} ${msg}`;
         toastWrap.appendChild(el);
         setTimeout(() => el.remove(), 3200);
@@ -2599,7 +2600,7 @@
           const card = document.createElement("div");
           card.className = "yt-card";
           card.innerHTML = `
-            <div class="yt-card-thumb">▶<div class="yt-badge">YouTube</div></div>
+            <div class="yt-card-thumb"><div class="yt-badge">YouTube</div></div>
             <div class="yt-card-body">
               <input class="yt-card-name yt-rename-input" data-id="${id}" value="${escHtml(m.filename || id)}" title="Click to rename" />
               <div class="yt-card-actions">
@@ -2753,7 +2754,7 @@
         assigned.forEach((name) => {
           const el = document.createElement("div");
           el.className = "assigned-badge";
-          el.innerHTML = `🖥️ ${escHtml(name)}`;
+          el.innerHTML = escHtml(name);
           assignedMonitorsList.appendChild(el);
         });
         if (!isLocked("monitorAssign") && !monitorAssignInput.value.trim() && assigned.length > 0) {
@@ -2767,7 +2768,7 @@
         if (!p.items || p.items.length === 0) {
           presentationItemsEl.innerHTML = `
             <div class="empty-state">
-              <div class="empty-state-icon">🖼️</div>
+              <div class="empty-state-icon"></div>
               <div class="empty-state-title">No slides yet</div>
               <div class="empty-state-sub">Add media from the library in the sidebar.</div>
             </div>`;
@@ -2787,7 +2788,7 @@
 
           let thumbHtml = "";
           if (isYt)
-            thumbHtml = `<div class="slide-item-thumb"><div class="slide-item-thumb-yt">▶</div><div class="slide-item-thumb-badge">YT</div><div class="slide-num">${index + 1}</div></div>`;
+            thumbHtml = `<div class="slide-item-thumb"><div class="slide-item-thumb-yt"></div><div class="slide-item-thumb-badge">YT</div><div class="slide-num">${index + 1}</div></div>`;
           else if (m.resource_type === "image")
             thumbHtml = `<div class="slide-item-thumb"><img src="${m.url}" /><div class="slide-num">${index + 1}</div></div>`;
           else

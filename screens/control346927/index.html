@@ -9,10 +9,10 @@
     </section>
   </div>
   <main id="adminView" class="shell hidden">
-    <header class="topbar"><div class="brand"><div><h1>Screen controls</h1><p>Manage what appears on the building display</p></div></div><div class="top-actions"><span id="connection" class="pill"><i class="dot"></i> Live</span><button id="themeBtn" class="soft-btn" type="button">◐ Theme</button><a class="soft-btn" href="../" target="_blank" rel="noopener">View screen ↗</a><button id="logoutBtn" class="soft-btn" type="button">Sign out</button></div></header>
+    <header class="topbar"><div class="brand"><div><h1>Screen controls</h1><p>Manage what appears on the building display</p></div></div><div class="top-actions"><span id="connection" class="pill"><i class="dot"></i> Live</span><button id="themeBtn" class="soft-btn" type="button">Dark mode</button><a class="soft-btn" href="../" target="_blank" rel="noopener">View screen </a><button id="logoutBtn" class="soft-btn" type="button">Sign out</button></div></header>
     <div class="admin-grid"><section class="card main-card">
-      <div class="section-title"><div><h2>Your slides</h2><p>Add announcements and media to the screen. Changes publish live.</p></div><span id="slideCount" class="count">0 slides</span></div>
-      <div id="tabs" class="tabbar" role="tablist"><button class="tab active" data-type="image" type="button">▧ Image</button><button class="tab" data-type="video" type="button">▶ Video</button><button class="tab" data-type="youtube" type="button">▷ YouTube</button><button class="tab" data-type="collage" type="button">▦ Photo story</button></div>
+      <div class="section-title"><div><h2>Your slides</h2><p>Add announcements and media to the screen. Changes publish live.</p></div></div>
+      <div id="tabs" class="tabbar" role="tablist"><button class="tab active" data-type="image" type="button">▧ Image</button><button class="tab" data-type="video" type="button"> Video</button><button class="tab" data-type="youtube" type="button">▷ YouTube</button><button class="tab" data-type="collage" type="button">▦ Photo story</button></div>
       <form id="slideForm">
         <div class="formgrid"><div class="field"><label for="title">Heading</label><input id="title" maxlength="75" placeholder="A clear, welcoming headline" required></div><div class="field"><label for="eyebrow">Small label <span class="hint">(optional)</span></label><input id="eyebrow" maxlength="35" placeholder="e.g. THIS WEEK"></div></div>
         <div class="field"><label for="description">Description</label><textarea id="description" maxlength="260" placeholder="A short explanation to help visitors understand what is being shown."></textarea><span class="hint"><span id="descriptionCount">0</span> / 260 characters</span></div>
@@ -29,7 +29,7 @@
       <div class="divider"></div><div class="section-title"><div><h2>Visitor notice</h2><p>A short message that stays visible over your slides.</p></div></div>
       <div class="field"><label for="noticeText">Notice message</label><textarea id="noticeText" maxlength="120" placeholder="The Innovate room is closed today"></textarea><span class="hint"><span id="noticeCount">0</span> / 120 characters</span></div>
       <div class="toggle-row"><div><strong>Show notice on screen</strong><small>Useful for closures or event updates.</small></div><button id="noticeSwitch" class="switch" role="switch" aria-checked="false" aria-label="Show visitor notice" type="button"></button></div><button id="saveNotice" class="primary" style="width:100%;margin-top:14px" type="button">Save notice</button><p id="noticeStatus" class="status" role="status"></p>
-      <div class="notice">💡 Keep messages brief so they are easy to read from across the room. Updates appear on the screen in a few seconds.</div>
+      <div class="notice"> Keep messages brief so they are easy to read from across the room. Updates appear on the screen in a few seconds.</div>
     </aside></div>
     <footer class="hint" style="text-align:center;margin-top:22px">Media uploads are stored in Cloudinary. Display content and settings sync through Firebase.</footer>
   </main>

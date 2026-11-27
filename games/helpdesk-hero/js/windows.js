@@ -67,9 +67,10 @@
       win.style.top = y + 'px';
     }
 
+    const iconLabel = opts.icon || (opts.title || 'APP').slice(0, 3).toUpperCase();
     win.innerHTML =
       '<div class="hd-titlebar">' +
-      '<span class="hd-wicon" aria-hidden="true">' + (opts.icon || '🗔') + '</span>' +
+      '<span class="hd-wicon" aria-hidden="true">' + iconLabel + '</span>' +
       '<span class="hd-wtitle"></span>' +
       '<div class="hd-wactions">' +
       '<button type="button" class="hd-wbtn hd-min" title="Minimize" aria-label="Minimize">&#8211;</button>' +
@@ -91,7 +92,7 @@
     tb.className = 'taskbtn';
     tb.type = 'button';
     tb.dataset.winid = opts.id;
-    tb.innerHTML = '<span aria-hidden="true">' + (opts.icon || '🗔') + '</span><span class="taskbtn-label">' + (opts.title || '') + '</span>';
+    tb.innerHTML = '<span aria-hidden="true">' + iconLabel + '</span><span class="taskbtn-label">' + (opts.title || '') + '</span>';
     tb.addEventListener('click', () => {
       if (rec.minimized) {
         this.restore(opts.id);

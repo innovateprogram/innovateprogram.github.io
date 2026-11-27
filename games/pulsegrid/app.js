@@ -542,7 +542,7 @@ function stop(reset = true) {
     tick = 0;
     $("position").textContent = "01 / " + state.steps;
   }
-  $("play").innerHTML = "▶ <span>Play beat</span>";
+  $("play").innerHTML = " <span>Play beat</span>";
 }
 function download(blob, name) {
   const url = URL.createObjectURL(blob),

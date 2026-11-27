@@ -126,7 +126,7 @@ body { background: #000; overflow: hidden; font-family: 'Courier New', monospace
     <div id="reload-track"><div id="reload-fill"></div></div>
   </div>
   <div id="weapon-slots"></div>
-  <button id="shop-btn">🛒 SHOP <span class="shop-key">[B]</span></button>
+  <button id="shop-btn">SHOP <span class="shop-key">[B]</span></button>
   <div id="hud-bar">
     <div id="health-section">
       <div id="health-label">HEALTH</div>
@@ -288,10 +288,10 @@ const WEAPONS = {
 };
 
 const SHOP_UPGRADES = {
-  hp_boost:    { name:'MAX HP +25',      cost:300,  desc:'Permanently increase max health.',       icon:'❤️',  type:'upgrade', id:'hp_boost' },
-  regen_boost: { name:'FAST REGEN',      cost:400,  desc:'Halves regen delay. Recover faster.',    icon:'💚',  type:'upgrade', id:'regen_boost' },
-  speed_boost: { name:'SPEED BOOST',     cost:350,  desc:'Move 20% faster permanently.',           icon:'⚡',  type:'upgrade', id:'speed_boost' },
-  armor:       { name:'ARMOR PLATING',   cost:500,  desc:'Take 25% less damage from all sources.', icon:'🛡️', type:'upgrade', id:'armor' },
+  hp_boost:    { name:'MAX HP +25',      cost:300,  desc:'Permanently increase max health.',       icon:'HP',  type:'upgrade', id:'hp_boost' },
+  regen_boost: { name:'FAST REGEN',      cost:400,  desc:'Halves regen delay. Recover faster.',    icon:'RGN',  type:'upgrade', id:'regen_boost' },
+  speed_boost: { name:'SPEED BOOST',     cost:350,  desc:'Move 20% faster permanently.',           icon:'SPD',  type:'upgrade', id:'speed_boost' },
+  armor:       { name:'ARMOR PLATING',   cost:500,  desc:'Take 25% less damage from all sources.', icon:'ARMOR', type:'upgrade', id:'armor' },
 };
 
 // ═══════════════════════════════════════════════════════════

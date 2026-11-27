@@ -498,7 +498,7 @@
 <!-- Scroll Mode -->
 <div id="scrollMode">
   <div class="sm-header">
-    <span class="sm-title">✨ Memories</span>
+    <span class="sm-title">Memories</span>
     <div style="display:flex;gap:8px">
       <button class="sm-header-btn" id="smShuffleBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
@@ -1337,7 +1337,7 @@ $("saveBtn").onclick = async () => {
       $("uploadMsg").textContent = `✓ ${mediaType === "video" ? "Video" : "Photo"} ${i + 1} saved`;
     } catch (err) {
       console.error("Upload failed for file", i + 1, err);
-      $("uploadMsg").textContent = `⚠ File ${i + 1} failed — continuing`;
+      $("uploadMsg").textContent = `File ${i + 1} failed — continuing`;
     }
   }
 
@@ -1611,7 +1611,7 @@ function buildSmFeed() {
     if (p.desc) info.innerHTML += `<div class="sm-slide-desc">${p.desc}</div>`;
     if (p.albumId) {
       const al = albums.find(a => a.id === p.albumId);
-      if (al) info.innerHTML += `<span class="sm-slide-album">📁 ${al.name}</span>`;
+      if (al) info.innerHTML += `<span class="sm-slide-album">${al.name}</span>`;
     }
     slide.appendChild(info);
     feed.appendChild(slide);

@@ -619,7 +619,7 @@
       triggerShake(3.2);
       showToast(`+${captured.length} TILES · ${mult.toFixed(1)}× COMBO!`);
     } else if (!wasReady && state.overload >= 100) {
-      showToast('⚡ NEON OVERLOAD READY! [SPACE]');
+      showToast('NEON OVERLOAD READY! [SPACE]');
     }
 
     checkEndConditions();
@@ -670,7 +670,7 @@
     triggerShake(8.5);
     spawnBoardShockwave('#00F0FF');
     spawnBoardShockwave('#FF1E8A', 90);
-    showToast(`⚡ OVERLOAD SURGE! +${captured.length} FREE TILES!`);
+    showToast(`OVERLOAD SURGE! +${captured.length} FREE TILES!`);
 
     checkEndConditions();
     refreshCandidates();
@@ -939,7 +939,7 @@
       dom.overloadPct.textContent = 'READY!';
       dom.btnOverload.classList.add('is-ready');
       dom.btnOverload.disabled = false;
-      dom.btnOverload.textContent = `⚡ OVERLOAD SURGE (+${surgeCount} TILES) [SPACE]`;
+      dom.btnOverload.textContent = `OVERLOAD SURGE (+${surgeCount} TILES) [SPACE]`;
       dom.overloadHint.textContent = `Free shockwave! Absorbs entire frontier ring (+${surgeCount} tiles) without spending a move.`;
     } else {
       dom.overloadPct.textContent = `${displayCharge}%`;
@@ -1402,9 +1402,9 @@
     // Audio & Accessibility toolbar controls
     const syncAudioButtons = () => {
       dom.btnSfx.classList.toggle('is-active', window.NeonAudio.sfxEnabled);
-      dom.btnSfx.textContent = window.NeonAudio.sfxEnabled ? '🔊 SFX: ON' : '🔇 SFX: OFF';
+      dom.btnSfx.textContent = window.NeonAudio.sfxEnabled ? 'SFX: ON' : 'SFX: OFF';
       dom.btnBeat.classList.toggle('beat-active', window.NeonAudio.beatEnabled);
-      dom.btnBeat.textContent = window.NeonAudio.beatEnabled ? '🎵 Beat: ON' : '🎵 Beat: OFF';
+      dom.btnBeat.textContent = window.NeonAudio.beatEnabled ? 'Beat: ON' : 'Beat: OFF';
     };
     syncAudioButtons();
 

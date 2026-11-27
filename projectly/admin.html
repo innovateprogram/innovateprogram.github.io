@@ -155,7 +155,7 @@
                 <h2 style="margin-bottom:18px">Manage Songs</h2>
                 <div id="songMessage"></div>
                 <div class="editing-banner" id="editingBanner">
-                    ✏️ <strong>Edit Mode:</strong> <span id="editingLabel">Editing a song.</span>
+                     <strong>Edit Mode:</strong> <span id="editingLabel">Editing a song.</span>
                     <button class="btn btn-secondary" style="margin-left:auto;padding:5px 11px;font-size:12px" onclick="cancelEdit()">Cancel</button>
                 </div>
                 <div class="info-box">
@@ -209,14 +209,14 @@ Praise the Lord</pre>
 
                 <!-- 4-way upload type toggle -->
                 <div class="upload-type-toggle">
-                    <div class="upload-type-btn active" id="uploadTypeImages" onclick="setUploadType('images')">🖼️ Images<br/><span style="font-size:10px;opacity:.7">Multiple</span></div>
-                    <div class="upload-type-btn" id="uploadTypePdf" onclick="setUploadType('pdf')">📄 PDF<br/><span style="font-size:10px;opacity:.7">Single file</span></div>
-                    <div class="upload-type-btn" id="uploadTypePptx" onclick="setUploadType('pptx')">📊 PowerPoint<br/><span style="font-size:10px;opacity:.7">Single file</span></div>
-                    <div class="upload-type-btn" id="uploadTypeMedia" onclick="setUploadType('media')">🎬 Media<br/><span style="font-size:10px;opacity:.7">Video or photo</span></div>
+                    <div class="upload-type-btn active" id="uploadTypeImages" onclick="setUploadType('images')" > Images<br/><span style="font-size:10px;opacity:.7">Multiple</span></div>
+                    <div class="upload-type-btn" id="uploadTypePdf" onclick="setUploadType('pdf')" > PDF<br/><span style="font-size:10px;opacity:.7">Single file</span></div>
+                    <div class="upload-type-btn" id="uploadTypePptx" onclick="setUploadType('pptx')" > PowerPoint<br/><span style="font-size:10px;opacity:.7">Single file</span></div>
+                    <div class="upload-type-btn" id="uploadTypeMedia" onclick="setUploadType('media')" > Media<br/><span style="font-size:10px;opacity:.7">Video or photo</span></div>
                 </div>
 
                 <div class="file-upload" id="sermonDropZone" onclick="document.getElementById('sermonFile').click()">
-                    <div class="upload-icon" id="sermonUploadIcon">🖼️</div>
+                    <div class="upload-icon" id="sermonUploadIcon">IMAGE</div>
                     <p><strong id="sermonUploadLabel">Click to upload images</strong></p>
                     <p style="color:#64748b;font-size:13px;margin-top:5px" id="sermonUploadHint">PNG, JPG — select multiple at once</p>
                     <input type="file" id="sermonFile" accept="image/*" multiple onchange="handleSermonSlideUpload(this)"/>
@@ -257,7 +257,7 @@ Praise the Lord</pre>
                 </div>
                 <div id="backgroundsSection">
                     <div class="file-upload" onclick="document.getElementById('backgroundFile').click()">
-                        <div class="upload-icon">🖼️</div>
+                        <div class="upload-icon">BACKGROUND</div>
                         <p><strong>Click to upload background</strong></p>
                         <p style="color:#64748b;font-size:13px;margin-top:5px">JPG, PNG, or MP4 (Max 100MB)</p>
                         <input type="file" id="backgroundFile" accept="image/*,video/mp4" onchange="handleBackgroundUpload(this,'background')"/>
@@ -270,7 +270,7 @@ Praise the Lord</pre>
                 </div>
                 <div id="logosSection" style="display:none">
                     <div class="file-upload" onclick="document.getElementById('logoFile').click()">
-                        <div class="upload-icon">🎨</div>
+                        <div class="upload-icon">LOGO</div>
                         <p><strong>Click to upload logo</strong></p>
                         <p style="color:#64748b;font-size:13px;margin-top:5px">PNG (transparent recommended)</p>
                         <input type="file" id="logoFile" accept="image/png,image/svg+xml" onchange="handleBackgroundUpload(this,'logo')"/>
@@ -401,7 +401,7 @@ Praise the Lord</pre>
                     <button class="btn btn-secondary" onclick="testCloudinaryConnection()">Test Connection</button>
                 </div>
                 <div class="cloudinary-usage-card" id="cloudinaryUsageCard" style="display:none">
-                    <h4>☁️ Cloudinary Usage <span id="cloudinaryPlanBadge" class="plan-badge"></span><button class="usage-refresh-btn" onclick="loadCloudinaryUsage()" style="margin-left:auto">↻ Refresh</button></h4>
+                    <h4>Cloudinary Usage <span id="cloudinaryPlanBadge" class="plan-badge"></span><button class="usage-refresh-btn" onclick="loadCloudinaryUsage()" style="margin-left:auto">↻ Refresh</button></h4>
                     <div class="usage-grid" id="cloudinaryUsageGrid"></div>
                     <div id="extraAccountsUsage" style="margin-top:16px"></div>
                 </div>
@@ -562,25 +562,25 @@ Praise the Lord</pre>
                 switch(type) {
                     case "images":
                         fi.accept="image/*"; fi.multiple=true;
-                        document.getElementById("sermonUploadIcon").textContent="🖼️";
+                        document.getElementById("sermonUploadIcon").textContent="IMAGE";
                         document.getElementById("sermonUploadLabel").textContent="Click to upload images";
                         document.getElementById("sermonUploadHint").textContent="PNG, JPG — select multiple at once";
                         break;
                     case "pdf":
                         fi.accept="application/pdf"; fi.multiple=false;
-                        document.getElementById("sermonUploadIcon").textContent="📄";
+                        document.getElementById("sermonUploadIcon").textContent="PDF";
                         document.getElementById("sermonUploadLabel").textContent="Click to upload a PDF";
                         document.getElementById("sermonUploadHint").textContent="PDF file";
                         break;
                     case "pptx":
                         fi.accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"; fi.multiple=false;
-                        document.getElementById("sermonUploadIcon").textContent="📊";
+                        document.getElementById("sermonUploadIcon").textContent="PPTX";
                         document.getElementById("sermonUploadLabel").textContent="Click to upload a PowerPoint";
                         document.getElementById("sermonUploadHint").textContent=".pptx or .ppt file";
                         break;
                     case "media":
                         fi.accept="image/*,video/mp4,video/webm,video/quicktime"; fi.multiple=false;
-                        document.getElementById("sermonUploadIcon").textContent="🎬";
+                        document.getElementById("sermonUploadIcon").textContent="MEDIA";
                         document.getElementById("sermonUploadLabel").textContent="Click to upload a photo or video";
                         document.getElementById("sermonUploadHint").textContent="Single image or MP4/WebM/MOV";
                         break;
@@ -651,10 +651,10 @@ Praise the Lord</pre>
                 list.innerHTML = window.pendingSlides.map((slide,i)=>{
                     let thumb;
                     if (slide.type==="image") thumb=`<img class="sermon-slide-thumb" src="${slide.url}" loading="lazy">`;
-                    else if (slide.type==="video") thumb=`<div class="sermon-slide-thumb video-thumb" title="Video">🎬</div>`;
-                    else if (slide.type==="pdf") thumb=`<div class="sermon-slide-thumb pdf-thumb" title="${slide.name||'PDF'}">📄</div>`;
-                    else if (slide.type==="pptx") thumb=`<div class="sermon-slide-thumb pptx-thumb" title="${slide.name||'PowerPoint'}">📊</div>`;
-                    else thumb=`<div class="sermon-slide-thumb media-thumb">🎬</div>`;
+                    else if (slide.type==="video") thumb=`<div class="sermon-slide-thumb video-thumb" title="Video">VIDEO</div>`;
+                    else if (slide.type==="pdf") thumb=`<div class="sermon-slide-thumb pdf-thumb" title="${slide.name||'PDF'}">PDF</div>`;
+                    else if (slide.type==="pptx") thumb=`<div class="sermon-slide-thumb pptx-thumb" title="${slide.name||'PowerPoint'}">PPTX</div>`;
+                    else thumb=`<div class="sermon-slide-thumb media-thumb">MEDIA</div>`;
                     return `<div class="slide-remove-btn">${thumb}<button onclick="removePendingSlide(${i})" title="Remove">×</button></div>`;
                 }).join("");
             };
@@ -701,10 +701,10 @@ Praise the Lord</pre>
                         const thumbs = (s.slides||[]).map((url,i)=>{
                             const t=st[i]||"image";
                             if(t==="image") return `<img class="sermon-slide-thumb" src="${url}" loading="lazy">`;
-                            if(t==="video") return `<div class="sermon-slide-thumb video-thumb" title="Video">🎬</div>`;
-                            if(t==="pdf") return `<div class="sermon-slide-thumb pdf-thumb" title="${sn[i]||'PDF'}">📄</div>`;
-                            if(t==="pptx") return `<div class="sermon-slide-thumb pptx-thumb" title="${sn[i]||'PPTX'}">📊</div>`;
-                            return `<div class="sermon-slide-thumb media-thumb">🎬</div>`;
+                            if(t==="video") return `<div class="sermon-slide-thumb video-thumb" title="Video">VIDEO</div>`;
+                            if(t==="pdf") return `<div class="sermon-slide-thumb pdf-thumb" title="${sn[i]||'PDF'}">PDF</div>`;
+                            if(t==="pptx") return `<div class="sermon-slide-thumb pptx-thumb" title="${sn[i]||'PPTX'}">PPTX</div>`;
+                            return `<div class="sermon-slide-thumb media-thumb">MEDIA</div>`;
                         }).join("");
                         html+=`<div class="sermon-item"><div class="sermon-item-header"><div><div class="song-title">${s.title}</div><div class="song-meta">${s.slides?s.slides.length:0} slides · ${new Date(s.createdAt).toLocaleDateString()}</div></div><div class="song-actions"><button class="btn btn-danger btn-sm" onclick="deleteSermon('${d.id}')">Delete</button></div></div>${thumbs?`<div class="sermon-slides-preview">${thumbs}</div>`:""}</div>`;
                     });
