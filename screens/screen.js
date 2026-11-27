@@ -13,6 +13,9 @@ let screenData = { slides: [], playing: true, notification: { enabled: false, te
 let currentSlide = 0;
 let playlistSignature = '';
 let advanceTimer = null;
+let renderVersion = 0;
+let youtubePlayer = null;
+let youtubeApiPromise = null;
 
 function text(value, maxLength = 500) {
   return String(value ?? '').slice(0, maxLength);
@@ -65,6 +68,81 @@ function getYouTubeId(slide) {
   return '';
 }
 
+function loadYouTubeApi() {
+  if (window.YT?.Player) return Promise.resolve(window.YT);
+  if (youtubeApiPromise) return youtubeApiPromise;
+
+  youtubeApiPromise = new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      youtubeApiPromise = null;
+      reject(new Error('YouTube player API timed out'));
+    }, 15000);
+    const previousReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (typeof previousReady === 'function') previousReady();
+      clearTimeout(timeout);
+      resolve(window.YT);
+    };
+    let script = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+    if (!script) {
+      script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      script.onerror = () => {
+        clearTimeout(timeout);
+        youtubeApiPromise = null;
+        reject(new Error('Unable to load YouTube player API'));
+      };
+      document.head.append(script);
+    }
+  });
+  return youtubeApiPromise;
+}
+
+function playYouTubeUntilEnd(stage, slide, videoId, version) {
+  const shell = document.createElement('div');
+  shell.className = 'yt';
+  const mount = document.createElement('div');
+  mount.className = 'yt-mount';
+  shell.append(mount);
+  stage.append(shell);
+
+  scheduleAdvance(slide);
+
+  loadYouTubeApi().then((YT) => {
+    if (version !== renderVersion) return;
+    youtubePlayer = new YT.Player(mount, {
+      width: '100%',
+      height: '100%',
+      videoId,
+      playerVars: { autoplay: 1, controls: 0, mute: 1, playsinline: 1, rel: 0 },
+      events: {
+        onReady(event) {
+          if (version !== renderVersion) {
+            event.target.destroy();
+            return;
+          }
+          event.target.mute();
+          event.target.playVideo();
+        },
+        onStateChange(event) {
+          if (event.data === YT.PlayerState.PLAYING) {
+            clearTimeout(advanceTimer);
+            advanceTimer = null;
+          } else if (event.data === YT.PlayerState.ENDED && version === renderVersion) {
+            clearTimeout(advanceTimer);
+            advanceSlide();
+          }
+        },
+        onError() {
+          if (version === renderVersion && !advanceTimer) scheduleAdvance(slide);
+        },
+      },
+    });
+  }).catch(() => {
+    if (version === renderVersion && !advanceTimer) scheduleAdvance(slide);
+  });
+}
+
 function scheduleAdvance(slide) {
   clearTimeout(advanceTimer);
   if (screenData.playing === false || screenData.slides.length < 2) return;
@@ -84,12 +162,17 @@ function showMediaError(stage, slide) {
 }
 
 function render() {
+  renderVersion += 1;
   clearTimeout(advanceTimer);
+  if (youtubePlayer) {
+    try { youtubePlayer.destroy(); } catch { /* Player may already be detached. */ }
+    youtubePlayer = null;
+  }
   const slides = screenData.slides;
   root.replaceChildren();
 
   if (!slides.length) {
-    root.classList.remove('solo');
+    root.classList.remove('solo', 'media-only', 'fullscreen-media');
     setBackground(null);
     const empty = document.createElement('section');
     empty.className = 'screen-empty';
@@ -102,14 +185,20 @@ function render() {
   } else {
     currentSlide = ((currentSlide % slides.length) + slides.length) % slides.length;
     const slide = slides[currentSlide] || {};
-    root.classList.toggle('solo', ['image', 'video', 'youtube'].includes(slide.type));
+    const supportsMediaOptions = ['image', 'video', 'youtube'].includes(slide.type);
+    const fullscreen = supportsMediaOptions && slide.fullscreen === true;
+    const showText = !supportsMediaOptions || (slide.showText !== false && !fullscreen);
+    root.classList.toggle('solo', supportsMediaOptions);
+    root.classList.toggle('media-only', !showText);
+    root.classList.toggle('fullscreen-media', fullscreen);
     setBackground(slide);
 
     const layout = document.createElement('section');
     layout.className = 'screen-layout';
     const stage = document.createElement('div');
     stage.className = 'media-stage';
-    layout.append(makeCopy(slide), stage);
+    if (showText) layout.append(makeCopy(slide));
+    layout.append(stage);
     root.append(layout);
 
     if (slide.type === 'image') {
@@ -145,6 +234,8 @@ function render() {
       const videoId = getYouTubeId(slide);
       if (!videoId) {
         showMediaError(stage, slide);
+      } else if (slide.youtubeAdvance === 'ended') {
+        playYouTubeUntilEnd(stage, slide, videoId, renderVersion);
       } else {
         const frame = document.createElement('iframe');
         frame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&mute=1&controls=0&rel=0&playsinline=1`;
