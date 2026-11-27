@@ -6,13 +6,13 @@ import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDEsmdqWZ2lU7MpnXCjD12aQViUDb4dqA",
+  apiKey: "AIzaSyDEsmdqWZ2lBU7MpnXCjD12aQViUDb4dqA",
   authDomain: "innovateprogram-fd00c.firebaseapp.com",
   databaseURL: "https://innovateprogram-fd00c-default-rtdb.firebaseio.com",
   projectId: "innovateprogram-fd00c",
   storageBucket: "innovateprogram-fd00c.firebasestorage.app",
   messagingSenderId: "1006945173823",
-  appId: "1:1006945173823:web:cfb0fb311ec6af860b938a"
+  appId: "1:1006945173823:web:64344613b7cc8e420b938a"
 };
 
 const app = initializeApp(firebaseConfig);
