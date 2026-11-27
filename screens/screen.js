@@ -1,12 +1,12 @@
 import { db, ref, onValue } from './firebase.js';
 const root=document.querySelector('#screen'), counter=document.querySelector('#counter');
 let data=null, current=0, timer=null, generation=0;
-const backgrounds={"Midnight blue":"linear-gradient(135deg,#17345d,#1c2741 55%,#452b58)","Soft sky":"linear-gradient(135deg,#4989c8,#9bbde0 55%,#e3edf9)","Warm light":"linear-gradient(135deg,#72473d,#bb7656 55%,#f0c795)","Fresh green":"linear-gradient(135deg,#194c4a,#348176 55%,#a7c9a1)","Violet glow":"linear-gradient(135deg,#30245c,#6a4aa0 58%,#dd9acb)"};
+const backgrounds={"Midnight blue":"#18345a","Soft sky":"#6f91ad","Warm light":"#a77a62","Fresh green":"#47766b","Violet":"#67577d"};
 function cleanText(value){return String(value||'').replace(/[<>]/g,'').slice(0,500)}
-function setBackground(slide){root.style.backgroundImage=slide?.backgroundUrl?`url("${slide.backgroundUrl.replace(/["\\]/g,'')}")`:backgrounds[slide?.background||'Midnight blue']||backgrounds['Midnight blue']}
+function setBackground(slide){root.style.backgroundColor=backgrounds[slide?.background||'Midnight blue']||backgrounds['Midnight blue'];root.style.backgroundImage=slide?.backgroundUrl?`url("${slide.backgroundUrl.replace(/["\\]/g,'')}")`:'none'}
 function updateCounter(){counter.textContent=`${Math.min(current+1,data.slides.length)} / ${data.slides.length}`;counter.classList.toggle('hidden',data.slides.length<2)}
 function render(){generation++;clearTimeout(timer);root.querySelectorAll('.screen-layout,.screen-empty,.notification-banner').forEach(el=>el.remove());data=data||{};const slides=Array.isArray(data.slides)?data.slides:[];const note=data.notification||{};
-  if(!slides.length){root.classList.remove('solo');setBackground({background:'Midnight blue'});const empty=document.createElement('section');empty.className='screen-empty';empty.innerHTML='<div class="brandmark">✦</div><h1>Welcome to Innovate</h1><p>Your screen is ready. New announcements and slides will appear here automatically.</p>';root.append(empty);counter.classList.add('hidden')}
+  if(!slides.length){root.classList.remove('solo');setBackground({background:'Midnight blue'});const empty=document.createElement('section');empty.className='screen-empty';empty.innerHTML='<h1>Welcome to Innovate</h1><p>Your screen is ready. New announcements and slides will appear here automatically.</p>';root.append(empty);counter.classList.add('hidden')}
   else {current=((Number(data.active)||0)%slides.length+slides.length)%slides.length;const slide=slides[current];root.classList.toggle('solo',slide.type==='image'||slide.type==='video'||slide.type==='youtube');setBackground(slide);
     const layout=document.createElement('section');layout.className='screen-layout';
     const copy=document.createElement('div');copy.className='screen-copy';copy.innerHTML=`<div class="eyebrow">${cleanText(slide.eyebrow||'Innovate')}</div><h1>${cleanText(slide.title||'')}</h1><p>${cleanText(slide.description||'')}</p>`;
@@ -21,5 +21,5 @@ function render(){generation++;clearTimeout(timer);root.querySelectorAll('.scree
 }
 function schedule(slide){clearTimeout(timer);if(data?.playing===false||data?.slides?.length<2)return;const myGeneration=generation;timer=setTimeout(()=>{if(myGeneration===generation)nextSlide()},Math.max(5,Math.min(300,Number(slide.duration)||12))*1000)}
 function nextSlide(){if(!data?.slides?.length)return;current=(current+1)%data.slides.length;data.active=current;render()}
-onValue(ref(db,'screen'),snapshot=>{const incoming=snapshot.val();if(!incoming){data={slides:[],playing:true,notification:{enabled:false}};render();return}data=incoming;if(!Number.isInteger(Number(data.active)))data.active=0;render()},error=>{console.error(error);root.innerHTML='<section class="screen-empty"><div class="brandmark">!</div><h1>Unable to connect</h1><p>Please check the display network connection. This screen will reconnect automatically.</p></section>'});
+onValue(ref(db,'screen'),snapshot=>{const incoming=snapshot.val();if(!incoming){data={slides:[],playing:true,notification:{enabled:false}};render();return}data=incoming;if(!Number.isInteger(Number(data.active)))data.active=0;render()},error=>{console.error(error);root.innerHTML='<section class="screen-empty"><h1>Unable to connect</h1><p>Please check the display network connection. This screen will reconnect automatically.</p></section>'});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&data?.slides?.length)render()});
