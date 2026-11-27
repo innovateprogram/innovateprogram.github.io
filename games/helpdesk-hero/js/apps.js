@@ -18,12 +18,12 @@
     const s = Math.floor(sec % 60);
     return m + ':' + (s < 10 ? '0' : '') + s;
   }
-  function moodEmoji(mood) {
-    if (mood >= 75) return '😄';
-    if (mood >= 55) return '🙂';
-    if (mood >= 35) return '😐';
-    if (mood >= 15) return '😠';
-    return '🤬';
+  function moodLabel(mood) {
+    if (mood >= 75) return 'Happy';
+    if (mood >= 55) return 'Content';
+    if (mood >= 35) return 'Neutral';
+    if (mood >= 15) return 'Frustrated';
+    return 'Angry';
   }
   function patienceClass(p) {
     if (p > 60) return 'ok';
@@ -95,12 +95,12 @@
         function updateMeters() {
           const bar = body.querySelector('.patience-fill');
           const wrap = body.querySelector('.patience-bar');
-          const moodEl = body.querySelector('.mood-emoji');
+          const moodEl = body.querySelector('.mood-label');
           if (bar && wrap) {
             bar.style.width = Math.max(0, ticket.patience) + '%';
             wrap.className = 'patience-bar ' + patienceClass(ticket.patience);
           }
-          if (moodEl) moodEl.textContent = moodEmoji(ticket.mood);
+          if (moodEl) moodEl.textContent = moodLabel(ticket.mood);
         }
 
         function render() {
@@ -110,7 +110,7 @@
             'ticket-head',
             '<div class="ticket-avatar">' + ticket.avatar + '</div>' +
               '<div class="ticket-meta"><strong>' + esc(ticket.customer) + '</strong><span>' + esc(ticket.subject) + '</span></div>' +
-              '<div class="mood-emoji">' + moodEmoji(ticket.mood) + '</div>'
+              '<div class="mood-label">' + moodLabel(ticket.mood) + '</div>'
           );
           body.appendChild(head);
 
@@ -169,7 +169,7 @@
         wrap.appendChild(el('label', 'field-label', 'Confirm employee identity before reset:'));
         wrap.appendChild(sel);
         wrap.appendChild(btn);
-        if (ticket.requirements[0].done) wrap.appendChild(el('p', 'req-done', '✅ Password reset & identity verified.'));
+        if (ticket.requirements[0].done) wrap.appendChild(el('p', 'req-done', 'Password reset & identity verified.'));
         break;
       }
       case 'email_config': {
@@ -193,12 +193,12 @@
         wrap.appendChild(s2);
         wrap.appendChild(el('p', 'hint-text', 'Tip: check the Browser app knowledge base for the standard settings.'));
         wrap.appendChild(btn);
-        if (ticket.requirements[0].done) wrap.appendChild(el('p', 'req-done', '✅ Mail account reconfigured.'));
+        if (ticket.requirements[0].done) wrap.appendChild(el('p', 'req-done', 'Mail account reconfigured.'));
         break;
       }
       case 'software_install': {
         const req = ticket.requirements[0];
-        const btn = el('button', 'btn btn-accent', req.done ? 'Installed ✅' : 'Install Software');
+        const btn = el('button', 'btn btn-accent', req.done ? 'Installed' : 'Install Software');
         btn.type = 'button';
         btn.disabled = req.done || ticket._installing;
         const prog = el('div', 'progress-track');
@@ -225,13 +225,13 @@
             }
           }, 100);
         });
-        if (req.done) wrap.appendChild(el('p', 'req-done', '✅ Software installed and verified.'));
+        if (req.done) wrap.appendChild(el('p', 'req-done', 'Software installed and verified.'));
         break;
       }
       case 'peripheral': {
         ticket.requirements.forEach((req) => {
           const row = el('div', 'check-row');
-          const btn = el('button', 'btn btn-toggle' + (req.done ? ' done' : ''), req.done ? '✅ ' + req.label : 'Do: ' + req.label);
+          const btn = el('button', 'btn btn-toggle' + (req.done ? ' done' : ''), req.done ? req.label : 'Do: ' + req.label);
           btn.type = 'button';
           btn.disabled = req.done;
           btn.addEventListener('click', () => {
@@ -250,7 +250,7 @@
         btn.type = 'button';
         btn.addEventListener('click', () => jumpTo('terminal'));
         wrap.appendChild(btn);
-        if (req.done) wrap.appendChild(el('p', 'req-done', '✅ Network link confirmed.'));
+        if (req.done) wrap.appendChild(el('p', 'req-done', 'Network link confirmed.'));
         break;
       }
       case 'terminal_task': {
@@ -260,7 +260,7 @@
         btn.type = 'button';
         btn.addEventListener('click', () => jumpTo('terminal'));
         wrap.appendChild(btn);
-        if (req.done) wrap.appendChild(el('p', 'req-done', '✅ Process terminated.'));
+        if (req.done) wrap.appendChild(el('p', 'req-done', 'Process terminated.'));
         break;
       }
       case 'malware_scan': {
@@ -270,7 +270,7 @@
         btn.type = 'button';
         btn.addEventListener('click', () => jumpTo('security'));
         wrap.appendChild(btn);
-        if (req.done) wrap.appendChild(el('p', 'req-done', '✅ System cleaned.'));
+        if (req.done) wrap.appendChild(el('p', 'req-done', 'System cleaned.'));
         break;
       }
       case 'file_recovery': {
@@ -280,7 +280,7 @@
         btn.type = 'button';
         btn.addEventListener('click', () => jumpTo('files'));
         wrap.appendChild(btn);
-        if (req.done) wrap.appendChild(el('p', 'req-done', '✅ File restored.'));
+        if (req.done) wrap.appendChild(el('p', 'req-done', 'File restored.'));
         break;
       }
       case 'registry_edit': {
@@ -290,7 +290,7 @@
         btn.type = 'button';
         btn.addEventListener('click', () => jumpTo('registry'));
         wrap.appendChild(btn);
-        if (req.done) wrap.appendChild(el('p', 'req-done', '✅ Registry key corrected.'));
+        if (req.done) wrap.appendChild(el('p', 'req-done', 'Registry key corrected.'));
         break;
       }
       case 'firewall_rule': {
@@ -300,7 +300,7 @@
         btn.type = 'button';
         btn.addEventListener('click', () => jumpTo('firewall'));
         wrap.appendChild(btn);
-        if (req.done) wrap.appendChild(el('p', 'req-done', '✅ Firewall updated.'));
+        if (req.done) wrap.appendChild(el('p', 'req-done', 'Firewall updated.'));
         break;
       }
     }
@@ -315,7 +315,7 @@
         wm.open({
           id: 'tickets',
           title: 'Ticket Manager',
-          icon: '🎫',
+          icon: '',
           width: 360,
           height: 440,
           minWidth: 300,
@@ -356,7 +356,7 @@
             function render() {
               body.innerHTML = '';
               if (!game.activeTickets.length && !game.queue.length) {
-                body.appendChild(el('p', 'empty-state', 'No open tickets right now. Nice and quiet! 🎧'));
+                body.appendChild(el('p', 'empty-state', 'No open tickets right now. Nice and quiet!'));
                 return;
               }
               if (game.activeTickets.length) {
@@ -382,7 +382,7 @@
         wm.open({
           id: 'telephony',
           title: 'Telephony',
-          icon: '☎️',
+          icon: '',
           width: 340,
           height: 380,
           minWidth: 300,
@@ -405,12 +405,12 @@
               body.innerHTML = '';
               const call = game.ringingCall;
               if (!call) {
-                body.appendChild(el('div', 'phone-idle', '<div class="phone-icon">☎️</div><p>No incoming calls right now.</p>'));
+                body.appendChild(el('div', 'phone-idle', '<p>No incoming calls right now.</p>'));
                 return;
               }
               const panel = el('div', 'phone-call');
               panel.innerHTML =
-                '<div class="phone-ring">📞 Incoming Call</div>' +
+                '<div class="phone-ring">Incoming Call</div>' +
                 '<div class="phone-caller">' + call.avatar + ' <strong>' + esc(call.customer) + '</strong></div>' +
                 '<p class="phone-opener">"' + esc(D.callOpeners[0]) + '"</p>';
               const bar = el('div', 'patience-bar ' + patienceClass(call.patience));
@@ -460,7 +460,7 @@
 
             function finishCall(ticket) {
               body.innerHTML = '';
-              body.appendChild(el('div', 'phone-idle', '<div class="phone-icon">✅</div><p>Ticket opened in Ticket Manager.</p>'));
+              body.appendChild(el('div', 'phone-idle', '<p>Ticket opened in Ticket Manager.</p>'));
               openTicketWindow(ctx, ticket);
               setTimeout(render, 1200);
             }
@@ -489,7 +489,7 @@
         wm.open({
           id: 'terminal',
           title: 'Terminal',
-          icon: '🖥️',
+          icon: '',
           width: 460,
           height: 360,
           minWidth: 320,
@@ -626,7 +626,7 @@
                     matches.forEach((t) => {
                       game.markRequirement(t.id, 'ping:' + arg, true);
                     });
-                    printHTML('<span class="term-ok">✔ Diagnostic requirement satisfied for ticket(s).</span>');
+                    printHTML('<span class="term-ok">Diagnostic requirement satisfied for ticket(s).</span>');
                   }
                   break;
                 }
@@ -639,7 +639,7 @@
                   if (matches.length) {
                     print('Process ' + arg + ' has been terminated.');
                     matches.forEach((t) => game.markRequirement(t.id, 'kill:' + arg, true));
-                    printHTML('<span class="term-ok">✔ Hung process cleared.</span>');
+                    printHTML('<span class="term-ok">Hung process cleared.</span>');
                   } else {
                     print('ERROR: Process ' + arg + ' not found or already stopped.', 'term-error');
                   }
@@ -709,7 +709,7 @@
         wm.open({
           id: 'browser',
           title: 'HelpNet Browser',
-          icon: '🌐',
+          icon: '',
           width: 480,
           height: 420,
           minWidth: 340,
@@ -745,7 +745,7 @@
                 D.kbArticles
                   .filter((a) => !filter || a.title.toLowerCase().includes(filter.toLowerCase()))
                   .forEach((a) => {
-                    const item = el('a', 'kb-item', '📄 ' + esc(a.title));
+                    const item = el('a', 'kb-item', esc(a.title));
                     item.href = 'javascript:void(0)';
                     item.addEventListener('click', () => openArticle(a));
                     results.appendChild(item);
@@ -820,7 +820,7 @@
         wm.open({
           id: 'files',
           title: 'File Explorer',
-          icon: '🗂️',
+          icon: '',
           width: 440,
           height: 380,
           minWidth: 340,
@@ -842,7 +842,7 @@
             function renderSidebar() {
               sidebar.innerHTML = '';
               Object.keys(folders).forEach((name) => {
-                const item = el('button', 'files-nav-item' + (current === name ? ' active' : ''), '📁 ' + name);
+                const item = el('button', 'files-nav-item' + (current === name ? ' active' : ''), name);
                 item.type = 'button';
                 item.addEventListener('click', () => {
                   current = name;
@@ -850,7 +850,7 @@
                 });
                 sidebar.appendChild(item);
               });
-              const bin = el('button', 'files-nav-item' + (current === 'RecycleBin' ? ' active' : ''), '🗑️ Recycle Bin');
+              const bin = el('button', 'files-nav-item' + (current === 'RecycleBin' ? ' active' : ''), 'Recycle Bin');
               bin.type = 'button';
               bin.addEventListener('click', () => {
                 current = 'RecycleBin';
@@ -871,7 +871,7 @@
                 }
                 items.forEach((r) => {
                   const row = el('div', 'file-row');
-                  row.innerHTML = '<span>🗎 ' + esc(r.file) + '</span>';
+                  row.innerHTML = '<span>FILE ' + esc(r.file) + '</span>';
                   const btn = el('button', 'btn btn-accent', 'Restore');
                   btn.type = 'button';
                   btn.addEventListener('click', () => {
@@ -891,7 +891,7 @@
                   return;
                 }
                 names.forEach((n) => {
-                  main.appendChild(el('div', 'file-row', '<span>🗎 ' + esc(n) + '</span>'));
+                  main.appendChild(el('div', 'file-row', '<span>FILE ' + esc(n) + '</span>'));
                 });
               }
             }
@@ -911,7 +911,7 @@
         wm.open({
           id: 'registry',
           title: 'Registry Editor',
-          icon: '🧩',
+          icon: '',
           width: 460,
           height: 400,
           minWidth: 360,
@@ -933,7 +933,7 @@
                 const btn = el(
                   'button',
                   'reg-node-btn' + (fullPath.join('/') === selectedPath.join('/') ? ' active' : ''),
-                  (isLeafGroup ? '🔑 ' : '📁 ') + key
+                  key
                 );
                 btn.type = 'button';
                 btn.addEventListener('click', () => {
@@ -977,7 +977,7 @@
                 row.innerHTML =
                   '<div><strong>' + esc(v.name) + '</strong><span class="reg-type">' + v.type + '</span></div>' +
                   '<div class="reg-current ' + (isBroken ? 'bad' : 'ok') + '">Value: ' + esc(v.value) + '</div>';
-                const btn = el('button', 'btn btn-accent', isBroken ? 'Set to ' + v.fixedValue : 'Fixed ✅');
+                const btn = el('button', 'btn btn-accent', isBroken ? 'Set to ' + v.fixedValue : 'Fixed');
                 btn.type = 'button';
                 btn.disabled = !isBroken;
                 btn.addEventListener('click', () => {
@@ -1008,7 +1008,7 @@
         wm.open({
           id: 'firewall',
           title: 'Firewall Manager',
-          icon: '🛡️',
+          icon: '',
           width: 460,
           height: 400,
           minWidth: 360,
@@ -1102,7 +1102,7 @@
         wm.open({
           id: 'security',
           title: 'Security Scanner',
-          icon: '🦠',
+          icon: '',
           width: 380,
           height: 360,
           minWidth: 300,
@@ -1112,7 +1112,7 @@
 
             function render() {
               body.innerHTML = '';
-              body.appendChild(el('div', 'sec-shield', '🛡️'));
+              body.appendChild(el('div', 'sec-shield', 'SECURITY'));
               const scanBtn = el('button', 'btn btn-primary', 'Run Full Scan');
               scanBtn.type = 'button';
               const prog = el('div', 'progress-track');
@@ -1142,14 +1142,14 @@
                 const count = 2 + ((Math.random() * 3) | 0);
                 const found = Array.from({ length: count }, () => threatNames[(Math.random() * threatNames.length) | 0]);
                 resultsBox.innerHTML = '<h3 class="section-title">Threats found: ' + count + '</h3>';
-                found.forEach((n) => resultsBox.appendChild(el('div', 'threat-row', '⚠️ ' + n)));
+                found.forEach((n) => resultsBox.appendChild(el('div', 'threat-row', n)));
                 const qBtn = el('button', 'btn btn-accent', 'Quarantine All');
                 qBtn.type = 'button';
                 qBtn.addEventListener('click', () => {
                   const matches = game.activeTickets.concat(game.queue).filter((t) => t.requirements.some((req) => req.id === 'scan' && !req.done));
                   matches.forEach((t) => game.markRequirement(t.id, 'scan', true));
                   if (HD.Audio) HD.Audio.success();
-                  resultsBox.innerHTML = '<p class="req-done">✅ All threats quarantined.</p>';
+                  resultsBox.innerHTML = '<p class="req-done">All threats quarantined.</p>';
                   scanBtn.textContent = 'Run Full Scan';
                   scanBtn.disabled = false;
                   prog.querySelector('.progress-fill').style.width = '0%';
@@ -1171,7 +1171,7 @@
         wm.open({
           id: 'shop',
           title: 'IT Upgrade Shop',
-          icon: '🛒',
+          icon: '',
           width: 420,
           height: 440,
           minWidth: 320,
@@ -1181,7 +1181,7 @@
 
             function render() {
               body.innerHTML = '';
-              body.appendChild(el('div', 'shop-credits', '💳 ' + game.credits + ' credits'));
+              body.appendChild(el('div', 'shop-credits', game.credits + ' credits'));
               D.upgrades.forEach((def) => {
                 const lvl = game.upgrades[def.id] || 0;
                 const cost = game.upgradeCost(def);
@@ -1216,7 +1216,7 @@
         wm.open({
           id: 'settings',
           title: 'Settings',
-          icon: '⚙️',
+          icon: '',
           width: 360,
           height: 380,
           minWidth: 300,
@@ -1295,7 +1295,7 @@
         wm.open({
           id: 'notifications',
           title: 'Notifications',
-          icon: '🔔',
+          icon: '',
           width: 340,
           height: 420,
           minWidth: 280,

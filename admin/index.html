@@ -140,7 +140,7 @@
         font-size: 13px; color: var(--red); margin-top: 12px; text-align: center; min-height: 18px;
         font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;
       }
-      .auth-error.visible::before { content: "⚠"; }
+      .auth-error.visible::before { content: ""; }
       .auth-pin-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
       .auth-pin-input {
         width: 64px; height: 64px; text-align: center; background: var(--surface2); border: 1px solid var(--border2);
@@ -446,6 +446,7 @@
       .info-box.visible { display: block; }
 
       .no-pres { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; color: var(--text3); text-align: center; padding: 40px; }
+      .drop-zone-icon:empty, .card-title-icon:empty, .empty-state-icon:empty, .no-pres-icon:empty { display: none; }
       .no-pres-icon { font-size: 56px; opacity: 0.25; }
       .no-pres-title { font-size: 18px; font-weight: 600; color: var(--text2); }
       .no-pres-sub { font-size: 14px; line-height: 1.5; }
@@ -574,7 +575,7 @@
     <!-- ===== CHANGE PIN MODAL ===== -->
     <div id="changePinModal" class="modal-overlay" style="display: none">
       <div class="modal-box">
-        <div class="modal-title">🔑 Change PIN</div>
+        <div class="modal-title">Change PIN</div>
         <div class="modal-sub">Enter your current PIN, then choose a new 4-digit PIN. Everyone with the old PIN will need the new one to sign in.</div>
         <div class="modal-field"><label>Current PIN</label><input type="password" id="cpCurrentPin" maxlength="4" inputmode="numeric" placeholder="••••" /></div>
         <div class="modal-field"><label>New PIN</label><input type="password" id="cpNewPin" maxlength="4" inputmode="numeric" placeholder="••••" /></div>
@@ -599,8 +600,8 @@
           <button class="sidebar-close" id="sidebarClose">×</button>
         </div>
         <div class="sidebar-tabs">
-          <div class="sidebar-tab active" data-panel="media">📁 Media</div>
-          <div class="sidebar-tab" data-panel="youtube">▶ YouTube</div>
+          <div class="sidebar-tab active" data-panel="media">Media</div>
+          <div class="sidebar-tab" data-panel="youtube">YouTube</div>
         </div>
 
         <!-- MEDIA PANEL -->
@@ -608,7 +609,7 @@
           <div class="sidebar-hint">Step 1 — Upload a photo or video here. Then add it to your slides from the library below.</div>
           <div class="drop-zone" id="dropZone">
             <input type="file" id="file" accept="image/*,video/*" multiple />
-            <div class="drop-zone-icon">🖼️</div>
+            <div class="drop-zone-icon"></div>
             <div class="drop-zone-label">Drop a file here</div>
             <div class="drop-zone-sub">or tap to browse · images &amp; videos</div>
           </div>
@@ -659,10 +660,10 @@
           <div class="topbar-title" id="editorTitle">Select a Presentation</div>
           <div class="topbar-actions">
             <span id="liveIndicator" style="display: none" class="badge-live">DEFAULT</span>
-            <button id="setActiveBtn" class="btn primary sm">⚡ Set as Default</button>
+            <button id="setActiveBtn" class="btn primary sm">Set as Default</button>
             <button id="refreshViewBtn" class="btn sm" title="Refresh all displays">↺ Refresh Displays</button>
             <button id="renamePresentationBtn" class="btn sm ghost">✎ Rename</button>
-            <button id="changePinBtn" class="btn sm ghost" title="Change PIN">🔑</button>
+            <button id="changePinBtn" class="btn sm ghost" title="Change PIN">PIN</button>
             <button id="deletePresentationBtn" class="btn sm danger">✕</button>
           </div>
         </div>
@@ -674,7 +675,7 @@
         <div class="editor-layout">
           <div class="editor-scroll" id="editorArea">
             <div class="no-pres" id="noPres" style="display: none">
-              <div class="no-pres-icon">🎞️</div>
+              <div class="no-pres-icon"></div>
               <div class="no-pres-title">No presentation selected</div>
               <div class="no-pres-sub">Tap <strong>+</strong> above to create one</div>
             </div>
@@ -682,7 +683,7 @@
             <!-- Onboarding checklist -->
             <div class="onboard-card" id="onboardCard" style="display: none">
               <div class="onboard-head">
-                <div class="onboard-title">👋 Get your first display running</div>
+                <div class="onboard-title">Get your first display running</div>
                 <button class="onboard-dismiss" id="onboardDismiss" title="Hide this">×</button>
               </div>
               <div class="onboard-sub">Follow these steps in order — each one unlocks the next.</div>
@@ -692,7 +693,7 @@
             <!-- Slides (always visible — the main task) -->
             <div class="card no-collapse" id="slidesCard">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">🎞️</span> Slides</div>
+                <div class="card-title"><span class="card-title-icon"></span> Slides</div>
                 <span style="font-size: 12px; color: var(--text3)">Drag to reorder</span>
               </div>
               <div class="card-body">
@@ -703,7 +704,7 @@
             <!-- Monitor Assignment -->
             <div class="card collapsed" id="monitorAssignCard" data-collapsible="1">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">🖥️</span> Assign Monitors <span class="card-chevron">▾</span></div>
+                <div class="card-title"><span class="card-title-icon"></span> Assign Monitors <span class="card-chevron">▾</span></div>
               </div>
               <div class="card-body compact">
                 <label style="display:flex; align-items:center; gap:8px;">Monitor names <span class="tip" data-tip="Type the names of the screens that should show this presentation, separated by commas.">?</span></label>
@@ -720,7 +721,7 @@
             <!-- Active Monitors -->
             <div class="card collapsed" id="activeMonitorsCard" data-collapsible="1">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">📡</span> Active Monitors <span class="card-chevron">▾</span></div>
+                <div class="card-title"><span class="card-title-icon"></span> Active Monitors <span class="card-chevron">▾</span></div>
                 <span style="font-size: 12px; color: var(--text3)">Online if seen &lt;15s ago</span>
               </div>
               <div class="card-body compact" id="monitorsContainer">
@@ -731,7 +732,7 @@
             <!-- Settings Card -->
             <div class="card collapsed" id="settingsCard" data-collapsible="1">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">⚙️</span> Playback Settings <span class="card-chevron">▾</span></div>
+                <div class="card-title"><span class="card-title-icon"></span> Playback Settings <span class="card-chevron">▾</span></div>
               </div>
               <div class="card-body">
                 <div class="settings-grid">
@@ -759,7 +760,7 @@
             <!-- Overlay Card -->
             <div class="card collapsed" id="overlayCard" data-collapsible="1">
               <div class="card-header">
-                <div class="card-title"><span class="card-title-icon">📢</span> Overlay Banner <span class="card-chevron">▾</span></div>
+                <div class="card-title"><span class="card-title-icon"></span> Overlay Banner <span class="card-chevron">▾</span></div>
                 <label class="check-row" style="cursor: pointer" onclick="event.stopPropagation()">
                   <input id="overlayVisible" type="checkbox" />
                   <span style="font-size: 13px; color: var(--text2)">Show on display</span>
@@ -995,7 +996,7 @@
           await set(pinRef, nw);
           correctPin = nw;
           changePinModal.style.display = "none";
-          toast("PIN changed successfully 🔑");
+          toast("PIN changed successfully ");
         } catch (e) {
           cpError.textContent = "Failed to save PIN. Try again.";
         } finally {
@@ -1086,7 +1087,7 @@
       function toast(msg, type = "success") {
         const el = document.createElement("div");
         el.className = `toast ${type}`;
-        const icons = { success: "✓", error: "✕", info: "ℹ" };
+        const icons = { success: "✓", error: "✕", info: "INFO" };
         el.textContent = `${icons[type] || ""} ${msg}`;
         toastWrap.appendChild(el);
         setTimeout(() => el.remove(), 3200);
@@ -1458,7 +1459,7 @@
           const card = document.createElement("div");
           card.className = "yt-card";
           card.innerHTML = `
-            <div class="yt-card-thumb">▶<div class="yt-badge">YouTube</div></div>
+            <div class="yt-card-thumb"><div class="yt-badge">YouTube</div></div>
             <div class="yt-card-body">
               <input class="yt-card-name yt-rename-input" data-id="${id}" value="${escHtml(m.filename || id)}" title="Click to rename" />
               <div class="yt-card-actions">
@@ -1594,7 +1595,7 @@
         assigned.forEach((name) => {
           const el = document.createElement("div");
           el.className = "assigned-badge";
-          el.innerHTML = `🖥️ ${escHtml(name)}`;
+          el.innerHTML = escHtml(name);
           assignedMonitorsList.appendChild(el);
         });
         if (!isLocked("monitorAssign") && !monitorAssignInput.value.trim() && assigned.length > 0) {
@@ -1608,10 +1609,10 @@
         if (!p.items || p.items.length === 0) {
           presentationItemsEl.innerHTML = `
             <div class="empty-state">
-              <div class="empty-state-icon">🖼️</div>
+              <div class="empty-state-icon"></div>
               <div class="empty-state-title">No slides yet</div>
               <div class="empty-state-sub">Open the Media panel and click "+ Add to Slides" on anything you've uploaded.</div>
-              <button class="btn primary" id="emptyOpenSidebarBtn">📁 Open Media Library</button>
+              <button class="btn primary" id="emptyOpenSidebarBtn">Open Media Library</button>
             </div>`;
           const btn = $("emptyOpenSidebarBtn");
           if (btn) btn.onclick = openSidebar;
@@ -1630,7 +1631,7 @@
           div.dataset.idx = index;
 
           let thumbHtml = "";
-          if (isYt) thumbHtml = `<div class="slide-item-thumb"><div class="slide-item-thumb-yt">▶</div><div class="slide-item-thumb-badge">YT</div><div class="slide-num">${index + 1}</div></div>`;
+          if (isYt) thumbHtml = `<div class="slide-item-thumb"><div class="slide-item-thumb-yt"></div><div class="slide-item-thumb-badge">YT</div><div class="slide-num">${index + 1}</div></div>`;
           else if (m.resource_type === "image") thumbHtml = `<div class="slide-item-thumb"><img src="${m.url}" /><div class="slide-num">${index + 1}</div></div>`;
           else thumbHtml = `<div class="slide-item-thumb"><video src="${m.url}" muted></video><div class="slide-num">${index + 1}</div></div>`;
 

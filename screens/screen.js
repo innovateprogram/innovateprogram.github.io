@@ -1,25 +1,235 @@
 import { db, ref, onValue } from './firebase.js';
-const root=document.querySelector('#screen'), counter=document.querySelector('#counter');
-let data=null, current=0, timer=null, generation=0;
-const backgrounds={"Midnight blue":"#18345a","Soft sky":"#6f91ad","Warm light":"#a77a62","Fresh green":"#47766b","Violet":"#67577d"};
-function cleanText(value){return String(value||'').replace(/[<>]/g,'').slice(0,500)}
-function setBackground(slide){root.style.backgroundColor=backgrounds[slide?.background||'Midnight blue']||backgrounds['Midnight blue'];root.style.backgroundImage=slide?.backgroundUrl?`url("${slide.backgroundUrl.replace(/["\\]/g,'')}")`:'none'}
-function updateCounter(){counter.textContent=`${Math.min(current+1,data.slides.length)} / ${data.slides.length}`;counter.classList.toggle('hidden',data.slides.length<2)}
-function render(){generation++;clearTimeout(timer);root.querySelectorAll('.screen-layout,.screen-empty,.notification-banner').forEach(el=>el.remove());data=data||{};const slides=Array.isArray(data.slides)?data.slides:[];const note=data.notification||{};
-  if(!slides.length){root.classList.remove('solo');setBackground({background:'Midnight blue'});const empty=document.createElement('section');empty.className='screen-empty';empty.innerHTML='<h1>Welcome to Innovate</h1><p>Your screen is ready. New announcements and slides will appear here automatically.</p>';root.append(empty);counter.classList.add('hidden')}
-  else {current=((Number(data.active)||0)%slides.length+slides.length)%slides.length;const slide=slides[current];root.classList.toggle('solo',slide.type==='image'||slide.type==='video'||slide.type==='youtube');setBackground(slide);
-    const layout=document.createElement('section');layout.className='screen-layout';
-    const copy=document.createElement('div');copy.className='screen-copy';copy.innerHTML=`<div class="eyebrow">${cleanText(slide.eyebrow||'Innovate')}</div><h1>${cleanText(slide.title||'')}</h1><p>${cleanText(slide.description||'')}</p>`;
-    const stage=document.createElement('div');stage.className='media-stage';layout.append(copy,stage);root.append(layout);updateCounter();
-    if(slide.type==='image'){const img=document.createElement('img');img.src=slide.url;img.alt=cleanText(slide.title||'Innovate slide');stage.append(img)}
-    else if(slide.type==='video'){const video=document.createElement('video');video.src=slide.url;video.autoplay=true;video.muted=true;video.playsInline=true;video.controls=false;video.addEventListener('ended',()=>{if(data.playing!==false)nextSlide()},{once:true});video.addEventListener('error',()=>schedule(slide),{once:true});stage.append(video);video.play().catch(()=>{})}
-    else if(slide.type==='youtube'){const holder=document.createElement('div');holder.className='yt';const frame=document.createElement('iframe');frame.src=`https://www.youtube-nocookie.com/embed/${encodeURIComponent(slide.videoId||'')}?autoplay=1&mute=1&controls=0&rel=0&playsinline=1`;frame.title=cleanText(slide.title||'YouTube video');frame.allow='autoplay; encrypted-media; picture-in-picture';frame.allowFullscreen=true;holder.append(frame);stage.append(holder);schedule(slide)}
-    else if(slide.type==='collage'){const images=Array.isArray(slide.images)?slide.images:[];const collage=document.createElement('div');collage.className=`collage tiles-${Math.min(images.length,4)} layout-${slide.layout||'grid'}`;images.slice(0,8).forEach(item=>{const tile=document.createElement('figure');tile.className='collage-tile';const img=document.createElement('img');img.src=item.url;img.alt=cleanText(item.caption||'');tile.append(img);if(item.caption){const caption=document.createElement('figcaption');caption.textContent=cleanText(item.caption);tile.append(caption)}collage.append(tile)});stage.append(collage);schedule(slide)}
-    else {const empty=document.createElement('div');empty.className='empty';empty.textContent='This slide type is not supported.';stage.append(empty);schedule(slide)}
-  }
-  if(note.enabled&&note.text){const banner=document.createElement('aside');banner.className='notification-banner';banner.innerHTML='<span class="notification-icon">🔔</span><span></span>';banner.lastElementChild.textContent=cleanText(note.text).slice(0,120);root.append(banner)}
+
+const root = document.querySelector('#screen');
+const backgrounds = {
+  'Midnight blue': '#18345a',
+  'Soft sky': '#6f91ad',
+  'Warm light': '#a77a62',
+  'Fresh green': '#47766b',
+  Violet: '#67577d',
+};
+
+let screenData = { slides: [], playing: true, notification: { enabled: false, text: '' } };
+let currentSlide = 0;
+let playlistSignature = '';
+let advanceTimer = null;
+
+function text(value, maxLength = 500) {
+  return String(value ?? '').slice(0, maxLength);
 }
-function schedule(slide){clearTimeout(timer);if(data?.playing===false||data?.slides?.length<2)return;const myGeneration=generation;timer=setTimeout(()=>{if(myGeneration===generation)nextSlide()},Math.max(5,Math.min(300,Number(slide.duration)||12))*1000)}
-function nextSlide(){if(!data?.slides?.length)return;current=(current+1)%data.slides.length;data.active=current;render()}
-onValue(ref(db,'screen'),snapshot=>{const incoming=snapshot.val();if(!incoming){data={slides:[],playing:true,notification:{enabled:false}};render();return}data=incoming;if(!Number.isInteger(Number(data.active)))data.active=0;render()},error=>{console.error(error);root.innerHTML='<section class="screen-empty"><h1>Unable to connect</h1><p>Please check the display network connection. This screen will reconnect automatically.</p></section>'});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&data?.slides?.length)render()});
+
+function validHttpsUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function setBackground(slide) {
+  root.style.backgroundColor = backgrounds[slide?.background] || backgrounds['Midnight blue'];
+  const imageUrl = validHttpsUrl(slide?.backgroundUrl);
+  root.style.backgroundImage = imageUrl ? `url("${imageUrl}")` : 'none';
+}
+
+function makeCopy(slide) {
+  const copy = document.createElement('div');
+  copy.className = 'screen-copy';
+
+  const eyebrow = document.createElement('div');
+  eyebrow.className = 'eyebrow';
+  eyebrow.textContent = text(slide.eyebrow || 'Innovate', 35);
+
+  const heading = document.createElement('h1');
+  heading.textContent = text(slide.title, 75);
+
+  const description = document.createElement('p');
+  description.textContent = text(slide.description, 260);
+
+  copy.append(eyebrow, heading, description);
+  return copy;
+}
+
+function getYouTubeId(slide) {
+  if (slide.videoId) return text(slide.videoId, 20);
+  try {
+    const url = new URL(slide.youtubeUrl);
+    if (url.hostname === 'youtu.be') return url.pathname.slice(1).split('/')[0];
+    if (url.hostname.endsWith('youtube.com')) {
+      return url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop() || '';
+    }
+  } catch {
+    // Invalid or missing URL; render a helpful message in the media area.
+  }
+  return '';
+}
+
+function scheduleAdvance(slide) {
+  clearTimeout(advanceTimer);
+  if (screenData.playing === false || screenData.slides.length < 2) return;
+  const seconds = Math.max(5, Math.min(300, Number(slide.duration) || 12));
+  advanceTimer = setTimeout(advanceSlide, seconds * 1000);
+}
+
+function advanceSlide() {
+  if (screenData.playing === false || screenData.slides.length < 2) return;
+  currentSlide = (currentSlide + 1) % screenData.slides.length;
+  render();
+}
+
+function showMediaError(stage, slide) {
+  stage.textContent = 'This media could not be played. Moving to the next slide.';
+  scheduleAdvance(slide);
+}
+
+function render() {
+  clearTimeout(advanceTimer);
+  const slides = screenData.slides;
+  root.replaceChildren();
+
+  if (!slides.length) {
+    root.classList.remove('solo');
+    setBackground(null);
+    const empty = document.createElement('section');
+    empty.className = 'screen-empty';
+    const heading = document.createElement('h1');
+    heading.textContent = 'Welcome to Innovate';
+    const description = document.createElement('p');
+    description.textContent = 'Your screen is ready. New announcements and slides will appear here automatically.';
+    empty.append(heading, description);
+    root.append(empty);
+  } else {
+    currentSlide = ((currentSlide % slides.length) + slides.length) % slides.length;
+    const slide = slides[currentSlide] || {};
+    root.classList.toggle('solo', ['image', 'video', 'youtube'].includes(slide.type));
+    setBackground(slide);
+
+    const layout = document.createElement('section');
+    layout.className = 'screen-layout';
+    const stage = document.createElement('div');
+    stage.className = 'media-stage';
+    layout.append(makeCopy(slide), stage);
+    root.append(layout);
+
+    if (slide.type === 'image') {
+      const imageUrl = validHttpsUrl(slide.url);
+      if (!imageUrl) {
+        showMediaError(stage, slide);
+      } else {
+        const image = document.createElement('img');
+        image.src = imageUrl;
+        image.alt = text(slide.title || 'Innovate slide');
+        image.addEventListener('error', () => showMediaError(stage, slide), { once: true });
+        stage.append(image);
+        scheduleAdvance(slide);
+      }
+    } else if (slide.type === 'video') {
+      const videoUrl = validHttpsUrl(slide.url);
+      if (!videoUrl) {
+        showMediaError(stage, slide);
+      } else {
+        const video = document.createElement('video');
+        video.src = videoUrl;
+        video.autoplay = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'auto';
+        video.addEventListener('ended', advanceSlide, { once: true });
+        video.addEventListener('error', () => showMediaError(stage, slide), { once: true });
+        stage.append(video);
+        const playback = video.play();
+        if (playback?.catch) playback.catch(() => scheduleAdvance(slide));
+      }
+    } else if (slide.type === 'youtube') {
+      const videoId = getYouTubeId(slide);
+      if (!videoId) {
+        showMediaError(stage, slide);
+      } else {
+        const frame = document.createElement('iframe');
+        frame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&mute=1&controls=0&rel=0&playsinline=1`;
+        frame.title = text(slide.title || 'YouTube video');
+        frame.allow = 'autoplay; encrypted-media; picture-in-picture';
+        frame.allowFullscreen = true;
+        stage.append(frame);
+        scheduleAdvance(slide);
+      }
+    } else if (slide.type === 'collage') {
+      const images = Array.isArray(slide.images) ? slide.images : [];
+      const collage = document.createElement('div');
+      collage.className = `collage tiles-${Math.min(images.length, 4)} layout-${slide.layout || 'grid'}`;
+      images.slice(0, 8).forEach((item) => {
+        const imageUrl = validHttpsUrl(item.url);
+        if (!imageUrl) return;
+        const tile = document.createElement('figure');
+        tile.className = 'collage-tile';
+        const image = document.createElement('img');
+        image.src = imageUrl;
+        image.alt = text(item.caption || '');
+        tile.append(image);
+        if (item.caption) {
+          const caption = document.createElement('figcaption');
+          caption.textContent = text(item.caption, 80);
+          tile.append(caption);
+        }
+        collage.append(tile);
+      });
+      if (!collage.childElementCount) {
+        showMediaError(stage, slide);
+      } else {
+        stage.append(collage);
+        scheduleAdvance(slide);
+      }
+    } else {
+      showMediaError(stage, slide);
+    }
+  }
+
+  const notice = screenData.notification || {};
+  if (notice.enabled && notice.text) {
+    const banner = document.createElement('aside');
+    banner.className = 'notification-banner';
+    const label = document.createElement('span');
+    label.className = 'notification-label';
+    label.textContent = 'Notice';
+    const message = document.createElement('span');
+    message.textContent = text(notice.text, 120);
+    banner.append(label, message);
+    root.append(banner);
+  }
+}
+
+onValue(ref(db, 'screen'), (snapshot) => {
+  const incoming = snapshot.val() || {};
+  const slides = Array.isArray(incoming.slides) ? incoming.slides : [];
+  const nextSignature = JSON.stringify(slides);
+
+  if (nextSignature !== playlistSignature) {
+    playlistSignature = nextSignature;
+    const active = Number(incoming.active);
+    currentSlide = Number.isInteger(active) && active >= 0 ? active : 0;
+  }
+
+  screenData = {
+    ...incoming,
+    slides,
+    playing: incoming.playing !== false,
+    notification: incoming.notification || { enabled: false, text: '' },
+  };
+  render();
+}, (error) => {
+  console.error('Unable to load screen content:', error);
+  root.replaceChildren();
+  const errorView = document.createElement('section');
+  errorView.className = 'screen-empty';
+  const heading = document.createElement('h1');
+  heading.textContent = 'Unable to connect';
+  const message = document.createElement('p');
+  message.textContent = 'Please check the display network connection. This screen will reconnect automatically.';
+  errorView.append(heading, message);
+  root.append(errorView);
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && screenData.slides.length) render();
+});

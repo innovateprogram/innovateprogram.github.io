@@ -49,16 +49,16 @@
     };
 
     const desktopApps = [
-      { id: 'tickets', label: 'Tickets', icon: '🎫' },
-      { id: 'telephony', label: 'Phone', icon: '☎️' },
-      { id: 'terminal', label: 'Terminal', icon: '🖥️' },
-      { id: 'browser', label: 'HelpNet', icon: '🌐' },
-      { id: 'files', label: 'Files', icon: '🗂️' },
-      { id: 'registry', label: 'Registry', icon: '🧩' },
-      { id: 'firewall', label: 'Firewall', icon: '🛡️' },
-      { id: 'security', label: 'Security', icon: '🦠' },
-      { id: 'shop', label: 'Shop', icon: '🛒' },
-      { id: 'settings', label: 'Settings', icon: '⚙️' },
+      { id: 'tickets', label: 'Tickets', icon: 'TKT' },
+      { id: 'telephony', label: 'Phone', icon: 'TEL' },
+      { id: 'terminal', label: 'Terminal', icon: 'CLI' },
+      { id: 'browser', label: 'HelpNet', icon: 'WEB' },
+      { id: 'files', label: 'Files', icon: 'FILE' },
+      { id: 'registry', label: 'Registry', icon: 'REG' },
+      { id: 'firewall', label: 'Firewall', icon: 'FW' },
+      { id: 'security', label: 'Security', icon: 'SEC' },
+      { id: 'shop', label: 'Shop', icon: 'SHOP' },
+      { id: 'settings', label: 'Settings', icon: 'SET' },
     ];
 
     /* ---------------------------------------------------------- Desktop icons */
@@ -164,9 +164,9 @@
 
     /* ---------------------------------------------------------- HUD */
     function renderHUD() {
-      creditsEl.textContent = '💳 ' + game.credits;
-      repEl.textContent = '⭐ ' + game.reputation + '%';
-      timerEl.textContent = '⏱ ' + fmtClock(Math.max(0, game.shiftTime));
+      creditsEl.textContent = 'Credits: ' + game.credits;
+      repEl.textContent = 'Rep: ' + game.reputation + '%';
+      timerEl.textContent = 'Time: ' + fmtClock(Math.max(0, game.shiftTime));
       dayEl.textContent = 'Day ' + game.day;
       levelEl.textContent = D.levelNames[game.level];
     }
@@ -192,7 +192,7 @@
       }
       callBanner.classList.add('show');
       callBanner.innerHTML =
-        '<span class="call-ring-icon">📞</span><span>Incoming call: <strong>' + call.customer + '</strong> — ' + call.subject + '</span>' +
+        '<span class="call-ring-icon">CALL</span><span>Incoming call: <strong>' + call.customer + '</strong> — ' + call.subject + '</span>' +
         '<button type="button" class="btn btn-primary btn-sm" id="banner-answer">Answer</button>' +
         '<button type="button" class="btn btn-danger btn-sm" id="banner-decline">Decline</button>';
       document.getElementById('banner-answer').addEventListener('click', () => {
@@ -231,7 +231,7 @@
       showOverlay(
         '<h1>Day ' + game.day + '</h1>' +
           '<p>' + D.levelNames[game.level] + ' — Reputation ' + game.reputation + '%</p>' +
-          '<p class="overlay-target">🎯 Resolve at least <strong>' + target + '</strong> tickets to hit today\'s target and earn a bonus.</p>' +
+          '<p class="overlay-target">Resolve at least <strong>' + target + '</strong> tickets to hit today\'s target and earn a bonus.</p>' +
           '<button type="button" class="btn btn-primary btn-lg" id="begin-shift">Begin Shift</button>'
       );
       document.getElementById('begin-shift').addEventListener('click', () => {

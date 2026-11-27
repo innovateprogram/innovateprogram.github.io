@@ -7,12 +7,11 @@
   /* ---------------------------------------------------------- Customers */
   D.firstNames = ['Alex', 'Jordan', 'Sam', 'Priya', 'Lucas', 'Mei', 'Omar', 'Grace', 'Noah', 'Ivy', 'Deshawn', 'Fatima', 'Liam', 'Sofia', 'Ethan', 'Chloe', 'Raj', 'Nina', 'Carlos', 'Tasha'];
   D.lastNames = ['Chen', 'Walker', 'Patel', 'Nguyen', 'Garcia', 'Smith', 'Kowalski', 'Haddad', 'Johansson', 'Mbeki', 'Rossi', 'Kim', 'Dubois', 'Flores', 'Okafor'];
-  D.avatars = ['🧑‍💼', '👩‍💻', '🧑‍🔧', '👨‍🏫', '🧑‍🎨', '👩‍⚕️', '🧑‍🍳', '👨‍💼', '🧑‍🌾', '👩‍🔬', '🧑‍🚀', '👨‍🎤'];
 
   function randomPerson() {
     const f = D.firstNames[(Math.random() * D.firstNames.length) | 0];
     const l = D.lastNames[(Math.random() * D.lastNames.length) | 0];
-    const a = D.avatars[(Math.random() * D.avatars.length) | 0];
+    const a = f.charAt(0) + l.charAt(0);
     return { name: f + ' ' + l, avatar: a };
   }
   D.randomPerson = randomPerson;
@@ -22,7 +21,7 @@
   D.ticketTypes = {
     password_reset: {
       label: 'Password Reset',
-      icon: '🔑',
+      icon: 'PW',
       minLevel: 1,
       baseReward: 18,
       baseTime: 55,
@@ -35,7 +34,7 @@
     },
     email_config: {
       label: 'Email Setup',
-      icon: '📧',
+      icon: 'MAIL',
       minLevel: 1,
       baseReward: 24,
       baseTime: 70,
@@ -48,7 +47,7 @@
     },
     software_install: {
       label: 'Software Install',
-      icon: '💿',
+      icon: 'APP',
       minLevel: 1,
       baseReward: 16,
       baseTime: 50,
@@ -61,7 +60,7 @@
     },
     peripheral: {
       label: 'Peripheral Issue',
-      icon: '🖨️',
+      icon: 'HW',
       minLevel: 1,
       baseReward: 20,
       baseTime: 60,
@@ -74,7 +73,7 @@
     },
     network_diag: {
       label: 'Network Diagnostics',
-      icon: '📡',
+      icon: 'NET',
       minLevel: 1,
       baseReward: 30,
       baseTime: 80,
@@ -88,7 +87,7 @@
     },
     terminal_task: {
       label: 'Hung Process',
-      icon: '🖥️',
+      icon: 'PROC',
       minLevel: 2,
       baseReward: 32,
       baseTime: 75,
@@ -101,7 +100,7 @@
     },
     malware_scan: {
       label: 'Malware Scan',
-      icon: '🦠',
+      icon: 'SEC',
       minLevel: 2,
       baseReward: 38,
       baseTime: 90,
@@ -114,7 +113,7 @@
     },
     file_recovery: {
       label: 'File Recovery',
-      icon: '🗃️',
+      icon: 'FILE',
       minLevel: 2,
       baseReward: 34,
       baseTime: 85,
@@ -127,7 +126,7 @@
     },
     registry_edit: {
       label: 'Registry Fix',
-      icon: '🧩',
+      icon: 'REG',
       minLevel: 3,
       baseReward: 42,
       baseTime: 95,
@@ -140,7 +139,7 @@
     },
     firewall_rule: {
       label: 'Firewall Rule',
-      icon: '🛡️',
+      icon: 'FW',
       minLevel: 3,
       baseReward: 44,
       baseTime: 95,
@@ -325,7 +324,7 @@
     {
       id: 'fastTools',
       name: 'Rapid Repair Toolkit',
-      icon: '🛠️',
+      icon: 'TOOL',
       desc: 'Cuts install/scan/progress timers. Each level stacks a 15% speed boost.',
       maxLevel: 3,
       baseCost: 60,
@@ -334,7 +333,7 @@
     {
       id: 'autoDiag',
       name: 'Auto-Diagnostic Script',
-      icon: '🤖',
+      icon: 'AUTO',
       desc: 'Automatically completes a portion of terminal diagnostics for you.',
       maxLevel: 3,
       baseCost: 90,
@@ -343,7 +342,7 @@
     {
       id: 'dualMonitor',
       name: 'Dual Monitor Rig',
-      icon: '🖥️',
+      icon: '2X',
       desc: 'Increases how many tickets you can actively juggle at once (+1 slot/level).',
       maxLevel: 3,
       baseCost: 120,
@@ -352,7 +351,7 @@
     {
       id: 'coffee',
       name: 'Coffee Boost',
-      icon: '☕',
+      icon: 'BREAK',
       desc: 'Slows down every customer patience meter for the rest of the day.',
       maxLevel: 3,
       baseCost: 40,
@@ -362,7 +361,7 @@
     {
       id: 'headset',
       name: 'Noise-Cancelling Headset',
-      icon: '🎧',
+      icon: 'AUDIO',
       desc: 'Calls ring longer before they are missed, and start with better mood.',
       maxLevel: 2,
       baseCost: 100,
@@ -371,7 +370,7 @@
     {
       id: 'macro',
       name: 'Terminal Macro Pack',
-      icon: '⌨️',
+      icon: 'CMD',
       desc: 'Unlocks quick-fill buttons for common terminal commands.',
       maxLevel: 1,
       baseCost: 70,

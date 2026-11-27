@@ -45,12 +45,14 @@ This keeps all other database paths private. Screen text is also constrained in 
 
 ## One-time Cloudinary setup
 
-The app uses unsigned uploads to cloud `dgrmpcha9` with preset `Innovate`. In Cloudinary Console, confirm that the preset is **Unsigned** and permits the desired image and video formats. For safety, configure the preset's allowed formats, file-size limits, and upload restrictions to match your needs. The public upload preset is necessarily visible to browsers; it must not grant access to delete or manage existing assets.
+The app uses unsigned uploads to cloud `dgrmpcha9` with preset `Innovate`. The pickers accept `image/*` and `video/*`, rather than limiting file extensions. Cloudinary still has to support the selected input format, and the unsigned preset must not have a restrictive `allowed_formats` list. In Cloudinary Console, confirm that the preset is **Unsigned** and allows the file size limits used by the app (15 MB per photo, 100 MB per video). For safety, keep appropriate upload restrictions; the public preset must not grant access to delete or manage existing assets.
+
+Uploaded images are delivered with Cloudinary automatic format/quality negotiation. Videos are delivered as H.264/AAC MP4 for better Raspberry Pi browser compatibility. Cloudinary may need to generate a transformed version on first playback.
 
 ## Media and playback
 
-- Image slides, photo stories and custom backgrounds accept JPG, PNG or WebP.
-- Videos accept MP4, WebM or MOV. They autoplay muted and advance when playback ends.
+- Image slides, photo stories and custom backgrounds accept the browser's image file types (`image/*`); Cloudinary converts supported formats for display.
+- Video uploads accept the browser's video file types (`video/*`) and are delivered as H.264/AAC MP4; videos autoplay muted and advance when playback ends. Cloudinary must support the original input format and preset size.
 - YouTube links are embedded with autoplay and mute enabled; the slide duration setting controls how long the display stays on the YouTube slide.
 - A notice is shown as a prominent bottom banner over the current slide. The message is capped at 120 characters.
 - The control page offers a light/dark theme toggle, playlist ordering, editing and removal.

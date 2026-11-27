@@ -32,7 +32,6 @@ button { cursor: pointer; }
 .section-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .section-title h2 { margin: 0; font-size: 19px; font-weight: 650; }
 .section-title p { margin: 5px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
-.count { padding: 6px 9px; border-radius: 5px; background: #edf1f6; color: #34445a; font-size: 12px; font-weight: 600; }
 .tabbar { display: flex; gap: 4px; margin-bottom: 18px; padding: 4px; border: 1px solid var(--line); border-radius: 7px; background: #f1f3f6; overflow-x: auto; }
 .tab { padding: 9px 12px; border: 0; border-radius: 5px; background: transparent; color: #536176; font-size: 13px; font-weight: 600; white-space: nowrap; }
 .tab.active { background: #fff; color: #203d68; outline: 1px solid #cbd3df; }
@@ -98,7 +97,6 @@ button { cursor: pointer; }
 .dark .field label, .dark .label { color: #d4dbe4; }
 .dark .uploadbox b { color: #e5e9ef; }
 .dark .row-actions button { border-color: var(--line); background: #303943; color: #e5e9ef; }
-.dark .count { background: #303943; color: #e5e9ef; }
 .dark .notice, .dark .notification-preview { border-color: #74633b; background: #3a3325; color: #f2dfaa; }
 .screen-page { min-height: 100vh; overflow: hidden; background: #101820; color: #fff; }
 .screen-frame { position: relative; display: flex; width: 100vw; height: 100vh; align-items: stretch; justify-content: center; background-color: #18345a; background-position: center; background-size: cover; }
@@ -118,11 +116,10 @@ button { cursor: pointer; }
 .collage-tile img { width: 100%; height: 100%; object-fit: cover; }
 .collage-tile figcaption { position: absolute; right: 0; bottom: 0; left: 0; padding: 9px 12px; background: rgba(8, 16, 28, .8); color: #fff; font-size: clamp(12px, 1vw, 18px); font-weight: 600; }
 .notification-banner { position: absolute; z-index: 5; right: 4vw; bottom: 3vh; left: 4vw; display: flex; align-items: center; gap: 12px; padding: 14px 18px; border: 1px solid #e5d4a7; border-radius: 6px; background: #fff9e9; color: #604b1c; font-size: clamp(15px, 1.45vw, 22px); font-weight: 650; }
-.notification-icon { display: grid; width: 34px; height: 34px; flex: none; place-items: center; border: 1px solid #e5d4a7; border-radius: 5px; background: #f5e9ca; }
+.notification-label { flex: none; font-size: .8em; font-weight: 700; text-transform: uppercase; }
 .screen-empty { position: relative; z-index: 1; align-self: center; padding: 30px; text-align: center; }
 .screen-empty h1 { margin: 0 0 12px; font-size: clamp(28px, 4vw, 50px); }
 .screen-empty p { max-width: 540px; margin: 0 auto; color: #e0e5eb; font-size: clamp(15px, 1.5vw, 21px); line-height: 1.5; }
-.screen-counter { position: absolute; z-index: 2; top: 3vh; right: 4vw; padding: 6px 10px; border: 1px solid rgba(255,255,255,.35); border-radius: 5px; background: rgba(8,16,28,.45); color: #fff; font-size: 12px; }
 @media (max-width: 900px) {
   .admin-grid { grid-template-columns: 1fr; }
   .side-card { position: static; }
@@ -144,5 +141,4 @@ button { cursor: pointer; }
   .screen-layout { grid-template-rows: auto minmax(0, 1fr); padding: 8vh 5vw 12vh; }
   .media-stage { height: 48vh; min-height: 190px; }
   .notification-banner { right: 4vw; bottom: 2vh; left: 4vw; padding: 11px 13px; font-size: 15px; }
-  .screen-counter { top: 2vh; right: 5vw; }
 }

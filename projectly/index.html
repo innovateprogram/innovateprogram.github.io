@@ -120,7 +120,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
     </div>
     <div id="registerForm" style="display:none">
       <div class="setup-wizard">
-        <h3>🚀 Getting Started</h3>
+        <h3>Getting Started</h3>
         <div class="setup-step"><div class="setup-step-num">1</div><div>Create your account — used for login across all devices.</div></div>
         <div class="setup-step"><div class="setup-step-num">2</div><div>Enter your Firebase config once. It's saved to your account and synced automatically on future logins.</div></div>
         <div class="setup-step"><div class="setup-step-num">3</div><div>Optionally configure Cloudinary for image/video uploads in Admin → Settings.</div></div>
@@ -132,8 +132,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f
     </div>
     <div id="firebaseConfigForm" style="display:none">
       <div class="info-box">
-        ✅ Logged in! Enter your Firebase config once — it will be saved to your account and auto-loaded on any device.<br><br>
-        <a href="https://console.firebase.google.com" target="_blank" style="color:#93c5fd">Firebase Console</a> → your project → ⚙️ <strong>Project Settings</strong> → <strong>Your apps</strong> → web app → SDK config.
+        Logged in! Enter your Firebase config once — it will be saved to your account and auto-loaded on any device.<br><br>
+        <a href="https://console.firebase.google.com" target="_blank" style="color:#93c5fd">Firebase Console</a> → your project → <strong>Project Settings</strong> → <strong>Your apps</strong> → web app → SDK config.
       </div>
       <div class="form-group"><label>API Key</label><input type="text" id="fb_apiKey" placeholder="AIzaSy..." autocomplete="off" spellcheck="false"/></div>
       <div class="form-group"><label>Auth Domain</label><input type="text" id="fb_authDomain" placeholder="your-app.firebaseapp.com" autocomplete="off" spellcheck="false"/></div>
@@ -486,7 +486,7 @@ window.renderSegments = function(segments) {
   segments.forEach((seg, i) => {
     const div = document.createElement("div"); div.className="segment-item"; div.dataset.index=i;
     const info = document.createElement("div"); info.className="segment-item-info";
-    const typeLabel = seg.type === "sermon" ? "📽 Media" : "🎵 Song";
+    const typeLabel = seg.type === "sermon" ? "Media" : "Song";
     info.innerHTML=`<div class="item-name">${seg.name||seg.type}</div><div class="item-count">${typeLabel}</div>`;
     info.onclick = () => selectSegment(seg, i, div);
     const rm = document.createElement("button"); rm.className="item-remove-btn"; rm.textContent="×";
@@ -638,16 +638,16 @@ window.renderSermonInterface = function(sermon) {
       card.innerHTML=`<div class="slide-index">${i+1}</div>`;
     } else if (slide.type === "video") {
       card.style.background="#0c1f3a";
-      card.innerHTML=`<div style="font-size:32px;text-align:center">🎬</div><div class="slide-index">${i+1}</div>${slide.name?`<div class="media-card-label">${slide.name}</div>`:''}`;
+      card.innerHTML=`<div style="font-size:18px;text-align:center">VIDEO</div><div class="slide-index">${i+1}</div>${slide.name?`<div class="media-card-label">${slide.name}</div>`:''}`;
     } else if (slide.type === "pdf") {
       card.style.background="#1f0a0a";
-      card.innerHTML=`<div style="font-size:32px;text-align:center;color:#f87171">📄</div><div style="font-size:9px;color:#f87171;text-align:center;padding:2px 4px">PDF</div><div class="slide-index">${i+1}</div>${slide.name?`<div class="media-card-label" style="color:#f87171">${slide.name}</div>`:''}`;
+      card.innerHTML=`<div style="font-size:18px;text-align:center;color:#f87171">PDF</div><div style="font-size:9px;color:#f87171;text-align:center;padding:2px 4px">PDF</div><div class="slide-index">${i+1}</div>${slide.name?`<div class="media-card-label" style="color:#f87171">${slide.name}</div>`:''}`;
     } else if (slide.type === "pptx") {
       card.style.background="#0a1a0f";
-      card.innerHTML=`<div style="font-size:32px;text-align:center;color:#4ade80">📊</div><div style="font-size:9px;color:#4ade80;text-align:center;padding:2px 4px">PPTX</div><div class="slide-index">${i+1}</div>${slide.name?`<div class="media-card-label" style="color:#4ade80">${slide.name}</div>`:''}`;
+      card.innerHTML=`<div style="font-size:18px;text-align:center;color:#4ade80">PPTX</div><div style="font-size:9px;color:#4ade80;text-align:center;padding:2px 4px">PPTX</div><div class="slide-index">${i+1}</div>${slide.name?`<div class="media-card-label" style="color:#4ade80">${slide.name}</div>`:''}`;
     } else {
       card.style.background="#0c1f3a";
-      card.innerHTML=`<div style="font-size:32px;text-align:center">🎬</div><div class="slide-index">${i+1}</div>`;
+      card.innerHTML=`<div style="font-size:18px;text-align:center">MEDIA</div><div class="slide-index">${i+1}</div>`;
     }
 
     card.onclick = () => { focusSermonSlide(i, false); sendSermonSlide(i); };

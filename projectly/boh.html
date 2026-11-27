@@ -169,7 +169,7 @@
     </div>
 
     <div class="next-panel">
-        <div class="next-label">▶ Next</div>
+        <div class="next-label"> Next</div>
         <div class="next-text blank-state" id="nextContent">No upcoming content</div>
     </div>
 </div>
@@ -262,7 +262,7 @@
                 currentContentEl.className = '';
                 currentContentEl.innerHTML = `
                     <div class="media-placeholder">
-                        <div class="media-icon">🎬</div>
+                        <div class="media-icon">VIDEO</div>
                         <div class="media-type-badge" style="background:#1e3a5f;color:#60a5fa">VIDEO</div>
                         <div class="media-label">${content.name || 'Video clip'}</div>
                     </div>`;
@@ -271,7 +271,7 @@
                 currentContentEl.className = '';
                 currentContentEl.innerHTML = `
                     <div class="media-placeholder">
-                        <div class="media-icon">📄</div>
+                        <div class="media-icon">PDF</div>
                         <div class="media-type-badge" style="background:#2d1515;color:#f87171">PDF</div>
                         <div class="media-label">${content.name || 'PDF document'}</div>
                     </div>`;
@@ -280,7 +280,7 @@
                 currentContentEl.className = '';
                 currentContentEl.innerHTML = `
                     <div class="media-placeholder">
-                        <div class="media-icon">📊</div>
+                        <div class="media-icon">PPTX</div>
                         <div class="media-type-badge" style="background:#0a1a0f;color:#4ade80">PPTX</div>
                         <div class="media-label">${content.name || 'Presentation'}</div>
                     </div>`;
@@ -294,9 +294,9 @@
             if (next && next.type === 'sermon') {
                 nextContentEl.className = 'next-text';
                 const nextType = next.mediaType || 'image';
-                const typeIcon = nextType === 'video' ? '🎬' : nextType === 'pdf' ? '📄' : nextType === 'pptx' ? '📊' : '🖼';
+                const typeLabel = nextType === 'video' ? 'VIDEO' : nextType === 'pdf' ? 'PDF' : nextType === 'pptx' ? 'PPTX' : 'IMAGE';
                 const nextLabel = next.name ? ` — ${next.name}` : '';
-                nextContentEl.textContent = `${typeIcon} Slide ${(currentIndex||1) + 1}${nextLabel}`;
+                nextContentEl.textContent = `${typeLabel} · Slide ${(currentIndex||1) + 1}${nextLabel}`;
             } else {
                 nextContentEl.className = 'next-text end-of-segment';
                 nextContentEl.textContent = '— Last slide —';

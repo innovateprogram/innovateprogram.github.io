@@ -17,14 +17,14 @@
 </style>
 </head>
 <body>
-<h1>🎮 Tournament Control</h1>
+<h1>Tournament Control</h1>
 
 <input type="text" id="linkInput" placeholder="https://kahoot.it/..." value="https://" />
 
-<button class="open"    onclick="send('OPEN_LINK')">🌐 Open Link (new window)</button>
-<button class="change"  onclick="send('CHANGE_TAB')">🔄 Change Tab</button>
-<button class="release" onclick="send('RELEASE', '')">✅ Release Control</button>
-<button class="shut"    onclick="confirmShutdown()">⛔ Shutdown PCs</button>
+<button class="open"    onclick="send('OPEN_LINK')">Open Link (new window)</button>
+<button class="change"  onclick="send('CHANGE_TAB')">Change Tab</button>
+<button class="release" onclick="send('RELEASE', '')">Release Control</button>
+<button class="shut"    onclick="confirmShutdown()">Shutdown PCs</button>
 
 <div id="status">Ready.</div>
 
@@ -50,12 +50,12 @@
     const status = document.getElementById("status");
 
     set(ref(db, "tournament/command"), { cmd, link })
-      .then(() => { status.textContent = `✅ Sent: ${cmd} → ${link || "(no link)"}`; })
-      .catch(e => { status.textContent = `❌ Error: ${e.message}`; });
+      .then(() => { status.textContent = `Sent: ${cmd} → ${link || "(no link)"}`; })
+      .catch(e => { status.textContent = `Error: ${e.message}`; });
   }
 
   window.confirmShutdown = function() {
-    if (confirm("⛔ Are you sure you want to SHUTDOWN all PCs?"))
+    if (confirm("Are you sure you want to SHUTDOWN all PCs?"))
       window.send("SHUTDOWN", "");
   }
 </script>
