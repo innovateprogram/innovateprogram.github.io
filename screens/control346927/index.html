@@ -9,7 +9,16 @@
     </section>
   </div>
   <main id="adminView" class="shell hidden">
-    <header class="topbar"><div class="brand"><div><h1>Screen controls</h1><p>Manage what appears on the building display</p></div></div><div class="top-actions"><span id="connection" class="pill"><i class="dot"></i> Live</span><button id="themeBtn" class="soft-btn" type="button">Dark mode</button><a class="soft-btn" href="../" target="_blank" rel="noopener">View screen </a><button id="logoutBtn" class="soft-btn" type="button">Sign out</button></div></header>
+    <header class="topbar"><div class="brand"><div><h1>Screen controls</h1><p>Manage what appears on the building display</p></div></div><div class="top-actions"><span id="connection" class="pill"><i class="dot"></i> Live</span><button id="tutorialToggle" class="soft-btn" type="button" aria-expanded="false" aria-controls="tutorialPanel">Tutorial</button><button id="themeBtn" class="soft-btn" type="button">Dark mode</button><a class="soft-btn" href="../" target="_blank" rel="noopener">View screen </a><button id="logoutBtn" class="soft-btn" type="button">Sign out</button></div></header>
+    <section id="tutorialPanel" class="card tutorial-card hidden" aria-labelledby="tutorialTitle">
+      <div class="tutorial-heading"><div><p class="tutorial-kicker">QUICK START</p><h2 id="tutorialTitle">Welcome to your screen controls</h2><p>Follow these simple steps to put your first update on the display.</p></div><button id="tutorialDismiss" class="primary" type="button">Got it</button></div>
+      <ol class="tutorial-steps">
+        <li><span class="tutorial-number">1</span><div><strong>Add a slide</strong><p>Choose Image, Video, or YouTube, then add your media. You can also create a photo story from several pictures.</p></div></li>
+        <li><span class="tutorial-number">2</span><div><strong>Choose how it appears</strong><p>Set a heading and description, hide the text, or show supported media full-screen. Choose how long slides stay on screen.</p></div></li>
+        <li><span class="tutorial-number">3</span><div><strong>Save and check the display</strong><p>Select Add slide. Your changes publish automatically. Use View screen to check what visitors see.</p></div></li>
+        <li><span class="tutorial-number">4</span><div><strong>Manage playback and notices</strong><p>Use the controls on the right to pause automatic slides or show a short visitor notice.</p></div></li>
+      </ol>
+    </section>
     <div class="admin-grid"><section class="card main-card">
       <div class="section-title"><div><h2>Your slides</h2><p>Add announcements and media to the screen. Changes publish live.</p></div></div>
       <div id="tabs" class="tabbar" role="tablist"><button class="tab active" data-type="image" type="button">▧ Image</button><button class="tab" data-type="video" type="button"> Video</button><button class="tab" data-type="youtube" type="button">▷ YouTube</button><button class="tab" data-type="collage" type="button">▦ Photo story</button></div>
