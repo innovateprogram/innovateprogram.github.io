@@ -26,6 +26,16 @@ button { cursor: pointer; }
 .primary { padding: 11px 16px; border: 1px solid var(--blue); border-radius: 7px; background: var(--blue); color: #fff; font-weight: 600; }
 .primary:hover { background: #1f477f; }
 .card { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.tutorial-card { margin-bottom: 18px; padding: 22px; }
+.tutorial-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.tutorial-heading h2 { margin: 0; font-size: 20px; }
+.tutorial-heading p:not(.tutorial-kicker) { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.tutorial-kicker { margin: 0 0 6px; color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+.tutorial-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 20px 0 0; padding: 0; list-style: none; }
+.tutorial-steps li { display: flex; align-items: flex-start; gap: 10px; }
+.tutorial-number { display: grid; width: 26px; height: 26px; flex: none; place-items: center; border: 1px solid #b8c8df; border-radius: 50%; color: #234c84; font-size: 12px; font-weight: 700; }
+.tutorial-steps strong { display: block; margin: 3px 0 4px; font-size: 13px; }
+.tutorial-steps p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .admin-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; gap: 18px; }
 .main-card, .side-card { padding: 22px; }
 .side-card { position: sticky; top: 16px; }
@@ -100,6 +110,8 @@ button { cursor: pointer; }
 .dark .tab.active { outline-color: var(--line); background: #303943; color: #fff; }
 .dark .field label, .dark .label, .dark .check-option { color: #d4dbe4; }
 .dark .display-options { border-color: var(--line); background: #20262e; }
+.dark .tutorial-number { border-color: #627b9c; color: #c4d5ee; }
+.dark .tutorial-kicker { color: #a9c6f0; }
 .dark .uploadbox b { color: #e5e9ef; }
 .dark .row-actions button { border-color: var(--line); background: #303943; color: #e5e9ef; }
 .dark .notice, .dark .notification-preview { border-color: #74633b; background: #3a3325; color: #f2dfaa; }
@@ -142,6 +154,7 @@ button { cursor: pointer; }
 .screen-empty h1 { margin: 0 0 12px; font-size: clamp(28px, 4vw, 50px); }
 .screen-empty p { max-width: 540px; margin: 0 auto; color: #e0e5eb; font-size: clamp(15px, 1.5vw, 21px); line-height: 1.5; }
 @media (max-width: 900px) {
+  .tutorial-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-grid { grid-template-columns: 1fr; }
   .side-card { position: static; }
   .screen-layout { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); gap: 2vh; padding: 9vh 6vw 11vh; }
@@ -157,6 +170,10 @@ button { cursor: pointer; }
   .top-actions { gap: 5px; }
   .pill, .soft-btn { padding: 8px 9px; font-size: 11px; }
   .main-card, .side-card { padding: 16px; }
+  .tutorial-card { padding: 16px; }
+  .tutorial-heading { align-items: flex-start; }
+  .tutorial-heading .primary { flex: none; padding: 9px 11px; }
+  .tutorial-steps { grid-template-columns: 1fr; gap: 13px; }
   .formgrid { grid-template-columns: 1fr; gap: 0; }
   .section-title h2 { font-size: 17px; }
   .screen-layout { grid-template-rows: auto minmax(0, 1fr); padding: 8vh 5vw 12vh; }
